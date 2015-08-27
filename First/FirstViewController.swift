@@ -20,7 +20,6 @@ class FirstViewController: UIViewController, UITableViewDataSource {
         super.viewDidLoad()
         setupUI()
         requestAccess()
-        fetchTodayStepCount()
     }
 
     override func didReceiveMemoryWarning() {
@@ -89,6 +88,7 @@ class FirstViewController: UIViewController, UITableViewDataSource {
             { (Bool success, NSError error) -> Void in
                 if success {
                     print("It was a sucess");
+                    self.fetchTodayStepCount()
                 }
         }
     }
