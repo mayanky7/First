@@ -15,6 +15,9 @@
 		F916BECE1B8F77AF00D37396 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F916BECC1B8F77AF00D37396 /* LaunchScreen.storyboard */; };
 		F916BED91B8F77AF00D37396 /* FirstTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BED81B8F77AF00D37396 /* FirstTests.swift */; };
 		F916BEE41B8F77AF00D37396 /* FirstUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BEE31B8F77AF00D37396 /* FirstUITests.swift */; };
+		F916BEF21B8F77D600D37396 /* HKHealthStore+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */; };
+		F916BEF41B8F899F00D37396 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F916BEF31B8F899F00D37396 /* HealthKit.framework */; };
+		F916BEF71B8F89AE00D37396 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F916BEF61B8F89AE00D37396 /* CloudKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +52,10 @@
 		F916BEDF1B8F77AF00D37396 /* FirstUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FirstUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F916BEE31B8F77AF00D37396 /* FirstUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstUITests.swift; sourceTree = "<group>"; };
 		F916BEE51B8F77AF00D37396 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "HKHealthStore+Convenience.swift"; sourceTree = "<group>"; };
+		F916BEF31B8F899F00D37396 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		F916BEF51B8F899F00D37396 /* First.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = First.entitlements; sourceTree = "<group>"; };
+		F916BEF61B8F89AE00D37396 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +63,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F916BEF41B8F899F00D37396 /* HealthKit.framework in Frameworks */,
+				F916BEF71B8F89AE00D37396 /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +88,8 @@
 		F916BEB51B8F77AE00D37396 = {
 			isa = PBXGroup;
 			children = (
+				F916BEF61B8F89AE00D37396 /* CloudKit.framework */,
+				F916BEF31B8F899F00D37396 /* HealthKit.framework */,
 				F916BEC01B8F77AE00D37396 /* First */,
 				F916BED71B8F77AF00D37396 /* FirstTests */,
 				F916BEE21B8F77AF00D37396 /* FirstUITests */,
@@ -99,8 +110,10 @@
 		F916BEC01B8F77AE00D37396 /* First */ = {
 			isa = PBXGroup;
 			children = (
+				F916BEF51B8F899F00D37396 /* First.entitlements */,
 				F916BEC11B8F77AE00D37396 /* AppDelegate.swift */,
 				F916BEC31B8F77AE00D37396 /* FirstViewController.swift */,
+				F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */,
 				F916BEC51B8F77AE00D37396 /* SecondViewController.swift */,
 				F916BEC71B8F77AF00D37396 /* Main.storyboard */,
 				F916BECA1B8F77AF00D37396 /* Assets.xcassets */,
@@ -195,6 +208,15 @@
 				TargetAttributes = {
 					F916BEBD1B8F77AE00D37396 = {
 						CreatedOnToolsVersion = 7.0;
+						DevelopmentTeam = DWM77K6AFX;
+						SystemCapabilities = {
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 					F916BED31B8F77AF00D37396 = {
 						CreatedOnToolsVersion = 7.0;
@@ -258,6 +280,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F916BEF21B8F77D600D37396 /* HKHealthStore+Convenience.swift in Sources */,
 				F916BEC61B8F77AE00D37396 /* SecondViewController.swift in Sources */,
 				F916BEC21B8F77AE00D37396 /* AppDelegate.swift in Sources */,
 				F916BEC41B8F77AE00D37396 /* FirstViewController.swift in Sources */,
@@ -400,10 +423,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = First/First.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = First/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.first.client.First;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -411,10 +438,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = First/First.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = First/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.first.client.First;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
