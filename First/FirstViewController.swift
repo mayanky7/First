@@ -74,8 +74,10 @@ class FirstViewController: UIViewController, UITableViewDataSource {
 
         self.healthStore.sampleCountOfType(sampleType!, predicate: predicate) { (sum, error) -> Void in
             if error == nil {
-                self.stepCount = sum;
-                self.tableView.reloadData()
+                if let constSum = sum {
+                    self.stepCount = constSum;
+                    self.tableView.reloadData()
+                }
             }
         }
     }

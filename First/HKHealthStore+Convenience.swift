@@ -3,7 +3,7 @@ import HealthKit;
 
 extension HKHealthStore {
 
-    func sampleCountOfType(sampleType: HKQuantityType, predicate: NSPredicate?, completion: (Double, NSError?) -> Void) {
+    func sampleCountOfType(sampleType: HKQuantityType, predicate: NSPredicate?, completion: (Double?, NSError?) -> Void) {
 
         let sumOptions = HKStatisticsOptions.CumulativeSum;
 
@@ -16,7 +16,7 @@ extension HKHealthStore {
             let sumQuantity = result?.sumQuantity()
             let unit = HKUnit.countUnit()
             let sum = sumQuantity?.doubleValueForUnit(unit)
-            completion(sum!, error)
+            completion(sum, error)
         }
 
         self.executeQuery(statQuery)
