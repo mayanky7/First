@@ -18,6 +18,8 @@
 		F916BEF21B8F77D600D37396 /* HKHealthStore+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */; };
 		F916BEF41B8F899F00D37396 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F916BEF31B8F899F00D37396 /* HealthKit.framework */; };
 		F916BEF71B8F89AE00D37396 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F916BEF61B8F89AE00D37396 /* CloudKit.framework */; };
+		F960A9FF1B93457700336790 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F960A9FE1B93457700336790 /* Authenticator.swift */; };
+		F9E28A331B925EC70009474D /* RecordStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E28A321B925EC70009474D /* RecordStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,8 @@
 		F916BEF31B8F899F00D37396 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		F916BEF51B8F899F00D37396 /* First.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = First.entitlements; sourceTree = "<group>"; };
 		F916BEF61B8F89AE00D37396 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		F960A9FE1B93457700336790 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
+		F9E28A321B925EC70009474D /* RecordStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RecordStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,8 +114,10 @@
 		F916BEC01B8F77AE00D37396 /* First */ = {
 			isa = PBXGroup;
 			children = (
+				F9E28A2F1B925E5D0009474D /* Model */,
 				F916BEF51B8F899F00D37396 /* First.entitlements */,
 				F916BEC11B8F77AE00D37396 /* AppDelegate.swift */,
+				F960A9FE1B93457700336790 /* Authenticator.swift */,
 				F916BEC31B8F77AE00D37396 /* FirstViewController.swift */,
 				F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */,
 				F916BEC51B8F77AE00D37396 /* SecondViewController.swift */,
@@ -139,6 +145,14 @@
 				F916BEE51B8F77AF00D37396 /* Info.plist */,
 			);
 			path = FirstUITests;
+			sourceTree = "<group>";
+		};
+		F9E28A2F1B925E5D0009474D /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				F9E28A321B925EC70009474D /* RecordStore.swift */,
+			);
+			name = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -284,6 +298,8 @@
 				F916BEC61B8F77AE00D37396 /* SecondViewController.swift in Sources */,
 				F916BEC21B8F77AE00D37396 /* AppDelegate.swift in Sources */,
 				F916BEC41B8F77AE00D37396 /* FirstViewController.swift in Sources */,
+				F9E28A331B925EC70009474D /* RecordStore.swift in Sources */,
+				F960A9FF1B93457700336790 /* Authenticator.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -516,6 +532,7 @@
 				F916BEEA1B8F77AF00D37396 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F916BEEB1B8F77AF00D37396 /* Build configuration list for PBXNativeTarget "FirstTests" */ = {
 			isa = XCConfigurationList;
@@ -524,6 +541,7 @@
 				F916BEED1B8F77AF00D37396 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		F916BEEE1B8F77AF00D37396 /* Build configuration list for PBXNativeTarget "FirstUITests" */ = {
 			isa = XCConfigurationList;
@@ -532,6 +550,7 @@
 				F916BEF01B8F77AF00D37396 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
