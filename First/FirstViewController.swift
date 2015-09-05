@@ -26,13 +26,11 @@ class FirstViewController: UIViewController, UITableViewDataSource {
         super.didReceiveMemoryWarning()
     }
 
-    //User Interface Stuff
     func setupUI() {
         self.tableView.registerClass(UITableViewCell.classForCoder(), forCellReuseIdentifier: "cell");
         self.tableView.dataSource = self;
     }
 
-    //Table View Delegate
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 
         return 1;
@@ -46,61 +44,15 @@ class FirstViewController: UIViewController, UITableViewDataSource {
         return cell;
     }
 
-    //Health Kit Stuff
-
-    func fetchTodayStepCount() {
-
-        let now = NSDate()
-
-        let calendar = NSCalendar.currentCalendar()
-
-        let calendarUnit = NSCalendarUnit.Year.union(NSCalendarUnit.Day).union(NSCalendarUnit.Month);
-        let components = calendar.components(calendarUnit, fromDate: now)
-        let todayBegining = calendar.dateFromComponents(components);
-
-        let endDayComponents = calendar.components(calendarUnit, fromDate: now)
-        endDayComponents.hour = 23
-        endDayComponents.minute = 59
-        endDayComponents.second = 59
-
-        let todayEnd = calendar.dateFromComponents(endDayComponents)
-
-        let startDate = todayBegining
-        let endDate = todayEnd
-
-        let predicate :NSPredicate? = HKStatisticsQuery.predicateForSamplesWithStartDate(startDate, endDate: endDate, options: HKQueryOptions.None)
-
-        let sampleType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierStepCount)
-
-        self.healthStore.sampleCountOfType(sampleType!, predicate: predicate) { (sum, error) -> Void in
-            if error == nil {
-                if let constSum = sum {
-                    self.stepCount = constSum;
-                    self.tableView.reloadData()
-                }
-            }
-        }
-    }
-
     func requestAccess() {
 
-        let dataTypes = dataTypesToRead();
-
-        self.healthStore.requestAuthorizationToShareTypes(Set(), readTypes: dataTypes)
-            { (Bool success, NSError error) -> Void in
-                if success {
-                    print("It was a sucess");
-                    self.fetchTodayStepCount()
-                }
+        let store = DataStore(healthKitStore: HKHealthStore())
+        store.fetchStepCount { (steps, error) -> Void in
+            if let steps = steps {
+                print("Fetched steps from iCloud")
+                self.stepCount = steps
+                self.tableView.reloadData()
+            }
         }
-    }
-
-    func dataTypesToRead() -> Set <HKObjectType> {
-
-        let quantityType = HKObjectType.quantityTypeForIdentifier(HKQuantityTypeIdentifierStepCount);
-        var dataTypes = Set<HKObjectType>();
-        dataTypes.insert(quantityType!);
-        
-        return dataTypes;
     }
 }
