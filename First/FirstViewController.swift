@@ -3,7 +3,6 @@ import HealthKit
 
 class FirstViewController: UIViewController, UITableViewDataSource {
 
-    let healthStore = HKHealthStore();
     var stepCount = 0.0
 
     @IBOutlet weak var tableView: UITableView!;
@@ -45,8 +44,7 @@ class FirstViewController: UIViewController, UITableViewDataSource {
     }
 
     func requestAccess() {
-
-        let store = DataStore(healthKitStore: HKHealthStore())
+        let store = ActivityStore(healthKitStore: HKHealthStore())
         store.fetchStepCount { (steps, error) -> Void in
             if let steps = steps {
                 print("Fetched steps from iCloud")
