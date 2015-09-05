@@ -6,18 +6,9 @@
 //  Copyright © 2015 First. All rights reserved.
 //
 
-import UIKit
 import CloudKit
-import HealthKit
 
 class DataStore {
-
-    let recordNameStepCount = "stepCount"
-    let healthStore:HKHealthStore;
-
-    init(healthKitStore: HKHealthStore) {
-        healthStore = healthKitStore;
-    }
 
     func saveRecord(record:CKRecord) {
 
@@ -32,8 +23,9 @@ class DataStore {
         }
     }
 
-    func fetchRecord(recordID:CKRecordID, completion:(CKRecord?) -> Void) {
+    func fetchRecord(recordName:String, completion:(CKRecord?) -> Void) {
 
+        let recordID = CKRecordID(recordName: recordName)
         let container = CKContainer.defaultContainer()
         let database = container.publicCloudDatabase
 
@@ -46,40 +38,10 @@ class DataStore {
         }
     }
 
-     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
-
-        let recordID = CKRecordID(recordName: recordNameStepCount)
-
-        fetchRecord(recordID) { (record) -> Void in
-            if let record = record {
-                let steps = record["steps"] as? Double ?? nil
-                completion(steps, nil)
-            } else {
-                completion(nil, nil)
-            }
-        }
-    }
-
-    func updateStepCount(stepCount:Double) {
-
-        let recordID = CKRecordID(recordName: recordNameStepCount)
+    func updateRecordForKey(recordName:String, key:String, value:Double) {
+        let recordID = CKRecordID(recordName: recordName)
         let record = CKRecord(recordType: "Activity", recordID: recordID)
-        record["steps"] = stepCount
+        record[key] = value
         saveRecord(record)
-    }
-
-     func fetchLocalStepCount(completion:(Double?, NSError?) -> Void) {
-
-        let dataTypes = self.healthStore.dataTypesToRead();
-        self.healthStore.requestAuthorizationToShareTypes(Set(), readTypes: dataTypes)
-            { (Bool success, NSError error) -> Void in
-                if success {
-                    self.healthStore.fetchTodayStepCount({ (stepCount, error) -> Void in
-                        print("Fetching local steps")
-                        self.updateStepCount(stepCount)
-                        completion(stepCount, error)
-                    })
-                }
-        }
     }
 }
