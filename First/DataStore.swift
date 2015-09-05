@@ -19,16 +19,12 @@ class DataStore {
         healthStore = healthKitStore;
     }
 
-    func updateStepCount(stepCount:Double) {
-
-        let recordID = CKRecordID(recordName: recordNameStepCount)
-        let activityRecord = CKRecord(recordType: "Activity", recordID: recordID)
-        activityRecord["steps"] = stepCount
+    func saveRecord(record:CKRecord) {
 
         let container = CKContainer.defaultContainer()
         let database = container.publicCloudDatabase
 
-        database.saveRecord(activityRecord) { (record, error) -> Void in
+        database.saveRecord(record) { (record, error) -> Void in
             if let record = record {
                 print("Printing Saved Record")
                 print(record)
@@ -36,22 +32,40 @@ class DataStore {
         }
     }
 
-     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
+    func fetchRecord(recordID:CKRecordID, completion:(CKRecord?) -> Void) {
 
         let container = CKContainer.defaultContainer()
         let database = container.publicCloudDatabase
 
-        let recordID = CKRecordID(recordName: recordNameStepCount)
         database.fetchRecordWithID(recordID) { (record, error) -> Void in
-
             if let record = record {
-                let steps = record["steps"] as? Double ?? nil
-                print("Fetching iCloud steps")
-                completion(steps, nil)
+                completion(record)
             } else {
-                self.fetchLocalStepCount(completion)
+                completion(nil)
             }
         }
+    }
+
+     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
+
+        let recordID = CKRecordID(recordName: recordNameStepCount)
+
+        fetchRecord(recordID) { (record) -> Void in
+            if let record = record {
+                let steps = record["steps"] as? Double ?? nil
+                completion(steps, nil)
+            } else {
+                completion(nil, nil)
+            }
+        }
+    }
+
+    func updateStepCount(stepCount:Double) {
+
+        let recordID = CKRecordID(recordName: recordNameStepCount)
+        let record = CKRecord(recordType: "Activity", recordID: recordID)
+        record["steps"] = stepCount
+        saveRecord(record)
     }
 
      func fetchLocalStepCount(completion:(Double?, NSError?) -> Void) {
