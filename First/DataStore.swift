@@ -13,7 +13,7 @@ class DataStore {
     func saveRecord(record:CKRecord) {
 
         let container = CKContainer.defaultContainer()
-        let database = container.publicCloudDatabase
+        let database = container.privateCloudDatabase
 
         database.saveRecord(record) { (record, error) -> Void in
             if let record = record {
@@ -27,7 +27,7 @@ class DataStore {
 
         let recordID = CKRecordID(recordName: recordName)
         let container = CKContainer.defaultContainer()
-        let database = container.publicCloudDatabase
+        let database = container.privateCloudDatabase
 
         database.fetchRecordWithID(recordID) { (record, error) -> Void in
             if let record = record {
@@ -43,6 +43,7 @@ class DataStore {
         let recordID = CKRecordID(recordName: recordName)
         let record = CKRecord(recordType: "Activity", recordID: recordID)
         record[key] = value
+        print("Updating record for key \(key) value\(value)")
         saveRecord(record)
     }
 }

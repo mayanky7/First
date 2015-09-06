@@ -25,9 +25,17 @@ class ActivityStore {
         dataStore.fetchRecord(recordNameStepCount) { (record) -> Void in
             if let record = record {
                 let steps = record["steps"] as? Double ?? nil
+                print("Fetched step count from iCloud")
                 completion(steps, nil)
             } else {
-                completion(nil, nil)
+                self.fetchLocalStepCount({ (stepCount, error) -> Void in
+                    if let stepCount = stepCount {
+                        print("Fetching local step count")
+                        completion(stepCount, nil)
+                    } else {
+                        completion(nil, error)
+                    }
+                })
             }
         }
     }
@@ -43,6 +51,9 @@ class ActivityStore {
                         self.updateStepCount(stepCount)
                         completion(stepCount, error)
                     })
+                } else {
+                    print("Failed to fetch local step count")
+                    completion(nil, nil)
                 }
         }
     }
