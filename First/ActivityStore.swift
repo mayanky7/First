@@ -20,6 +20,11 @@ class ActivityStore {
         dataStore = DataStore()
     }
 
+    func requestDiscoveryPermission(completion:(Bool) -> Void) {
+
+        dataStore.requestDiscoveryPermission(completion)
+    }
+
     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
 
         dataStore.fetchRecord(recordNameStepCount) { (record) -> Void in
@@ -60,5 +65,9 @@ class ActivityStore {
 
     func updateStepCount(stepCount:Double) {
         dataStore.updateRecordForKey(recordNameStepCount, key: "steps", value: stepCount)
+    }
+
+    func fetchFriends() {
+        dataStore.fetchAddressbookFriends()
     }
 }

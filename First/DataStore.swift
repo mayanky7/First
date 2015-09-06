@@ -46,4 +46,34 @@ class DataStore {
         print("Updating record for key \(key) value\(value)")
         saveRecord(record)
     }
+
+    //Social
+    func requestDiscoveryPermission(completion:(Bool) -> Void) {
+
+        let container = CKContainer.defaultContainer()
+
+        container.requestApplicationPermission(CKApplicationPermissions.UserDiscoverability) { (status, error) -> Void in
+
+            if status == CKApplicationPermissionStatus.Granted {
+                completion(true)
+            } else {
+                completion(false)
+            }
+        }
+    }
+
+    func fetchAddressbookFriends() {
+
+        let defaultContainer = CKContainer.defaultContainer()
+        let email = "mayanky7@gmail.com"
+
+        defaultContainer.discoverUserInfoWithEmailAddress(email) { (discoveredUserInfo, error) -> Void in
+
+            if let error = error {
+                print(error)
+            } else {
+                print(discoveredUserInfo)
+            }
+        }
+    }
 }

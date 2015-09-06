@@ -43,9 +43,23 @@ class FirstViewController: UIViewController, UITableViewDataSource {
     }
 
     func requestAccess() {
+
         let store = ActivityStore(healthKitStore: HKHealthStore())
+
+        store.requestDiscoveryPermission { (success) -> Void in
+            if success {
+                store.fetchFriends()
+                self.requestSteps(store)
+            }
+        }
+    }
+
+    func requestSteps(store:ActivityStore) {
+
         store.fetchStepCount { (steps, error) -> Void in
+
             if let steps = steps {
+
                 self.stepCount = steps
                 self.tableView.reloadData()
             }
