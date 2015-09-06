@@ -14,14 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-
-        Authenticator.authenticate { (success) -> Void in
-            if success {
-                print("Authentication Sucess")
-            } else {
-                print("Authentication Failed")
-            }
-        }
+        
         return true
     }
 

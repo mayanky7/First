@@ -20,11 +20,6 @@ class ActivityStore {
         dataStore = DataStore()
     }
 
-    func requestDiscoveryPermission(completion:(Bool) -> Void) {
-
-        dataStore.requestDiscoveryPermission(completion)
-    }
-
     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
 
         dataStore.fetchRecord(recordNameStepCount) { (record) -> Void in
@@ -47,20 +42,11 @@ class ActivityStore {
 
     func fetchLocalStepCount(completion:(Double?, NSError?) -> Void) {
 
-        let dataTypes = healthStore.dataTypesToRead();
-        healthStore.requestAuthorizationToShareTypes(Set(), readTypes: dataTypes)
-            { (Bool success, NSError error) -> Void in
-                if success {
-                    self.healthStore.fetchTodayStepCount({ (stepCount, error) -> Void in
-                        print("Fetching local steps")
-                        self.updateStepCount(stepCount)
-                        completion(stepCount, error)
-                    })
-                } else {
-                    print("Failed to fetch local step count")
-                    completion(nil, nil)
-                }
-        }
+        self.healthStore.fetchTodayStepCount({ (stepCount, error) -> Void in
+            print("Fetching local steps")
+            self.updateStepCount(stepCount)
+            completion(stepCount, error)
+        })
     }
 
     func updateStepCount(stepCount:Double) {

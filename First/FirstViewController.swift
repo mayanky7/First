@@ -16,16 +16,19 @@ class FirstViewController: UIViewController, UITableViewDataSource {
     }
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
         setupUI()
         requestAccess()
     }
 
     override func didReceiveMemoryWarning() {
+
         super.didReceiveMemoryWarning()
     }
 
     func setupUI() {
+
         self.tableView.registerClass(UITableViewCell.classForCoder(), forCellReuseIdentifier: "cell");
         self.tableView.dataSource = self;
     }
@@ -44,25 +47,25 @@ class FirstViewController: UIViewController, UITableViewDataSource {
 
     func requestAccess() {
 
-        let store = ActivityStore(healthKitStore: HKHealthStore())
+        let authenticator = Authenticator()
+        authenticator.requestPermissions { (success) -> Void in
 
-        store.requestDiscoveryPermission { (success) -> Void in
+            print("Permissions status success ? \(success)")
             if success {
+                let store = ActivityStore(healthKitStore: HKHealthStore())
+                self.updateSteps(store)
                 store.fetchFriends()
-                self.requestSteps(store)
             }
         }
     }
 
-    func requestSteps(store:ActivityStore) {
+    func updateSteps(store:ActivityStore) {
 
-        store.fetchStepCount { (steps, error) -> Void in
-
+        store.fetchStepCount({ (steps, error) -> Void in
             if let steps = steps {
-
                 self.stepCount = steps
                 self.tableView.reloadData()
             }
-        }
+        })
     }
 }
