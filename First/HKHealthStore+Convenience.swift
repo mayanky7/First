@@ -48,7 +48,7 @@ extension HKHealthStore {
         let sampleType = HKQuantityType.quantityTypeForIdentifier(HKQuantityTypeIdentifierStepCount)
 
         self.sampleCountOfType(sampleType!, predicate: predicate) { (sum, error) -> Void in
-            if error == nil {
+            if error == nil && sum != nil {
                 if let sum = sum {
                     completion(sum, nil)
                 }

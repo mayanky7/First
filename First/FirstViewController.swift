@@ -46,7 +46,6 @@ class FirstViewController: UIViewController, UITableViewDataSource {
         let store = ActivityStore(healthKitStore: HKHealthStore())
         store.fetchStepCount { (steps, error) -> Void in
             if let steps = steps {
-                print("Fetched steps from iCloud")
                 self.stepCount = steps
                 self.tableView.reloadData()
             }
