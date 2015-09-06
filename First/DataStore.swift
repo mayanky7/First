@@ -39,6 +39,7 @@ class DataStore {
     }
 
     func updateRecordForKey(recordName:String, key:String, value:Double) {
+
         let recordID = CKRecordID(recordName: recordName)
         let record = CKRecord(recordType: "Activity", recordID: recordID)
         record[key] = value
