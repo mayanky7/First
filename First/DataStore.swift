@@ -72,6 +72,14 @@ class DataStore {
             if let error = error {
                 print(error)
             } else {
+                if let discoveredUserInfo = discoveredUserInfo {
+                    let recordId = discoveredUserInfo.userRecordID
+                    if let _ = recordId {
+
+
+                    }
+                }
+
                 print(discoveredUserInfo)
             }
         }
