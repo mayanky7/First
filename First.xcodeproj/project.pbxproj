@@ -20,7 +20,7 @@
 		F94FA0D41B9B74C4001D0BFA /* ActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */; };
 		F960A9FF1B93457700336790 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F960A9FE1B93457700336790 /* Authenticator.swift */; };
 		F974DDA91BC1C22B004AF002 /* FriendsListViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */; settings = {ASSET_TAGS = (); }; };
-		F99106B41B9CA37600CE0EC5 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99106B31B9CA37600CE0EC5 /* UserData.swift */; };
+		F99106B41B9CA37600CE0EC5 /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99106B31B9CA37600CE0EC5 /* Person.swift */; };
 		F9E28A331B925EC70009474D /* DataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E28A321B925EC70009474D /* DataStore.swift */; };
 /* End PBXBuildFile section */
 
@@ -62,7 +62,7 @@
 		F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityStore.swift; sourceTree = "<group>"; };
 		F960A9FE1B93457700336790 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
 		F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendsListViewDataSource.swift; sourceTree = "<group>"; };
-		F99106B31B9CA37600CE0EC5 /* UserData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
+		F99106B31B9CA37600CE0EC5 /* Person.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Person.swift; sourceTree = "<group>"; };
 		F9E28A321B925EC70009474D /* DataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -186,7 +186,7 @@
 			isa = PBXGroup;
 			children = (
 				F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */,
-				F99106B31B9CA37600CE0EC5 /* UserData.swift */,
+				F99106B31B9CA37600CE0EC5 /* Person.swift */,
 				F9E28A321B925EC70009474D /* DataStore.swift */,
 				F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */,
 			);
@@ -334,7 +334,7 @@
 			files = (
 				F916BEF21B8F77D600D37396 /* HKHealthStore+Convenience.swift in Sources */,
 				F94FA0D41B9B74C4001D0BFA /* ActivityStore.swift in Sources */,
-				F99106B41B9CA37600CE0EC5 /* UserData.swift in Sources */,
+				F99106B41B9CA37600CE0EC5 /* Person.swift in Sources */,
 				F916BEC21B8F77AE00D37396 /* AppDelegate.swift in Sources */,
 				F916BEC41B8F77AE00D37396 /* FirstViewController.swift in Sources */,
 				F9E28A331B925EC70009474D /* DataStore.swift in Sources */,
