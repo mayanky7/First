@@ -21,36 +21,32 @@ class ActivityStore {
     }
 
     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
-
-        dataStore.fetchRecord(recordNameStepCount) { (record) -> Void in
-            if let record = record {
-                let steps = record["steps"] as? Double ?? nil
-                print("Fetched step count from iCloud")
-                completion(steps, nil)
+        self.fetchLocalStepCount({ (stepCount, error) -> Void in
+            if let stepCount = stepCount {
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    self.updateRemoteStepCount(stepCount)
+                    completion(stepCount, nil)
+                })
             } else {
-                self.fetchLocalStepCount({ (stepCount, error) -> Void in
-                    if let stepCount = stepCount {
-                        print("Fetching local step count")
-                        completion(stepCount, nil)
-                    } else {
-                        completion(nil, error)
-                    }
+                dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                    completion(nil, error)
                 })
             }
-        }
+        })
     }
 
     func fetchLocalStepCount(completion:(Double?, NSError?) -> Void) {
 
         self.healthStore.fetchTodayStepCount({ (stepCount, error) -> Void in
             print("Fetching local steps")
-            self.updateStepCount(stepCount)
-            completion(stepCount, error)
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(stepCount, error)
+            })
         })
     }
 
-    func updateStepCount(stepCount:Double) {
-        dataStore.updateRecordForKey(recordNameStepCount, key: "steps", value: stepCount)
+    func updateRemoteStepCount(stepCount:Double) {
+        dataStore.updateRemoteRecordForKey(recordNameStepCount, key: "steps", value: stepCount)
     }
 
     func fetchFriends() {

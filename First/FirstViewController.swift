@@ -23,12 +23,10 @@ class FirstViewController: UIViewController, UITableViewDataSource {
     }
 
     override func didReceiveMemoryWarning() {
-
         super.didReceiveMemoryWarning()
     }
 
     func setupUI() {
-
         self.tableView.registerClass(UITableViewCell.classForCoder(), forCellReuseIdentifier: "cell");
         self.tableView.dataSource = self;
     }
@@ -54,13 +52,11 @@ class FirstViewController: UIViewController, UITableViewDataSource {
             if success {
                 let store = ActivityStore(healthKitStore: HKHealthStore())
                 self.updateSteps(store)
-                store.fetchFriends()
             }
         }
     }
 
     func updateSteps(store:ActivityStore) {
-
         store.fetchStepCount({ (steps, error) -> Void in
             if let steps = steps {
                 self.stepCount = steps

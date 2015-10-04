@@ -10,20 +10,21 @@ import CloudKit
 
 class DataStore {
 
-    func saveRecord(record:CKRecord) {
+    func saveRemoteRecord(record:CKRecord) {
 
         let container = CKContainer.defaultContainer()
         let database = container.privateCloudDatabase
 
         database.saveRecord(record) { (record, error) -> Void in
-            if let record = record {
-                print("Printing Saved Record")
-                print(record)
+            if let error = error {
+                print("Error saving record \(error)")
+            } else if let _ = record {
+                print("Printing Saved Record, record \(record)")
             }
         }
     }
 
-    func fetchRecord(recordName:String, completion:(CKRecord?) -> Void) {
+    func fetchRemoteRecord(recordName:String, completion:(CKRecord?) -> Void) {
 
         let recordID = CKRecordID(recordName: recordName)
         let container = CKContainer.defaultContainer()
@@ -38,13 +39,20 @@ class DataStore {
         }
     }
 
-    func updateRecordForKey(recordName:String, key:String, value:Double) {
+    func updateRemoteRecordForKey(recordName:String, key:String, value:Double) {
 
-        let recordID = CKRecordID(recordName: recordName)
-        let record = CKRecord(recordType: "Activity", recordID: recordID)
-        record[key] = value
-        print("Updating record for key \(key) value\(value)")
-        saveRecord(record)
+        fetchRemoteRecord(recordName) { (fetchedRecord) -> Void in
+            if let fetchedRecord = fetchedRecord {
+                fetchedRecord[key] = value
+                self.saveRemoteRecord(fetchedRecord)
+            } else {
+                let recordID = CKRecordID(recordName: recordName)
+                let record = CKRecord(recordType: "Activity", recordID: recordID)
+                record[key] = value
+                print("Updating record for key \(key) value\(value)")
+                self.saveRemoteRecord(record)
+            }
+        }
     }
 
     //Social
@@ -80,7 +88,7 @@ class DataStore {
                     }
                 }
 
-                print(discoveredUserInfo)
+                //print("Printing discovered user info \(discoveredUserInfo)")
             }
         }
     }
