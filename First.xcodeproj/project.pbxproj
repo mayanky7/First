@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		F916BEC21B8F77AE00D37396 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BEC11B8F77AE00D37396 /* AppDelegate.swift */; };
 		F916BEC41B8F77AE00D37396 /* FirstViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BEC31B8F77AE00D37396 /* FirstViewController.swift */; };
-		F916BEC61B8F77AE00D37396 /* SecondViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F916BEC51B8F77AE00D37396 /* SecondViewController.swift */; };
 		F916BEC91B8F77AF00D37396 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F916BEC71B8F77AF00D37396 /* Main.storyboard */; };
 		F916BECB1B8F77AF00D37396 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F916BECA1B8F77AF00D37396 /* Assets.xcassets */; };
 		F916BECE1B8F77AF00D37396 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F916BECC1B8F77AF00D37396 /* LaunchScreen.storyboard */; };
@@ -20,6 +19,7 @@
 		F916BEF71B8F89AE00D37396 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F916BEF61B8F89AE00D37396 /* CloudKit.framework */; };
 		F94FA0D41B9B74C4001D0BFA /* ActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */; };
 		F960A9FF1B93457700336790 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F960A9FE1B93457700336790 /* Authenticator.swift */; };
+		F974DDA91BC1C22B004AF002 /* FriendsListViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */; settings = {ASSET_TAGS = (); }; };
 		F99106B41B9CA37600CE0EC5 /* UserData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99106B31B9CA37600CE0EC5 /* UserData.swift */; };
 		F9E28A331B925EC70009474D /* DataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E28A321B925EC70009474D /* DataStore.swift */; };
 /* End PBXBuildFile section */
@@ -45,7 +45,6 @@
 		F916BEBE1B8F77AE00D37396 /* First.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = First.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F916BEC11B8F77AE00D37396 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F916BEC31B8F77AE00D37396 /* FirstViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstViewController.swift; sourceTree = "<group>"; };
-		F916BEC51B8F77AE00D37396 /* SecondViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondViewController.swift; sourceTree = "<group>"; };
 		F916BEC81B8F77AF00D37396 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		F916BECA1B8F77AF00D37396 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		F916BECD1B8F77AF00D37396 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -62,6 +61,7 @@
 		F916BEF61B8F89AE00D37396 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityStore.swift; sourceTree = "<group>"; };
 		F960A9FE1B93457700336790 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
+		F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendsListViewDataSource.swift; sourceTree = "<group>"; };
 		F99106B31B9CA37600CE0EC5 /* UserData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserData.swift; sourceTree = "<group>"; };
 		F9E28A321B925EC70009474D /* DataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -118,13 +118,13 @@
 		F916BEC01B8F77AE00D37396 /* First */ = {
 			isa = PBXGroup;
 			children = (
-				F9E28A2F1B925E5D0009474D /* Model */,
+				F974DDA71BC1C202004AF002 /* VCDataSource */,
+				F974DDA61BC1C1D0004AF002 /* Views */,
+				F974DDA51BC1C1C0004AF002 /* Authentication */,
+				F974DDA41BC1C1B1004AF002 /* ViewControllers */,
+				F9E28A2F1B925E5D0009474D /* Data */,
 				F916BEF51B8F899F00D37396 /* First.entitlements */,
 				F916BEC11B8F77AE00D37396 /* AppDelegate.swift */,
-				F960A9FE1B93457700336790 /* Authenticator.swift */,
-				F916BEC31B8F77AE00D37396 /* FirstViewController.swift */,
-				F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */,
-				F916BEC51B8F77AE00D37396 /* SecondViewController.swift */,
 				F916BEC71B8F77AF00D37396 /* Main.storyboard */,
 				F916BECA1B8F77AF00D37396 /* Assets.xcassets */,
 				F916BECC1B8F77AF00D37396 /* LaunchScreen.storyboard */,
@@ -151,14 +151,46 @@
 			path = FirstUITests;
 			sourceTree = "<group>";
 		};
-		F9E28A2F1B925E5D0009474D /* Model */ = {
+		F974DDA41BC1C1B1004AF002 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
+				F916BEC31B8F77AE00D37396 /* FirstViewController.swift */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
+		F974DDA51BC1C1C0004AF002 /* Authentication */ = {
+			isa = PBXGroup;
+			children = (
+				F960A9FE1B93457700336790 /* Authenticator.swift */,
+			);
+			name = Authentication;
+			sourceTree = "<group>";
+		};
+		F974DDA61BC1C1D0004AF002 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		F974DDA71BC1C202004AF002 /* VCDataSource */ = {
+			isa = PBXGroup;
+			children = (
+				F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */,
+			);
+			name = VCDataSource;
+			sourceTree = "<group>";
+		};
+		F9E28A2F1B925E5D0009474D /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */,
 				F99106B31B9CA37600CE0EC5 /* UserData.swift */,
 				F9E28A321B925EC70009474D /* DataStore.swift */,
 				F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */,
 			);
-			name = Model;
+			name = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -303,11 +335,11 @@
 				F916BEF21B8F77D600D37396 /* HKHealthStore+Convenience.swift in Sources */,
 				F94FA0D41B9B74C4001D0BFA /* ActivityStore.swift in Sources */,
 				F99106B41B9CA37600CE0EC5 /* UserData.swift in Sources */,
-				F916BEC61B8F77AE00D37396 /* SecondViewController.swift in Sources */,
 				F916BEC21B8F77AE00D37396 /* AppDelegate.swift in Sources */,
 				F916BEC41B8F77AE00D37396 /* FirstViewController.swift in Sources */,
 				F9E28A331B925EC70009474D /* DataStore.swift in Sources */,
 				F960A9FF1B93457700336790 /* Authenticator.swift in Sources */,
+				F974DDA91BC1C22B004AF002 /* FriendsListViewDataSource.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

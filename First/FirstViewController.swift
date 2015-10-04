@@ -1,9 +1,10 @@
 import UIKit
 import HealthKit
 
-class FirstViewController: UIViewController, UITableViewDataSource {
+class FirstViewController: UIViewController {
 
     var stepCount = 0.0
+    var dataSource: FriendsListViewDataSource? = nil;
 
     @IBOutlet weak var tableView: UITableView!;
 
@@ -18,50 +19,15 @@ class FirstViewController: UIViewController, UITableViewDataSource {
     override func viewDidLoad() {
 
         super.viewDidLoad()
-        setupUI()
-        requestAccess()
+        setupDataSource()
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
 
-    func setupUI() {
-        self.tableView.registerClass(UITableViewCell.classForCoder(), forCellReuseIdentifier: "cell");
-        self.tableView.dataSource = self;
-    }
-
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1;
-    }
-
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-
-        let cell:UITableViewCell = tableView.dequeueReusableCellWithIdentifier("cell")!
-        cell.textLabel?.text = "Today's step count is \(self.stepCount)"
-
-        return cell;
-    }
-
-    func requestAccess() {
-
-        let authenticator = Authenticator()
-        authenticator.requestPermissions { (success) -> Void in
-
-            print("Permissions status success ? \(success)")
-            if success {
-                let store = ActivityStore(healthKitStore: HKHealthStore())
-                self.updateSteps(store)
-            }
-        }
-    }
-
-    func updateSteps(store:ActivityStore) {
-        store.fetchStepCount({ (steps, error) -> Void in
-            if let steps = steps {
-                self.stepCount = steps
-                self.tableView.reloadData()
-            }
-        })
+    func setupDataSource() {
+        dataSource = FriendsListViewDataSource(tableView: tableView)
+        tableView.dataSource = dataSource
     }
 }
