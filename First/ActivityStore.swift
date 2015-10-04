@@ -8,6 +8,7 @@
 
 import Foundation
 import HealthKit
+import Contacts
 
 class ActivityStore {
 
@@ -49,7 +50,7 @@ class ActivityStore {
         dataStore.updateRemoteRecordForKey(recordNameStepCount, key: "steps", value: stepCount)
     }
 
-    func fetchFriends() {
-        dataStore.fetchAddressbookFriends()
+    func fetchFriends(completion:([CNContact]?) -> Void) {
+        dataStore.fetchAddressbookFriends(completion)
     }
 }

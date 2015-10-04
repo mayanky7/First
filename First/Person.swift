@@ -6,14 +6,16 @@
 //  Copyright © 2015 First. All rights reserved.
 //
 
-struct UserData {
+struct Person {
 
     let name:String
     let steps:Double
+    let identifier:String
 
-    init(userName:String, userSteps:Double) {
+    init(userName:String, userSteps:Double, userIdentifier:String) {
         name = userName
         steps = userSteps
+        identifier = userIdentifier
     }
 }
 

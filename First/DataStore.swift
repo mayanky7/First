@@ -70,25 +70,28 @@ class DataStore {
         }
     }
 
-    func fetchAddressbookFriends() {
+    func fetchAddressbookFriends(completion:([CNContact]?) -> Void) {
 
         let defaultContainer = CKContainer.defaultContainer()
         let email = "mayanky7@gmail.com"
 
         defaultContainer.discoverUserInfoWithEmailAddress(email) { (discoveredUserInfo, error) -> Void in
-
             if let error = error {
-                print(error)
+                print("Error fetching addressbook friends \(error)")
+                completion(nil)
             } else {
+
                 if let discoveredUserInfo = discoveredUserInfo {
-                    let recordId = discoveredUserInfo.userRecordID
-                    if let _ = recordId {
 
-
+                    let contact = discoveredUserInfo.displayContact
+                    var contacts = [CNContact]()
+                    if let contact = contact {
+                        contacts.append(contact)
                     }
-                }
 
-                //print("Printing discovered user info \(discoveredUserInfo)")
+                    completion(contacts)
+                    print("Found contacts \(discoveredUserInfo)")
+                }
             }
         }
     }
