@@ -24,7 +24,7 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
     }
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return contacts.count;
+        return contacts.count
     }
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -76,15 +76,8 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
         }
     }
 
-    private func updateContactFriends(friends: [CNContact]) {
-
-       let persons = friends.map { (let contact) -> Person in
-            let identifier = NSUUID().UUIDString
-            let friend = Person(userName: contact.givenName, userSteps: 2, userIdentifier: identifier)
-            return friend
-        }
-
-        self.contacts.appendContentsOf(persons)
+    private func updateContactFriends(friends: [Person]) {
+        self.contacts.appendContentsOf(friends)
         self.tableView.reloadData()
     }
 

@@ -10,10 +10,10 @@ import CloudKit
 
 class DataStore {
 
-    func saveRemoteRecord(record:CKRecord) {
+    let container = CKContainer.defaultContainer()
+    let database = CKContainer.defaultContainer().publicCloudDatabase
 
-        let container = CKContainer.defaultContainer()
-        let database = container.privateCloudDatabase
+    func saveRemoteRecord(record:CKRecord) {
 
         database.saveRecord(record) { (record, error) -> Void in
             if let error = error {
@@ -27,8 +27,6 @@ class DataStore {
     func fetchRemoteRecord(recordName:String, completion:(CKRecord?) -> Void) {
 
         let recordID = CKRecordID(recordName: recordName)
-        let container = CKContainer.defaultContainer()
-        let database = container.privateCloudDatabase
 
         let mainThreadCompletion = { (record: CKRecord?) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -45,26 +43,29 @@ class DataStore {
         }
     }
 
-    func updateRemoteRecordForKey(recordName:String, key:String, value:Double) {
+    func updateRemoteRecordForRecordName(recordName:String, key:String, value:Double) {
 
         fetchRemoteRecord(recordName) { (fetchedRecord) -> Void in
+
+            var recordToSave: CKRecord? = nil;
+
             if let fetchedRecord = fetchedRecord {
                 fetchedRecord[key] = value
-                self.saveRemoteRecord(fetchedRecord)
+                recordToSave = fetchedRecord;
             } else {
                 let recordID = CKRecordID(recordName: recordName)
                 let record = CKRecord(recordType: "Activity", recordID: recordID)
                 record[key] = value
+                recordToSave = record;
                 print("Updating record for key \(key) value\(value)")
-                self.saveRemoteRecord(record)
             }
+
+            self.saveRemoteRecord(recordToSave!)
         }
     }
 
     //Social
     func requestDiscoveryPermission(completion:(Bool) -> Void) {
-
-        let container = CKContainer.defaultContainer()
 
         let mainThreadCompletion = { (complete: Bool) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -82,32 +83,42 @@ class DataStore {
         }
     }
 
-    func fetchAddressbookFriends(completion:([CNContact]?) -> Void) {
+    func fetchUserRecordIdentifier(completion:(String?, NSError?) -> Void) {
 
-        let defaultContainer = CKContainer.defaultContainer()
+        let mainThreadCompletion = { (recordID: CKRecordID?, error: NSError? ) -> Void in
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(recordID?.recordName, error);
+            })
+        }
+
+        container.fetchUserRecordIDWithCompletionHandler { (recordID, error) -> Void in
+            if let error = error {
+                mainThreadCompletion(nil, error)
+                print("Error fetch user record ID \(error)")
+            } else {
+                print("Fetched user record ID \(recordID)")
+                mainThreadCompletion(recordID, nil);
+            }
+        }
+    }
+
+    func fetchAddressbookFriends(completion:([CKDiscoveredUserInfo]?) -> Void) {
+
         let email = "mayanky7@gmail.com"
 
-        let mainThreadCompletion = { (contacts: [CNContact]?) -> Void in
+        let mainThreadCompletion = { (contacts: [CKDiscoveredUserInfo]?) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 completion(contacts);
             })
         }
 
-        defaultContainer.discoverUserInfoWithEmailAddress(email) { (discoveredUserInfo, error) -> Void in
+        container.discoverUserInfoWithEmailAddress(email) { (discoveredUserInfo, error) -> Void in
             if let error = error {
                 print("Error fetching addressbook friends \(error)")
                 mainThreadCompletion(nil)
             } else {
-
                 if let discoveredUserInfo = discoveredUserInfo {
-
-                    let contact = discoveredUserInfo.displayContact
-                    var contacts = [CNContact]()
-                    if let contact = contact {
-                        contacts.append(contact)
-                    }
-
-                    mainThreadCompletion(contacts)
+                    mainThreadCompletion([discoveredUserInfo])
                     print("Found contacts \(discoveredUserInfo)")
                 }
             }

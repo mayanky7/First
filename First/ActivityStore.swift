@@ -9,16 +9,15 @@
 import Foundation
 import HealthKit
 import Contacts
+import CloudKit
 
 class ActivityStore {
 
-    let recordNameStepCount = "stepCount"
     let healthStore:HKHealthStore
-    let dataStore:DataStore
+    let dataStore:DataStore = DataStore()
 
     init(healthKitStore: HKHealthStore) {
         healthStore = healthKitStore;
-        dataStore = DataStore()
     }
 
     func fetchStepCount(completion:(Double?, NSError?) -> Void) {
@@ -47,10 +46,30 @@ class ActivityStore {
     }
 
     func updateRemoteStepCount(stepCount:Double) {
-        dataStore.updateRemoteRecordForKey(recordNameStepCount, key: "steps", value: stepCount)
+
+        dataStore.fetchUserRecordIdentifier { (recordIdentifier, error) -> Void in
+            if let recordIdentifier = recordIdentifier {
+                self.dataStore.updateRemoteRecordForRecordName(recordIdentifier, key: "steps", value: stepCount)
+            }
+        }
     }
 
-    func fetchFriends(completion:([CNContact]?) -> Void) {
-        dataStore.fetchAddressbookFriends(completion)
+    func fetchFriends(completion:([Person]?) -> Void) {
+
+        dataStore.fetchAddressbookFriends { (userInfos) -> Void in
+            if let userInfos = userInfos {
+                let persons = userInfos.map({ (let info) -> Person in
+                    let identifier = info.userRecordID?.recordName
+                    let name = info.displayContact?.givenName
+                    let person = Person(userName: name!, userSteps: 20.0, userIdentifier: identifier!)
+                    return person
+                })
+
+                completion(persons)
+            } else {
+                print("Failed to fetch user infos")
+                completion(nil)
+            }
+        }
     }
 }

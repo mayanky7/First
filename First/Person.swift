@@ -9,7 +9,7 @@
 struct Person {
 
     let name:String
-    let steps:Double
+    var steps:Double
     let identifier:String
 
     init(userName:String, userSteps:Double, userIdentifier:String) {
