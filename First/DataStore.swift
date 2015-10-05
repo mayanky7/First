@@ -30,11 +30,17 @@ class DataStore {
         let container = CKContainer.defaultContainer()
         let database = container.privateCloudDatabase
 
+        let mainThreadCompletion = { (record: CKRecord?) -> Void in
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(record);
+            })
+        }
+
         database.fetchRecordWithID(recordID) { (record, error) -> Void in
             if let record = record {
-                completion(record)
+                mainThreadCompletion(record)
             } else {
-                completion(nil)
+                mainThreadCompletion(nil)
             }
         }
     }
@@ -60,12 +66,18 @@ class DataStore {
 
         let container = CKContainer.defaultContainer()
 
+        let mainThreadCompletion = { (complete: Bool) -> Void in
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(complete);
+            })
+        }
+
         container.requestApplicationPermission(CKApplicationPermissions.UserDiscoverability) { (status, error) -> Void in
 
             if status == CKApplicationPermissionStatus.Granted {
-                completion(true)
+                mainThreadCompletion(true)
             } else {
-                completion(false)
+                mainThreadCompletion(false)
             }
         }
     }
@@ -75,10 +87,16 @@ class DataStore {
         let defaultContainer = CKContainer.defaultContainer()
         let email = "mayanky7@gmail.com"
 
+        let mainThreadCompletion = { (contacts: [CNContact]?) -> Void in
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(contacts);
+            })
+        }
+
         defaultContainer.discoverUserInfoWithEmailAddress(email) { (discoveredUserInfo, error) -> Void in
             if let error = error {
                 print("Error fetching addressbook friends \(error)")
-                completion(nil)
+                mainThreadCompletion(nil)
             } else {
 
                 if let discoveredUserInfo = discoveredUserInfo {
@@ -89,7 +107,7 @@ class DataStore {
                         contacts.append(contact)
                     }
 
-                    completion(contacts)
+                    mainThreadCompletion(contacts)
                     print("Found contacts \(discoveredUserInfo)")
                 }
             }
