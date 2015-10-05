@@ -43,6 +43,11 @@ class DataStore {
         }
     }
 
+    func fetchRemoteRecords(recordNames:[String], completion:([CKRecord]?) -> Void) {
+        print("Method implementation is empty in datastore")
+        abort();
+    }
+
     func updateRemoteRecordForRecordName(recordName:String, key:String, value:Double) {
 
         fetchRemoteRecord(recordName) { (fetchedRecord) -> Void in
@@ -104,23 +109,18 @@ class DataStore {
 
     func fetchAddressbookFriends(completion:([CKDiscoveredUserInfo]?) -> Void) {
 
-        let email = "mayanky7@gmail.com"
-
         let mainThreadCompletion = { (contacts: [CKDiscoveredUserInfo]?) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 completion(contacts);
             })
         }
 
-        container.discoverUserInfoWithEmailAddress(email) { (discoveredUserInfo, error) -> Void in
+        container.discoverAllContactUserInfosWithCompletionHandler { (discoveredUserInfos, error) -> Void in
             if let error = error {
                 print("Error fetching addressbook friends \(error)")
                 mainThreadCompletion(nil)
             } else {
-                if let discoveredUserInfo = discoveredUserInfo {
-                    mainThreadCompletion([discoveredUserInfo])
-                    print("Found contacts \(discoveredUserInfo)")
-                }
+                mainThreadCompletion(discoveredUserInfos)
             }
         }
     }

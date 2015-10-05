@@ -54,18 +54,46 @@ class ActivityStore {
         }
     }
 
-    func fetchFriends(completion:([Person]?) -> Void) {
+    func fetchFriendsStepCount(completion:([Person]?) -> Void) {
 
-        dataStore.fetchAddressbookFriends { (userInfos) -> Void in
-            if let userInfos = userInfos {
-                let persons = userInfos.map({ (let info) -> Person in
-                    let identifier = info.userRecordID?.recordName
-                    let name = info.displayContact?.givenName
-                    let person = Person(userName: name!, userSteps: 20.0, userIdentifier: identifier!)
-                    return person
+        fetchFriends { (friends) -> Void in
+
+            if let friends = friends {
+                //Fetch all friends record IDs
+                var nameIDMap = [String:String]();
+                let recordNames = friends.map({ (let userInfo:CKDiscoveredUserInfo) -> String in
+                    let recordName = (userInfo.userRecordID?.recordName)!
+                    let name = (userInfo.displayContact?.familyName)!
+                    nameIDMap[recordName] = name
+                    return recordName
                 })
 
-                completion(persons)
+                //Fetch activities for those record IDs and create person objects
+                self.dataStore.fetchRemoteRecords(recordNames, completion: { (records) -> Void in
+
+                    let persons = records?.map({ (let record) -> Person in
+                        let identifier = record.recordID.recordName
+                        var stepCount:Double? = record["steps"] as! Double?
+                        if stepCount == nil {
+                            stepCount = 0;
+                        }
+                        let name = nameIDMap[identifier]!
+                        let person = Person(userName: name, userSteps: stepCount!, userIdentifier: identifier)
+                        return person
+                    })
+
+                    completion(persons)
+                })
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    private func fetchFriends(completion:([CKDiscoveredUserInfo]?) -> Void) {
+        dataStore.fetchAddressbookFriends { (userInfos) -> Void in
+            if let userInfos = userInfos {
+                completion(userInfos)
             } else {
                 print("Failed to fetch user infos")
                 completion(nil)

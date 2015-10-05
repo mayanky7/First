@@ -69,7 +69,7 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
 
     private func fetchFriendList(store: ActivityStore) {
 
-        store.fetchFriends { (fetchedContacts) -> Void in
+        store.fetchFriendsStepCount { (fetchedContacts) -> Void in
             if let fetchedContacts = fetchedContacts {
                 self.updateContactFriends(fetchedContacts)
             }
