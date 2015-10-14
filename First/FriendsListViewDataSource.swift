@@ -23,6 +23,7 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
         startFetchingData();
     }
 
+    //MARK: - UITableViewDataSource
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return contacts.count
     }
@@ -44,44 +45,46 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
         return constCell;
     }
 
+    //MARK: - Data Fetching
     private func startFetchingData() {
 
         Authenticator().requestPermissions { (success) -> Void in
             if success {
                 let store = ActivityStore(healthKitStore: HKHealthStore())
-                self.updateSteps(store)
-                self.fetchFriendList(store)
+                self.fetchPersonData(store)
+                self.fetchFriendData(store)
             } else {
                 print("Failed to get permissions")
             }
         }
     }
 
-    private func updateSteps(store:ActivityStore) {
+    //MARK: Data Updates
+    private func fetchPersonData(store:ActivityStore) {
 
         store.fetchStepCount({ (steps, error) -> Void in
             if let steps = steps {
-                self.updatePersonStepCount(steps)
+                self.updatePersonData(steps)
                 self.tableView.reloadData()
             }
         })
     }
 
-    private func fetchFriendList(store: ActivityStore) {
+    private func fetchFriendData(store: ActivityStore) {
 
         store.fetchFriendsStepCount { (fetchedContacts) -> Void in
             if let fetchedContacts = fetchedContacts {
-                self.updateContactFriends(fetchedContacts)
+                self.updateContactData(fetchedContacts)
             }
         }
     }
 
-    private func updateContactFriends(friends: [Person]) {
+    private func updateContactData(friends: [Person]) {
         self.contacts.appendContentsOf(friends)
         self.tableView.reloadData()
     }
 
-    private func updatePersonStepCount(stepCount: Double) {
+    private func updatePersonData(stepCount: Double) {
 
         assert(person == nil)
         let personIdentifier = NSUUID()
