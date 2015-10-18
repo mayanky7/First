@@ -13,6 +13,7 @@ import CloudKit
 
 class ActivityStore {
 
+    let activityNamePrefix = "activity:"
     let healthStore:HKHealthStore
     let dataStore:DataStore = DataStore()
 
@@ -49,7 +50,11 @@ class ActivityStore {
 
         dataStore.fetchUserRecordIdentifier { (recordIdentifier, error) -> Void in
             if let recordIdentifier = recordIdentifier {
-                self.dataStore.updateRemoteRecordForRecordName(recordIdentifier, key: "steps", value: stepCount)
+                let map:[String: AnyObject] = ["steps":stepCount,
+                    "userIdentifier":recordIdentifier];
+
+                let recrordName = self.activityNamePrefix+recordIdentifier
+                self.dataStore.updateRemoteRecordForRecordName(recrordName, recordType:"Activity", valueMap: map)
             }
         }
     }
@@ -64,19 +69,20 @@ class ActivityStore {
                 let recordNames = friends.map({ (let userInfo:CKDiscoveredUserInfo) -> String in
                     let recordName = (userInfo.userRecordID?.recordName)!
                     let name = (userInfo.displayContact?.familyName)!
-                    nameIDMap[recordName] = name
+                    nameIDMap[self.activityNamePrefix+recordName] = name
                     return recordName
                 })
 
                 //Fetch activities for those record IDs and create person objects
-                self.dataStore.fetchRemoteRecords(recordNames, completion: { (records) -> Void in
+                self.dataStore.fetchRemoteRecords(recordNames, recordType:"Activity", completion: { (records) -> Void in
 
                     let persons = records?.map({ (let record) -> Person in
                         let identifier = record.recordID.recordName
-                        var stepCount:Double? = record["steps"] as! Double?
+                        var stepCount:Double? = (record["steps"] as? Double?)!
                         if stepCount == nil {
                             stepCount = 0;
                         }
+
                         let name = nameIDMap[identifier]!
                         let person = Person(userName: name, userSteps: stepCount!, userIdentifier: identifier)
                         return person

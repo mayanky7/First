@@ -27,7 +27,6 @@ class DataStore {
     func fetchRemoteRecord(recordName:String, completion:(CKRecord?) -> Void) {
 
         let recordID = CKRecordID(recordName: recordName)
-
         let mainThreadCompletion = { (record: CKRecord?) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
                 completion(record);
@@ -43,29 +42,53 @@ class DataStore {
         }
     }
 
-    func fetchRemoteRecords(recordNames:[String], completion:([CKRecord]?) -> Void) {
-        print("Method implementation is empty in datastore")
-        abort();
+    func fetchRemoteRecords(userIdentifiers:[String], recordType:String, completion:([CKRecord]?) -> Void) {
+
+        let mainThreadCompletion = { (records: [CKRecord]?, error: NSError?) -> Void in
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(records)
+            })
+        }
+
+        let predicate = NSPredicate(format: "userIdentifier == %@", userIdentifiers.first!)
+        let query = CKQuery(recordType: recordType, predicate: predicate)
+
+        database.performQuery(query, inZoneWithID: nil) { (records, error) -> Void in
+            if let error = error {
+                print("Error fetch user record ID \(error)")
+                mainThreadCompletion(nil, error)
+            } else {
+                print("Fetched user records \(records)")
+                mainThreadCompletion(records, nil)
+            }
+        }
     }
 
-    func updateRemoteRecordForRecordName(recordName:String, key:String, value:Double) {
+    func updateRemoteRecordForRecordName(recordName:String, recordType:String, valueMap:[String:AnyObject]) {
 
         fetchRemoteRecord(recordName) { (fetchedRecord) -> Void in
 
             var recordToSave: CKRecord? = nil;
-
             if let fetchedRecord = fetchedRecord {
-                fetchedRecord[key] = value
+                assert(fetchedRecord.recordType == recordType) //FIXME:
                 recordToSave = fetchedRecord;
+                print("Fetched record \(fetchedRecord)")
             } else {
                 let recordID = CKRecordID(recordName: recordName)
-                let record = CKRecord(recordType: "Activity", recordID: recordID)
-                record[key] = value
+                let record = CKRecord(recordType: recordType, recordID: recordID)
+                print("Created record \(fetchedRecord)")
                 recordToSave = record;
-                print("Updating record for key \(key) value\(value)")
             }
 
-            self.saveRemoteRecord(recordToSave!)
+            if let recordToSave = recordToSave {
+                for key in valueMap.keys {
+                    recordToSave[key] = valueMap[key] as? CKRecordValue
+                }
+                print("Updating record with recordName \(recordName) values\(valueMap)")
+                self.saveRemoteRecord(recordToSave)
+            } else {
+                print("Failed to create record with recordName \(recordName) values\(valueMap)")
+            }
         }
     }
 
