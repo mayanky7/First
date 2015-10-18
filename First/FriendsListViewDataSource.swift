@@ -13,7 +13,7 @@ import Contacts
 class FriendsListViewDataSource: NSObject, UITableViewDataSource {
 
     var tableView: UITableView
-    var contacts = [Person]()
+    var friends = [Person]()
     var person: Person? = nil;
 
     init(tableView: UITableView) {
@@ -25,7 +25,7 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
 
     //MARK: - UITableViewDataSource
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return contacts.count
+        return friends.count
     }
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -37,7 +37,7 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
         }
 
         let constCell = cell!
-        let contact = self.contacts[indexPath.row]
+        let contact = self.friends[indexPath.row]
         constCell.textLabel?.text = contact.name
         print("Cell Steps \(contact.steps)")
         constCell.detailTextLabel?.text = "\(contact.steps)"
@@ -64,7 +64,7 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
 
         store.fetchStepCount({ (steps, error) -> Void in
             if let steps = steps {
-                self.updatePersonData(steps)
+                self.updatePerson(steps)
                 self.tableView.reloadData()
             }
         })
@@ -74,22 +74,22 @@ class FriendsListViewDataSource: NSObject, UITableViewDataSource {
 
         store.fetchFriendsStepCount { (fetchedContacts) -> Void in
             if let fetchedContacts = fetchedContacts {
-                self.updateContactData(fetchedContacts)
+                self.updateFriends(fetchedContacts)
             }
         }
     }
 
-    private func updateContactData(friends: [Person]) {
-        self.contacts.appendContentsOf(friends)
+    private func updateFriends(friends: [Person]) {
+        self.friends.appendContentsOf(friends)
         self.tableView.reloadData()
     }
 
-    private func updatePersonData(stepCount: Double) {
+    private func updatePerson(stepCount: Double) {
 
         assert(person == nil)
         let personIdentifier = NSUUID()
-        person = Person(userName: "Self", userSteps: stepCount, userIdentifier: personIdentifier.UUIDString)
-        contacts.append(person!)
+        person = Person(userName: "You", userSteps: stepCount, userIdentifier: personIdentifier.UUIDString)
+        friends.append(person!)
         self.tableView.reloadData()
     }
 }
