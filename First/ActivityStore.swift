@@ -88,7 +88,16 @@ class ActivityStore {
                         return person
                     })
 
-                    completion(persons)
+                    var mutablePersons = self.dummyPersonsWithSteps()
+                    if let persons = persons {
+                        mutablePersons = mutablePersons + persons
+                    }
+
+                    let sortedBySteps = mutablePersons.sort({ (first:Person, second:Person) -> Bool in
+                        return first.steps > second.steps
+                    })
+
+                    completion(sortedBySteps)
                 })
             } else {
                 completion(nil)
@@ -105,5 +114,18 @@ class ActivityStore {
                 completion(nil)
             }
         }
+    }
+
+    private func dummyPersonsWithSteps() -> [Person] {
+
+        var mutablePersons = [Person]()
+        let userNames = ["Harshey", "Little Mermaid", "Bamby", "Pinocchio", "Snowhite", "Cinderella", "Dumbo", "Sleeping Beauty", "Alice"]
+        for index in 0..<9 {
+            let randomSteps = Int(arc4random_uniform(10000))
+            let person = Person(userName: userNames[index], userSteps: Double(randomSteps), userIdentifier: NSUUID().UUIDString)
+            mutablePersons.append(person)
+        }
+
+        return mutablePersons
     }
 }
