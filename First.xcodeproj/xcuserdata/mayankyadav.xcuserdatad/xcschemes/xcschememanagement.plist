@@ -4,6 +4,16 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>ActivityDataStore.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>CloudDataStore.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
 		<key>First.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -23,6 +33,16 @@
 			<true/>
 		</dict>
 		<key>F916BEDE1B8F77AF00D37396</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>F96190181BEA9817003D4B36</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>F96190211BEA9817003D4B36</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -19,9 +19,16 @@
 		F916BEF71B8F89AE00D37396 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F916BEF61B8F89AE00D37396 /* CloudKit.framework */; };
 		F94FA0D41B9B74C4001D0BFA /* ActivityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */; };
 		F960A9FF1B93457700336790 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = F960A9FE1B93457700336790 /* Authenticator.swift */; };
-		F974DDA91BC1C22B004AF002 /* FriendsListViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */; settings = {ASSET_TAGS = (); }; };
+		F961901C1BEA9817003D4B36 /* CloudDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = F961901B1BEA9817003D4B36 /* CloudDataStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		F96190231BEA9817003D4B36 /* CloudDataStore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96190191BEA9817003D4B36 /* CloudDataStore.framework */; };
+		F961902A1BEA9817003D4B36 /* CloudDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F96190291BEA9817003D4B36 /* CloudDataStoreTests.swift */; };
+		F961902E1BEA9817003D4B36 /* CloudDataStore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F96190191BEA9817003D4B36 /* CloudDataStore.framework */; };
+		F961902F1BEA9817003D4B36 /* CloudDataStore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F96190191BEA9817003D4B36 /* CloudDataStore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F96190381BEA98A7003D4B36 /* DataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F96190371BEA98A7003D4B36 /* DataStore.swift */; };
+		F96190391BEA99F6003D4B36 /* DataStore.swift in Headers */ = {isa = PBXBuildFile; fileRef = F96190371BEA98A7003D4B36 /* DataStore.swift */; settings = {ATTRIBUTES = (Public, ); }; };
+		F961903A1BEA9BAC003D4B36 /* CloudDataStore.h in Sources */ = {isa = PBXBuildFile; fileRef = F961901B1BEA9817003D4B36 /* CloudDataStore.h */; };
+		F974DDA91BC1C22B004AF002 /* FriendsListViewDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */; };
 		F99106B41B9CA37600CE0EC5 /* Person.swift in Sources */ = {isa = PBXBuildFile; fileRef = F99106B31B9CA37600CE0EC5 /* Person.swift */; };
-		F9E28A331B925EC70009474D /* DataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E28A321B925EC70009474D /* DataStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,7 +46,42 @@
 			remoteGlobalIDString = F916BEBD1B8F77AE00D37396;
 			remoteInfo = First;
 		};
+		F96190241BEA9817003D4B36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F916BEB61B8F77AE00D37396 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F96190181BEA9817003D4B36;
+			remoteInfo = CloudDataStore;
+		};
+		F96190261BEA9817003D4B36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F916BEB61B8F77AE00D37396 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F916BEBD1B8F77AE00D37396;
+			remoteInfo = First;
+		};
+		F961902C1BEA9817003D4B36 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F916BEB61B8F77AE00D37396 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F96190181BEA9817003D4B36;
+			remoteInfo = CloudDataStore;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F96190351BEA9817003D4B36 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				F961902F1BEA9817003D4B36 /* CloudDataStore.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F916BEBE1B8F77AE00D37396 /* First.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = First.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,9 +103,15 @@
 		F916BEF61B8F89AE00D37396 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ActivityStore.swift; sourceTree = "<group>"; };
 		F960A9FE1B93457700336790 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
+		F96190191BEA9817003D4B36 /* CloudDataStore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CloudDataStore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F961901B1BEA9817003D4B36 /* CloudDataStore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CloudDataStore.h; sourceTree = "<group>"; };
+		F961901D1BEA9817003D4B36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F96190221BEA9817003D4B36 /* CloudDataStoreTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloudDataStoreTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F96190291BEA9817003D4B36 /* CloudDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudDataStoreTests.swift; sourceTree = "<group>"; };
+		F961902B1BEA9817003D4B36 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F96190371BEA98A7003D4B36 /* DataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataStore.swift; sourceTree = "<group>"; };
 		F974DDA81BC1C22B004AF002 /* FriendsListViewDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FriendsListViewDataSource.swift; sourceTree = "<group>"; };
 		F99106B31B9CA37600CE0EC5 /* Person.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Person.swift; sourceTree = "<group>"; };
-		F9E28A321B925EC70009474D /* DataStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DataStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +121,7 @@
 			files = (
 				F916BEF41B8F899F00D37396 /* HealthKit.framework in Frameworks */,
 				F916BEF71B8F89AE00D37396 /* CloudKit.framework in Frameworks */,
+				F961902E1BEA9817003D4B36 /* CloudDataStore.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -90,6 +139,21 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F96190151BEA9817003D4B36 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F961901F1BEA9817003D4B36 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F96190231BEA9817003D4B36 /* CloudDataStore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -101,6 +165,8 @@
 				F916BEC01B8F77AE00D37396 /* First */,
 				F916BED71B8F77AF00D37396 /* FirstTests */,
 				F916BEE21B8F77AF00D37396 /* FirstUITests */,
+				F961901A1BEA9817003D4B36 /* CloudDataStore */,
+				F96190281BEA9817003D4B36 /* CloudDataStoreTests */,
 				F916BEBF1B8F77AE00D37396 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -111,6 +177,8 @@
 				F916BEBE1B8F77AE00D37396 /* First.app */,
 				F916BED41B8F77AF00D37396 /* FirstTests.xctest */,
 				F916BEDF1B8F77AF00D37396 /* FirstUITests.xctest */,
+				F96190191BEA9817003D4B36 /* CloudDataStore.framework */,
+				F96190221BEA9817003D4B36 /* CloudDataStoreTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,7 +187,6 @@
 			isa = PBXGroup;
 			children = (
 				F974DDA71BC1C202004AF002 /* VCDataSource */,
-				F974DDA61BC1C1D0004AF002 /* Views */,
 				F974DDA51BC1C1C0004AF002 /* Authentication */,
 				F974DDA41BC1C1B1004AF002 /* ViewControllers */,
 				F9E28A2F1B925E5D0009474D /* Data */,
@@ -151,6 +218,25 @@
 			path = FirstUITests;
 			sourceTree = "<group>";
 		};
+		F961901A1BEA9817003D4B36 /* CloudDataStore */ = {
+			isa = PBXGroup;
+			children = (
+				F96190371BEA98A7003D4B36 /* DataStore.swift */,
+				F961901B1BEA9817003D4B36 /* CloudDataStore.h */,
+				F961901D1BEA9817003D4B36 /* Info.plist */,
+			);
+			path = CloudDataStore;
+			sourceTree = "<group>";
+		};
+		F96190281BEA9817003D4B36 /* CloudDataStoreTests */ = {
+			isa = PBXGroup;
+			children = (
+				F96190291BEA9817003D4B36 /* CloudDataStoreTests.swift */,
+				F961902B1BEA9817003D4B36 /* Info.plist */,
+			);
+			path = CloudDataStoreTests;
+			sourceTree = "<group>";
+		};
 		F974DDA41BC1C1B1004AF002 /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -167,13 +253,6 @@
 			name = Authentication;
 			sourceTree = "<group>";
 		};
-		F974DDA61BC1C1D0004AF002 /* Views */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Views;
-			sourceTree = "<group>";
-		};
 		F974DDA71BC1C202004AF002 /* VCDataSource */ = {
 			isa = PBXGroup;
 			children = (
@@ -187,13 +266,24 @@
 			children = (
 				F916BEF11B8F77D600D37396 /* HKHealthStore+Convenience.swift */,
 				F99106B31B9CA37600CE0EC5 /* Person.swift */,
-				F9E28A321B925EC70009474D /* DataStore.swift */,
 				F94FA0D31B9B74C4001D0BFA /* ActivityStore.swift */,
 			);
 			name = Data;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		F96190161BEA9817003D4B36 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F961901C1BEA9817003D4B36 /* CloudDataStore.h in Headers */,
+				F96190391BEA99F6003D4B36 /* DataStore.swift in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		F916BEBD1B8F77AE00D37396 /* First */ = {
@@ -203,10 +293,12 @@
 				F916BEBA1B8F77AE00D37396 /* Sources */,
 				F916BEBB1B8F77AE00D37396 /* Frameworks */,
 				F916BEBC1B8F77AE00D37396 /* Resources */,
+				F96190351BEA9817003D4B36 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F961902D1BEA9817003D4B36 /* PBXTargetDependency */,
 			);
 			name = First;
 			productName = First;
@@ -249,12 +341,50 @@
 			productReference = F916BEDF1B8F77AF00D37396 /* FirstUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		F96190181BEA9817003D4B36 /* CloudDataStore */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F96190341BEA9817003D4B36 /* Build configuration list for PBXNativeTarget "CloudDataStore" */;
+			buildPhases = (
+				F96190141BEA9817003D4B36 /* Sources */,
+				F96190151BEA9817003D4B36 /* Frameworks */,
+				F96190161BEA9817003D4B36 /* Headers */,
+				F96190171BEA9817003D4B36 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CloudDataStore;
+			productName = CloudDataStore;
+			productReference = F96190191BEA9817003D4B36 /* CloudDataStore.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		F96190211BEA9817003D4B36 /* CloudDataStoreTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F96190361BEA9817003D4B36 /* Build configuration list for PBXNativeTarget "CloudDataStoreTests" */;
+			buildPhases = (
+				F961901E1BEA9817003D4B36 /* Sources */,
+				F961901F1BEA9817003D4B36 /* Frameworks */,
+				F96190201BEA9817003D4B36 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F96190251BEA9817003D4B36 /* PBXTargetDependency */,
+				F96190271BEA9817003D4B36 /* PBXTargetDependency */,
+			);
+			name = CloudDataStoreTests;
+			productName = CloudDataStoreTests;
+			productReference = F96190221BEA9817003D4B36 /* CloudDataStoreTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		F916BEB61B8F77AE00D37396 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 0710;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = First;
 				TargetAttributes = {
@@ -278,6 +408,14 @@
 						CreatedOnToolsVersion = 7.0;
 						TestTargetID = F916BEBD1B8F77AE00D37396;
 					};
+					F96190181BEA9817003D4B36 = {
+						CreatedOnToolsVersion = 7.1;
+						DevelopmentTeam = DWM77K6AFX;
+					};
+					F96190211BEA9817003D4B36 = {
+						CreatedOnToolsVersion = 7.1;
+						TestTargetID = F916BEBD1B8F77AE00D37396;
+					};
 				};
 			};
 			buildConfigurationList = F916BEB91B8F77AE00D37396 /* Build configuration list for PBXProject "First" */;
@@ -296,6 +434,8 @@
 				F916BEBD1B8F77AE00D37396 /* First */,
 				F916BED31B8F77AF00D37396 /* FirstTests */,
 				F916BEDE1B8F77AF00D37396 /* FirstUITests */,
+				F96190181BEA9817003D4B36 /* CloudDataStore */,
+				F96190211BEA9817003D4B36 /* CloudDataStoreTests */,
 			);
 		};
 /* End PBXProject section */
@@ -325,6 +465,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F96190171BEA9817003D4B36 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F96190201BEA9817003D4B36 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -337,7 +491,6 @@
 				F99106B41B9CA37600CE0EC5 /* Person.swift in Sources */,
 				F916BEC21B8F77AE00D37396 /* AppDelegate.swift in Sources */,
 				F916BEC41B8F77AE00D37396 /* FirstViewController.swift in Sources */,
-				F9E28A331B925EC70009474D /* DataStore.swift in Sources */,
 				F960A9FF1B93457700336790 /* Authenticator.swift in Sources */,
 				F974DDA91BC1C22B004AF002 /* FriendsListViewDataSource.swift in Sources */,
 			);
@@ -359,6 +512,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F96190141BEA9817003D4B36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F961903A1BEA9BAC003D4B36 /* CloudDataStore.h in Sources */,
+				F96190381BEA98A7003D4B36 /* DataStore.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F961901E1BEA9817003D4B36 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F961902A1BEA9817003D4B36 /* CloudDataStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -371,6 +541,21 @@
 			isa = PBXTargetDependency;
 			target = F916BEBD1B8F77AE00D37396 /* First */;
 			targetProxy = F916BEE01B8F77AF00D37396 /* PBXContainerItemProxy */;
+		};
+		F96190251BEA9817003D4B36 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F96190181BEA9817003D4B36 /* CloudDataStore */;
+			targetProxy = F96190241BEA9817003D4B36 /* PBXContainerItemProxy */;
+		};
+		F96190271BEA9817003D4B36 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F916BEBD1B8F77AE00D37396 /* First */;
+			targetProxy = F96190261BEA9817003D4B36 /* PBXContainerItemProxy */;
+		};
+		F961902D1BEA9817003D4B36 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F96190181BEA9817003D4B36 /* CloudDataStore */;
+			targetProxy = F961902C1BEA9817003D4B36 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -482,6 +667,7 @@
 				CODE_SIGN_ENTITLEMENTS = First/First.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = First/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.first.client.First;
@@ -497,6 +683,7 @@
 				CODE_SIGN_ENTITLEMENTS = First/First.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				EMBEDDED_CONTENT_CONTAINS_SWIFT = YES;
 				INFOPLIST_FILE = First/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.first.client.First;
@@ -553,6 +740,79 @@
 			};
 			name = Release;
 		};
+		F96190301BEA9817003D4B36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CloudDataStore/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mayank.first.CloudDataStore;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		F96190311BEA9817003D4B36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				INFOPLIST_FILE = CloudDataStore/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mayank.first.CloudDataStore;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
+		F96190321BEA9817003D4B36 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = CloudDataStoreTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mayank.first.CloudDataStoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/First.app/First";
+			};
+			name = Debug;
+		};
+		F96190331BEA9817003D4B36 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = CloudDataStoreTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.mayank.first.CloudDataStoreTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/First.app/First";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -591,6 +851,22 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		F96190341BEA9817003D4B36 /* Build configuration list for PBXNativeTarget "CloudDataStore" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F96190301BEA9817003D4B36 /* Debug */,
+				F96190311BEA9817003D4B36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		F96190361BEA9817003D4B36 /* Build configuration list for PBXNativeTarget "CloudDataStoreTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F96190321BEA9817003D4B36 /* Debug */,
+				F96190331BEA9817003D4B36 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

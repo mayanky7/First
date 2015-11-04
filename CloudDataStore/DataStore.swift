@@ -8,10 +8,12 @@
 
 import CloudKit
 
-class DataStore {
+public class DataStore {
 
     let container = CKContainer.defaultContainer()
     let database = CKContainer.defaultContainer().publicCloudDatabase
+
+    public init() {}
 
     func saveRemoteRecord(record:CKRecord) {
 
@@ -42,7 +44,28 @@ class DataStore {
         }
     }
 
-    func fetchRemoteRecords(userIdentifiers:[String], recordType:String, completion:([CKRecord]?) -> Void) {
+    //Social
+    func requestDiscoveryPermission(completion:(Bool) -> Void) {
+
+        let mainThreadCompletion = { (complete: Bool) -> Void in
+            dispatch_async(dispatch_get_main_queue(), { () -> Void in
+                completion(complete);
+            })
+        }
+
+        container.requestApplicationPermission(CKApplicationPermissions.UserDiscoverability) { (status, error) -> Void in
+
+            if status == CKApplicationPermissionStatus.Granted {
+                mainThreadCompletion(true)
+            } else {
+                mainThreadCompletion(false)
+            }
+        }
+    }
+
+
+    //API
+    public func fetchRemoteRecords(userIdentifiers:[String], recordType:String, completion:([CKRecord]?) -> Void) {
 
         let mainThreadCompletion = { (records: [CKRecord]?, error: NSError?) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -70,7 +93,7 @@ class DataStore {
         }
     }
 
-    func updateRemoteRecordForRecordName(recordName:String, recordType:String, valueMap:[String:AnyObject]) {
+    public func updateRemoteRecordForRecordName(recordName:String, recordType:String, valueMap:[String:AnyObject]) {
 
         fetchRemoteRecord(recordName) { (fetchedRecord) -> Void in
 
@@ -98,26 +121,8 @@ class DataStore {
         }
     }
 
-    //Social
-    func requestDiscoveryPermission(completion:(Bool) -> Void) {
 
-        let mainThreadCompletion = { (complete: Bool) -> Void in
-            dispatch_async(dispatch_get_main_queue(), { () -> Void in
-                completion(complete);
-            })
-        }
-
-        container.requestApplicationPermission(CKApplicationPermissions.UserDiscoverability) { (status, error) -> Void in
-
-            if status == CKApplicationPermissionStatus.Granted {
-                mainThreadCompletion(true)
-            } else {
-                mainThreadCompletion(false)
-            }
-        }
-    }
-
-    func fetchUserRecordIdentifier(completion:(String?, NSError?) -> Void) {
+    public func fetchUserRecordIdentifier(completion:(String?, NSError?) -> Void) {
 
         let mainThreadCompletion = { (recordID: CKRecordID?, error: NSError? ) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in
@@ -136,7 +141,7 @@ class DataStore {
         }
     }
 
-    func fetchAddressbookFriends(completion:([CKDiscoveredUserInfo]?) -> Void) {
+    public func fetchAddressbookFriends(completion:([CKDiscoveredUserInfo]?) -> Void) {
 
         let mainThreadCompletion = { (contacts: [CKDiscoveredUserInfo]?) -> Void in
             dispatch_async(dispatch_get_main_queue(), { () -> Void in

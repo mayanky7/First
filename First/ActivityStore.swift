@@ -8,13 +8,13 @@
 
 import Foundation
 import HealthKit
-import CloudKit
+import CloudDataStore
 
 class ActivityStore {
 
     let activityNamePrefix = "activity:"
     let healthStore:HKHealthStore
-    let dataStore:DataStore = DataStore()
+    let dataStore = DataStore()
 
     init(healthKitStore: HKHealthStore) {
         healthStore = healthKitStore;
