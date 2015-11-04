@@ -8,7 +8,6 @@
 
 import UIKit
 import HealthKit
-import Contacts
 
 class FriendsListViewDataSource: NSObject, UITableViewDataSource {
 
