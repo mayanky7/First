@@ -50,7 +50,13 @@ class DataStore {
             })
         }
 
-        let predicate = NSPredicate(format: "userIdentifier == %@", userIdentifiers.first!)
+        guard let firstIdentifier = userIdentifiers.first else {
+            print("Did not find any user identifiers")
+            mainThreadCompletion(nil, nil)
+            return
+        }
+
+        let predicate = NSPredicate(format: "userIdentifier == %@", firstIdentifier)
         let query = CKQuery(recordType: recordType, predicate: predicate)
 
         database.performQuery(query, inZoneWithID: nil) { (records, error) -> Void in
