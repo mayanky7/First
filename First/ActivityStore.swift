@@ -8,7 +8,6 @@
 
 import Foundation
 import HealthKit
-import Contacts
 import CloudKit
 
 class ActivityStore {
