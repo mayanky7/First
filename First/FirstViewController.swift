@@ -1,5 +1,4 @@
 import UIKit
-import HealthKit
 
 class FirstViewController: UIViewController {
 
