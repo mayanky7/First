@@ -1,5 +1,5 @@
 'use strict';
-/* Starlight Queen — the Queen, her foes, items, and the Ashen King */
+/* Starlight Queen — Ana and Sam, their foes, items, diamonds, and the Hoarder King */
 
 const SOLID = { '#': 1, 'B': 1, '?': 1, 'H': 1, 'S': 1, 'L': 1, 'U': 1, 'X': 1 };
 function tileAt(w, cx, cy) { if (cy < 0 || cy >= w.rows || cx < 0 || cx >= w.cols) return '.'; return w.grid[cy][cx]; }
@@ -31,9 +31,21 @@ function moveBody(w, e) {
   }
 }
 
-/* ============ Player ============ */
-function makePlayer(x, y) {
+/* ============ Players ============ */
+function act(p, n, hit) {
+  const f = hit ? Input.hit : Input.held;
+  if (!Game.coop) return f(n) || f(n + '2');
+  return f(p.id ? n + '2' : n);
+}
+function nearP(w, e) {
+  let best = w.player, bd = 1e9;
+  for (const p of w.players) { if (p.dead) continue; const d = Math.abs(p.x - e.x) + Math.abs(p.y - e.y) * 0.5; if (d < bd) { bd = d; best = p; } }
+  return best;
+}
+function touch(w, e) { for (const p of w.players) if (!p.dead && overlap(e, p)) return p; return null; }
+function makePlayer(x, y, id) {
   return {
+    id: id || 0,
     x: x - 5, y: y - 22, w: 10, h: 22, vx: 0, vy: 0, face: 1, onGround: false, coy: 0, jbuf: 0, jumping: false,
     gliding: false, glide: 0, drop: 0, hp: 3, inv: 0, hurtT: 0, radiant: 0, arrows: 3, arrowT: 0, shootT: 0,
     anim: 0, dead: 0, ride: null, control: true, stepT: 0
@@ -44,18 +56,18 @@ function updatePlayer(w, p) {
   if (p.dead) { p.dead++; return; }
   if (p.ride) { p.x += p.ride.ddx; p.y += p.ride.ddy; }
   const ctl = p.control && p.hurtT <= 0;
-  const ax = ctl ? (Input.held('right') ? 1 : 0) - (Input.held('left') ? 1 : 0) : (p.auto || 0);
+  const ax = ctl ? (act(p, 'right') ? 1 : 0) - (act(p, 'left') ? 1 : 0) : (p.auto || 0);
   const maxv = p.radiant > 0 ? 2.35 : 2.0;
   if (ax) { p.vx += ax * (p.onGround ? 0.2 : 0.15); p.face = ax; }
   else if (p.hurtT <= 0) p.vx *= p.onGround ? 0.76 : 0.95;
   p.vx = clamp(p.vx, -maxv, maxv);
   if (Math.abs(p.vx) < 0.03) p.vx = 0;
 
-  const jHeld = ctl && Input.held('jump'), jHit = ctl && Input.hit('jump');
+  const jHeld = ctl && act(p, 'jump'), jHit = ctl && act(p, 'jump', true);
   if (p.onGround) { p.coy = 7; p.glide = GLIDE_MAX; p.gliding = false; } else p.coy--;
   if (jHit) p.jbuf = 7; else p.jbuf--;
   if (p.jbuf > 0 && p.coy > 0) {
-    if (Input.held('down') && p.onGround && standingOnPlat(w, p)) { p.drop = 10; p.y += 1; }
+    if (act(p, 'down') && p.onGround && standingOnPlat(w, p)) { p.drop = 10; p.y += 1; }
     else { p.vy = -5.6; p.jumping = true; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
     p.jbuf = 0; p.coy = 0; p.onGround = false; p.ride = null;
   } else if (jHit && !p.onGround && p.glide > 0) { p.gliding = true; Sound.sfx('glide'); }
@@ -82,7 +94,7 @@ function updatePlayer(w, p) {
 
   // shoot
   if (p.arrows < 3) { p.arrowT++; if (p.arrowT >= 48) { p.arrows++; p.arrowT = 0; } }
-  if (ctl && Input.hit('fire')) {
+  if (ctl && act(p, 'fire', true)) {
     if (p.arrows > 0) {
       p.arrows--; p.shootT = 14;
       w.ents.push(makeEnt({ t: 'arrow', x: p.x + 5 + p.face * 9, y: p.y + 10, dir: p.face }));
@@ -127,13 +139,14 @@ function hurtPlayer(w, p, fromX) {
 function killPlayer(w, p, pit) {
   if (p.dead || w.state !== 'play') return;
   if (w.god && !pit) return;
-  p.dead = 1; p.hp = 0; Sound.sfx('die'); Sound.duck(true); w.shake = 10;
+  p.dead = 1; p.hp = 0; Sound.sfx('die'); w.shake = 10; Game.stats.deaths++;
+  if (w.players.every(q => q.dead)) Sound.duck(true);
   for (let i = 0; i < 26; i++) { const a = rand(TAU), s = rand(0.5, 2.6); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, life: rand(40, 80), col: i % 2 ? '#bff4ff' : '#fff6b0', g: -0.01, glow: 1, sz: 1 + (i % 2) }); }
 }
 function drawPlayer(c, w, p, ox, oy) {
   if (p.dead) return;
   if (p.inv > 0 && p.hurtT <= 0 && (p.inv >> 2) % 2) return;
-  const set = p.shootT > 0 ? Art.S.queenShoot : Art.S.queen;
+  const set = p.id ? (p.shootT > 0 ? Art.S.boyShoot : Art.S.boy) : (p.shootT > 0 ? Art.S.queenShoot : Art.S.queen);
   let img;
   if (p.hurtT > 0) img = set.hurt[0];
   else if (!p.onGround) img = p.gliding ? set.glide[(w.t >> 3) % 2] : p.vy < 0 ? set.jump[0] : set.fall[(w.t >> 3) % 2];
@@ -187,18 +200,18 @@ function damageFoe(w, e, n, how) {
 ENT.goblin = {
   foe: true, stomp: true, arrow: true,
   init(e) { e.w = 12; e.h = 13; e.x -= 6; e.y -= 13; e.img = Art.S.goblin[0]; },
-  update(w, e) { walker(w, e, 0.45); e.img = Art.S.goblin[(w.t >> 3) % 2]; },
+  update(w, e) { walker(w, e, 0.45 * e.manic); e.img = Art.S.goblin[(w.t >> (e.manic > 1 ? 2 : 3)) % 2]; },
   draw(c, w, e, ox, oy) { Art.blit(c, e.img, e.x - ox - 2, e.y - oy - 3, e.dir < 0); }
 };
 ENT.wolf = {
   foe: true, stomp: true, arrow: true,
   init(e) { e.w = 20; e.h = 12; e.x -= 10; e.y -= 12; e.charge = 0; e.img = Art.S.wolf[0]; },
   update(w, e) {
-    const p = w.player, dx = p.x - e.x, near = Math.abs(dx) < 120 && Math.abs(p.y + p.h - e.y - e.h) < 30 && !p.dead;
+    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 120 && Math.abs(p.y + p.h - e.y - e.h) < 30 && !p.dead;
     if (near) { if (!e.charge) { Sound.sfx('growl'); e.wait = 18; } e.charge = 50; e.dir = dx > 0 ? 1 : -1; }
     else if (e.charge > 0) e.charge--;
     if (e.wait > 0) { e.wait--; walker(w, e, 0, true); }
-    else walker(w, e, e.charge ? 1.75 : 0.5, e.charge > 0);
+    else walker(w, e, (e.charge ? 1.75 : 0.5) * (e.manic > 1 ? 1.12 : 1), e.charge > 0);
     e.img = Art.S.wolf[e.wait > 0 ? 0 : (w.t >> (e.charge ? 2 : 3)) % 2];
   },
   draw(c, w, e, ox, oy) { Art.blit(c, e.img, e.x - ox - 3, e.y - oy - 4, e.dir < 0); }
@@ -207,7 +220,7 @@ ENT.spider = {
   foe: true, stomp: true, arrow: true,
   init(e) { e.w = 14; e.h = 11; e.ax = e.x; e.ay = e.y; e.x -= 7; e.off = 4; e.st = 0; e.max = (e.len || 4) * T - 14; e.img = Art.S.spider[0]; },
   update(w, e) {
-    const p = w.player;
+    const p = nearP(w, e);
     if (e.st === 0) { e.off = Math.max(4, e.off - 0.6); if (e.off <= 4 && Math.abs(p.x + 5 - e.ax) < 46 && p.y > e.ay - 8) e.st = 1; }
     else if (e.st === 1) { e.off += 2.4; if (e.off >= e.max) { e.off = e.max; e.st = 2; e.hold = 50; } }
     else if (--e.hold <= 0) e.st = 0;
@@ -223,14 +236,15 @@ ENT.bat = {
   foe: true, stomp: true, arrow: true,
   init(e) { e.w = 12; e.h = 9; e.x -= 6; e.st = 0; e.img = Art.S.bat[2]; e.needAttach = true; },
   update(w, e) {
+    if (e.needAttach && e.free) { e.needAttach = false; e.y -= 20; e.st = 1; }
     if (e.needAttach) {
       e.needAttach = false;
       let cy = Math.floor((e.y - 8) / T); const cx = Math.floor((e.x + 6) / T);
       while (cy > 0 && !solidAt(w, cx, cy)) cy--;
       e.y = (cy + 1) * T;
     }
-    const p = w.player, dx = p.x + 5 - (e.x + 6), dy = p.y + 6 - e.y;
-    if (e.st === 0) { if (Math.abs(dx) < 100 && dy > -10 && dy < 150) { e.st = 1; e.t0 = 0; } e.img = Art.S.bat[2]; return; }
+    const p = nearP(w, e), dx = p.x + 5 - (e.x + 6), dy = p.y + 6 - e.y;
+    if (e.st === 0) { if (Math.abs(dx) < 110 && dy > -10 && dy < 240) { e.st = 1; e.t0 = 0; } e.img = Art.S.bat[2]; return; }
     e.t0++;
     e.vx = clamp(e.vx + Math.sign(dx) * 0.05, -1.25, 1.25);
     const ty = p.y + 2 + Math.sin(e.t0 * 0.08) * 16;
@@ -244,7 +258,7 @@ ENT.wraith = {
   foe: true, stomp: false, arrow: true, always: false,
   init(e) { e.w = 12; e.h = 20; e.x -= 6; e.y -= 22; e.by = e.y; e.st = 0; e.hp = 2; e.fade = 0; e.img = Art.S.wraith[0]; },
   update(w, e) {
-    const p = w.player, dx = p.x + 5 - (e.x + 6), dy = p.y - e.y;
+    const p = nearP(w, e), dx = p.x + 5 - (e.x + 6), dy = p.y - e.y;
     if (e.invT > 0) e.invT--;
     if (e.st === 0) {
       e.y = e.by + Math.sin(w.t * 0.05 + e.x) * 3;
@@ -279,7 +293,7 @@ ENT.troll = {
   init(e) { e.w = 20; e.h = 30; e.x -= 10; e.y -= 30; e.hp = 3; e.img = Art.S.troll[0]; },
   update(w, e) {
     if (e.invT > 0) e.invT--;
-    const p = w.player, dx = p.x - e.x, near = Math.abs(dx) < 90 && Math.abs(p.y + p.h - e.y - e.h) < 40;
+    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 90 && Math.abs(p.y + p.h - e.y - e.h) < 40;
     if (near && e.onGround && w.t % 30 === 0) e.dir = dx > 0 ? 1 : -1;
     walker(w, e, near ? 0.6 : 0.3, near);
     e.img = Art.S.troll[(w.t >> 4) % 2];
@@ -311,7 +325,7 @@ ENT.shard = {
   init(e) { e.w = 9; e.h = 11; e.x -= 4; e.y -= 11; e.by = e.y; },
   update(w, e) {
     e.y = e.by + Math.sin(w.t * 0.08 + e.x * 0.05) * 1.5;
-    if (overlap(e, w.player) && !w.player.dead) { e.dead = true; World.gainShard(e.x + 4, e.y + 5); }
+    if (touch(w, e)) { e.dead = true; World.gainShard(e.x + 4, e.y + 5, false, e.n); }
   },
   draw(c, w, e, ox, oy) {
     if (w.theme.dark > 0.3) Art.glow(c, e.x - ox + 4, e.y - oy + 5, 8, '#9ff4ff', 0.35);
@@ -332,12 +346,11 @@ function pickup(kind) {
       if (e.rise > 0) { e.rise -= 0.5; e.y = e.ty + e.rise; return; }
       e.y = e.ty + Math.sin(w.t * 0.08) * 1.2 - 1;
       if (kind === 'bloom') e.img = Art.S.bloom[(w.t >> 4) % 2];
-      const p = w.player;
-      if (overlap(e, p) && !p.dead) {
+      const p = touch(w, e);
+      if (p) {
         e.dead = true;
         if (kind === 'cake') { if (p.hp < 3) { p.hp++; Sound.sfx('heal'); } else { Sound.sfx('item'); for (let i = 0; i < 5; i++) World.gainShard(e.x + 6, e.y, true); } World.sparkle(e.x + 6, e.y + 5, '#7af0c0', 10); }
         if (kind === 'bloom') { p.radiant = 600; Sound.sfx('power'); World.sparkle(e.x + 7, e.y + 6, '#fff6b0', 18); w.flash = 0.4; }
-        if (kind === 'leaf') { Game.lives++; Sound.sfx('oneup'); World.sparkle(e.x + 6, e.y + 6, '#e6f2ff', 14); World.toast('+1 life'); }
       }
     },
     draw(c, w, e, ox, oy) {
@@ -349,7 +362,7 @@ function pickup(kind) {
     }
   };
 }
-ENT.cake = pickup('cake'); ENT.bloom = pickup('bloom'); ENT.leaf = pickup('leaf');
+ENT.cake = pickup('cake'); ENT.bloom = pickup('bloom');
 
 ENT.arrow = {
   lit: true, glowCol: '#bff4ff', glowR: 22,
@@ -382,7 +395,8 @@ ENT.plat = {
   },
   update() { },
   draw(c, w, e, ox, oy) {
-    for (let i = 0; i < e.w; i += T) c.drawImage(w.tiles.plat, e.x - ox + i, e.y - oy);
+    const img = Art.tileSet(w.colTheme[clamp(Math.floor(e.bx / T), 0, w.cols - 1)]).plat;
+    for (let i = 0; i < e.w; i += T) c.drawImage(img, e.x - ox + i, e.y - oy);
     R(c, e.x - ox, e.y - oy, 1, 6, 'rgba(0,0,0,0.35)'); R(c, e.x + e.w - 1 - ox, e.y - oy, 1, 6, 'rgba(0,0,0,0.35)');
     if (w.theme.liquid.glow) Art.glow(c, e.x - ox + e.w / 2, e.y - oy + 8, 16, w.theme.liquid.glow, 0.25);
   }
@@ -391,9 +405,8 @@ ENT.lantern = {
   lit: true,
   init(e) { e.w = 12; e.h = 26; e.x -= 6; e.y -= 26; e.on = false; },
   update(w, e) {
-    if (!e.on && overlap(e, w.player) && !w.player.dead) {
-      e.on = true; Game.cp = { x: e.x + 6, y: e.y + 26 }; Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — your road is remembered');
-      if (w.player.hp < 3) w.player.hp++;
+    if (!e.on && touch(w, e)) {
+      e.on = true; World.checkpoint(e.x + 6, e.y + 26); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — your road is remembered');
     }
   },
   draw(c, w, e, ox, oy) {
@@ -404,9 +417,9 @@ ENT.lantern = {
 };
 ENT.sign = {
   init(e) { e.w = 14; e.h = 16; e.x -= 7; e.y -= 16; },
-  update(w, e) { const p = w.player; if (Math.abs(p.x + 5 - (e.x + 7)) < 22 && Math.abs(p.y + p.h - (e.y + 16)) < 26) { w.signText = e.text; w.signNear = e; } },
+  update(w, e) { const p = nearP(w, e); if (Math.abs(p.x + 5 - (e.x + 7)) < 22 && Math.abs(p.y + p.h - (e.y + 16)) < 26) { w.signText = e.text; w.signNear = e; } },
   draw(c, w, e, ox, oy) {
-    Art.blit(c, Art.S.rune, e.x - ox, e.y - oy);
+    Art.blit(c, Art.S.tonttu[(w.t >> 5) % 2], e.x - ox, e.y - oy);
     if (w.signNear === e) Art.glow(c, e.x - ox + 7, e.y - oy + 8, 12, '#9ff4ff', 0.5);
   },
   light() { return 22; }
@@ -414,8 +427,8 @@ ENT.sign = {
 ENT.beacon = {
   init(e) { e.w = 40; e.h = 56; e.x -= 20; e.y -= 56; e.on = false; e.fire = 0; },
   update(w, e) {
-    const p = w.player;
-    if (!e.on && !w.bossAlive && !p.dead && p.x + p.w > e.x + 2 && p.x < e.x + e.w - 2 && Math.abs(p.y + p.h - (e.y + 56)) < 40) { e.on = true; World.lightBeacon(e); }
+    const p = nearP(w, e);
+    if (!e.on && (!e.final || (!w.bossAlive && Game.gems.kohinoor)) && !p.dead && p.x + p.w > e.x + 2 && p.x < e.x + e.w - 2 && Math.abs(p.y + p.h - (e.y + 56)) < 40) { e.on = true; World.lightBeacon(e); }
     if (e.on) {
       e.fire = Math.min(1, e.fire + 0.012);
       for (let i = 0; i < 2; i++) w.parts.push({ x: e.x + 20 + rand(-7, 7) * e.fire, y: e.y + 2, vx: rand(-0.3, 0.3), vy: rand(-2.6, -0.8) * (0.4 + e.fire), life: rand(18, 44), col: ['#fff6b0', '#ffc040', '#ff7a1a', '#ff4a10'][i + (w.t % 2) * 2 & 3], g: -0.02, glow: 1, sz: 2 + (rand() < 0.4) });
@@ -431,12 +444,12 @@ ENT.beacon = {
   light(e) { return 30 + e.fire * 110; }
 };
 
-/* ============ The Ashen King ============ */
+/* ============ The Hoarder King ============ */
 ENT.boss = {
   foe: true, stomp: false, arrow: false,
   init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.hp = 12; e.max = 12; e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
   update(w, e) {
-    const A = w.arena, p = w.player;
+    const A = w.arena, p = nearP(w, e);
     e.t0++;
     if (e.invT > 0) e.invT--;
     const face = () => { e.dir = p.x + 5 > e.x + 11 ? 1 : -1; };
@@ -501,7 +514,7 @@ ENT.boss = {
         if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
           e.p2 = true; Sound.sfx('roar'); w.shake = 24; Sound.setRate(0.88); w.flash = 0.5;
           w.ents.push(makeEnt({ t: 'cake', x: (A.x0 + A.x1) / 2, y: A.floor - 44 }));
-          World.toast('The Cinder Crown blazes with wrath!');
+          World.toast('The Hoarder’s crown blazes with wrath!');
         }
         if (e.t0 > 26) go('idle');
         break;
@@ -511,7 +524,7 @@ ENT.boss = {
           Sound.sfx('shatter'); w.flash = 1; w.shake = 30; e.dead = true;
           for (let i = 0; i < 7; i++) w.ents.push(makeEnt({ t: 'star', x: e.x + 11, y: e.y + 2, i }));
           for (let i = 0; i < 40; i++) { const a = rand(TAU), s = rand(1, 4); w.parts.push({ x: e.x + 11, y: e.y + 20, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(40, 90), col: i % 2 ? '#3a3a4a' : '#ff7a20', g: 0.05, sz: 2, glow: i % 2 }); }
-          World.bossDefeated();
+          World.bossDefeated(e.x + 11);
         }
         break;
     }
@@ -621,4 +634,43 @@ ENT.star = { // the seven stars, freed
     Art.glow(c, x, y, 14, '#ffffff', 0.9);
     R(c, x - 1, y - 4, 2, 8, '#fff'); R(c, x - 4, y - 1, 8, 2, '#fff'); R(c, x - 2, y - 2, 4, 4, '#dffbff');
   }
+};
+
+/* ----- the twelve diamonds ----- */
+ENT.gem = {
+  lit: true,
+  init(e) { e.def = GEM_BY_ID[e.gem]; e.img = Art.gemSprite(e.def); e.w = e.img.width; e.h = e.img.height; e.x -= e.w / 2; e.y -= e.h + 4; e.by = e.y; },
+  update(w, e) {
+    e.y = e.by + Math.sin(w.t * 0.05) * 2.5;
+    if (w.t % 9 === 0) w.parts.push({ x: e.x + rand(e.w), y: e.y + rand(e.h), vx: 0, vy: -0.25, life: 26, col: w.t % 18 ? '#ffffff' : e.def.tint, glow: 1, sz: 1 });
+    if (touch(w, e)) { e.dead = true; World.gainGem(e); }
+  },
+  draw(c, w, e, ox, oy) {
+    const x = e.x - ox + e.w / 2, y = e.y - oy + e.h / 2, r = e.w * 0.9 + 6;
+    Art.glow(c, x, y, r + Math.sin(w.t * 0.08) * 3, e.def.tint, 0.55);
+    for (let i = 0; i < 4; i++) { const a = w.t * 0.03 + i * TAU / 4, d = e.w * 0.75 + 4; R(c, x + Math.cos(a) * d, y + Math.sin(a) * d * 0.7, 1, 1, '#ffffff'); }
+    Art.blit(c, e.img, e.x - ox, e.y - oy);
+    const k = (w.t + e.def.n * 13) % 70;
+    if (k < 8) { const sx = e.x - ox + 2 + (k > 3 ? 1 : 0), sy = e.y - oy + 1; R(c, sx - 2, sy, 5, 1, '#fff'); R(c, sx, sy - 2, 1, 5, '#fff'); }
+  },
+  light(e) { return 34 + e.def.n * 2; }
+};
+/* ----- Sam, met in America ----- */
+ENT.boy = {
+  init(e) { e.w = 10; e.h = 22; e.x -= 5; e.y -= 22; },
+  update(w, e) {
+    if (Game.coop) return;
+    const p = nearP(w, e), near = Math.abs(p.x - e.x) < 34 && Math.abs(p.y - e.y) < 30;
+    e.dir = p.x < e.x ? -1 : 1;
+    if (near) {
+      if (!Game.metBoy) { Game.metBoy = true; Sound.sfx('oneup'); World.sparkle(e.x + 5, e.y + 6, '#ffd070', 14); Game.save(); }
+      w.signText = 'Sam: “You came all the way from Finland? I dig for diamonds here.|Let’s go together!”   ·   Player 2 — press [2] to join'; w.signNear = e;
+    }
+  },
+  draw(c, w, e, ox, oy) {
+    if (Game.coop) return;
+    Art.blit(c, Art.S.boy.idle[(w.t >> 5) % 2], e.x - ox + 5 - 12, e.y - oy + 22 - 28, e.dir < 0);
+    if (!Game.metBoy && (w.t >> 4) % 2) { R(c, e.x - ox + 4, e.y - oy - 12, 2, 5, '#ffd070'); R(c, e.x - ox + 4, e.y - oy - 5, 2, 2, '#ffd070'); }
+  },
+  light() { return 40; }
 };

@@ -1,12 +1,13 @@
-# Starlight Queen — A Tale of the Seven Stars
+# Starlight Queen — Ana & the Mountain of Light
 
-A classic side-scrolling 2D platformer for the browser, in an original high-fantasy world.
-You are **Aelara, Queen of the Silverwood**. The Ashen King has torn the seven stars from the
-sky and bound them in a crown of cinders. Travel east across Aurelin, rekindle the beacons,
-and break the Cinder Crown.
+A classic side-scrolling 2D platformer for the browser. You are **Ana**, the quiet girl at the
+end of the last lane in Kaamos, a small town at the top of Finland — and the last queen of the
+northern elves. A Hoarder King is gathering the world's great diamonds for himself. Leave the
+small town, cross the frozen gulf to the manic midsummer lands of Sweden, sail to a far-away
+world called America, meet Sam, and win back the Koh-i-Noor.
 
-No build step, no dependencies, no asset files: every sprite, backdrop, sound and tune is
-generated in code.
+One long, continuous road. No build step, no dependencies, no asset files: every sprite,
+backdrop, sound and tune is generated in code.
 
 ## Play
 
@@ -17,27 +18,37 @@ cd starlight-queen
 python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
-| Action | Keyboard | Gamepad | Touch |
+| Action | One player | Two players: Ana | Two players: Sam |
 | --- | --- | --- | --- |
-| Walk | ← → or A D | stick / d-pad | ◀ ▶ |
-| Leap (hold for height) | Space, ↑, W or Z | A / B | ▲ |
-| Glide | press Leap again in the air and hold | same | same |
-| Starlight arrow | X, J, K or Shift | X / Y | ✦ |
-| Drop through a ledge | ↓ + Leap | | |
-| Pause | Esc or P | Start | II |
-| Sound on/off, fullscreen | M, F | | |
+| Walk | ← → or A D | A D | ← → |
+| Leap (hold for height) | Space, W or ↑ | W or Space | ↑ |
+| Glide | leap again in the air and hold | same | same |
+| Arrow / sling | X, F or K | X or F | K or / |
+| Drop through a ledge | ↓ + leap | S + leap | ↓ + leap |
+
+Esc pauses, M toggles sound, G toggles fullscreen, V opens the Vault from the title.
+Gamepads work (first pad is Ana, second is Sam), and touch buttons appear on phones.
+
+**Co-op:** once Ana meets Sam in America, a second player presses **2** to join or leave.
+
+## The diamonds
+
+Twelve diamonds lie along the road, each larger than the last and each in a spot that takes
+some finding. Collecting one opens a card with its carat, cut, colour, clarity and origin, and
+a short lesson. The first six are teaching stones invented for the game (carat, cut, clarity,
+colour, fancy colour, where diamonds come from). The last six are real: Uncle Sam, the Dresden
+Green, the Hope, the Tiffany Yellow, Cullinan I and the Koh-i-Noor, described with their real
+figures. The small sparkles are *melee* — the trade's word for diamonds under a fifth of a carat.
+
+Every diamond you have ever found stays in the **Vault**. At the end, the journey itself is
+graded on the four Cs: **carat** (diamonds found), **colour** (melee gathered), **clarity**
+(hits taken) and **cut** (time). Your finest grade is kept on the title screen.
 
 ## The road
 
-1. **The Greenmeads** — rolling hills, goblins and wolves
-2. **The Silverwood** — great boughs and the spiders that haunt them
-3. **The Sunken Halls** — torch-lit dwarven deeps, lava and a bridge troll
-4. **The Mourning Fens** — do not follow the lights
-5. **Mount Gloam** — the Cinder Throne and the Ashen King
-
-Leap on foes or loose arrows (the quiver of three refills over time). Rune blocks hold
-starshards (100 = an extra life), honeycakes (heal), starblooms (brief radiance) and silver
-leaves (extra life). Lanterns are checkpoints. Progress is saved per chapter in the browser.
+Finland (Kaamos, the frozen Gulf of Bothnia) → Sweden (the midsummer lands, the iron deeps of
+Kiruna) → the western sea → the United States (red rock country, the Hoarder King's mesa).
+Lanterns and beacons are checkpoints; there are no lives, only flaws on your final grade.
 
 ## Code map
 
@@ -45,12 +56,14 @@ leaves (extra life). Lanterns are checkpoints. Progress is saved per chapter in 
 | --- | --- |
 | `js/core.js` | constants, helpers, keyboard / gamepad / touch input |
 | `js/audio.js` | WebAudio sequencer, songs and sound effects |
+| `js/gems.js` | the twelve diamonds and the faceted gem renderer |
 | `js/art.js` | sprites, tiles, glow, HUD digits |
 | `js/backdrops.js` | themes, parallax backdrops, scenery, ambient particles |
-| `js/levels.js` | the five levels, written with a small builder API |
-| `js/entities.js` | the Queen, foes, pickups, the boss |
-| `js/world.js` | simulation step, camera, lighting, rendering |
-| `js/scenes.js` | title, prologue, map, play, game over, ending |
+| `js/levels.js` | the road, region by region, written with a small builder API |
+| `js/entities.js` | Ana, Sam, foes, pickups, diamonds, the boss |
+| `js/world.js` | simulation step, camera, region blending, lighting, rendering |
+| `js/scenes.js` | title, prologue, map, play, diamond cards, vault, graded ending |
 | `js/main.js` | boot, fixed-timestep loop, presentation |
 
-For testing, `index.html?level=3` starts at a chapter; adding `&god` ignores enemy damage.
+For testing, `index.html?at=300&alt=3` starts at a tile column and height; `&god` ignores
+enemy damage, `&coop` starts with both players.

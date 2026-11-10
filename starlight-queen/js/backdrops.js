@@ -1,12 +1,26 @@
 'use strict';
 /* Starlight Queen — themes, parallax backdrops, scenery props, ambient particles */
 const THEMES = {
+  north: {
+    id: 'north', seed: 5, music: 'wood', dark: 0.2, darkCol: '8,14,44', amb: 'snow', pit: '#081030',
+    tiles: { style: 'dirt', body: '#4c4760', dark: '#37334a', light: '#625c78', speck: '#7c7692', cap: '#eef4ff', capHi: '#ffffff', capDark: '#b4c6e8', capDots: '#d8e6ff',
+      plat: '#8a6a4c', platHi: '#e8f0ff', platDark: '#5a4230', brick: '#7a6e86', brickHi: '#a096ac', brickDark: '#4c4458', spike: '#bfe0ff', spikeHi: '#ffffff' },
+    liquid: { top: '#e4f8ff', body: '#3f74a8', deep: '#1f3f72', glow: null },
+    scatter: [['snowtuft', 0.3], ['rock', 0.08], ['frostgrass', 0.2]], trees: 'spruce'
+  },
+  canyon: {
+    id: 'canyon', seed: 61, music: 'canyon', dark: 0, amb: 'pollen', pit: '#3a1220',
+    tiles: { style: 'dirt', body: '#a8502e', dark: '#7e361c', light: '#c46c3e', speck: '#dc9258', cap: '#eab474', capHi: '#ffe0a0', capDark: '#b46e38', capDots: '#fff0c0',
+      plat: '#8e5c36', platHi: '#c08a58', platDark: '#5e3a20', brick: '#c0704a', brickHi: '#e09a70', brickDark: '#863e24', spike: '#5a7a3a', spikeHi: '#d8e8a0' },
+    liquid: { top: '#c8f4ee', body: '#2f97a2', deep: '#1c5c74', glow: null },
+    scatter: [['drygrass', 0.3], ['cactus', 0.06], ['skull', 0.03], ['rock', 0.1]], trees: 'saguaro'
+  },
   meads: {
     id: 'meads', seed: 11, music: 'meads', dark: 0, amb: 'pollen', pit: '#14264a',
     tiles: { style: 'dirt', body: '#8a5a34', dark: '#6e4426', light: '#a06c40', speck: '#b8946a', cap: '#58b848', capHi: '#9ee86a', capDark: '#3a8a38', capDots: '#ffe870',
       plat: '#b07c44', platHi: '#d8a468', platDark: '#7a5028', brick: '#b8825a', brickHi: '#d8a67c', brickDark: '#7c5234', spike: '#c8c8d0', spikeHi: '#ffffff' },
     liquid: { top: '#7fd0ff', body: '#3a8ad8', deep: '#2a5eb0', glow: null },
-    scatter: [['grass', 0.5], ['flower', 0.22], ['bush', 0.06]], trees: 'oak'
+    scatter: [['grass', 0.45], ['flower', 0.25], ['bush', 0.06], ['maypole', 0.02]], trees: 'oak'
   },
   wood: {
     id: 'wood', seed: 23, music: 'wood', dark: 0.16, darkCol: '10,30,40', amb: 'leaves', pit: '#07140f',
@@ -16,8 +30,8 @@ const THEMES = {
     scatter: [['fern', 0.3], ['mushroom', 0.14], ['grass', 0.3], ['flower', 0.08]], trees: 'elder'
   },
   halls: {
-    id: 'halls', seed: 37, music: 'halls', dark: 0.7, darkCol: '4,5,14', amb: 'dust',
-    tiles: { style: 'brick', body: '#4a4e62', dark: '#33374a', light: '#5e637a', speck: '#6f7590', cap: '#6f7590', capHi: '#9aa2c0', capDark: '#3d4156',
+    id: 'halls', seed: 37, music: 'halls', dark: 0.56, darkCol: '4,5,14', amb: 'dust',
+    tiles: { style: 'brick', body: '#555a74', dark: '#383c52', light: '#6e7492', speck: '#a8552e', cap: '#6f7590', capHi: '#9aa2c0', capDark: '#3d4156',
       plat: '#6a6f86', platHi: '#9aa2c0', platDark: '#3d4156', platStyle: 'stone', brick: '#5a5266', brickHi: '#7c7290', brickDark: '#3a3446', spike: '#8a8fa6', spikeHi: '#e0e4f4' },
     liquid: { top: '#ffe070', body: '#ff7a18', deep: '#c83808', glow: '#ff6a10' },
     scatter: [['crystal', 0.07], ['bones', 0.06], ['rubble', 0.2]], trees: null
@@ -85,8 +99,9 @@ const Backdrop = (() => {
   }
   function smallTree(g, x, y, s, trunk, leaf, leaf2) {
     R(g, x, y - s, 2, s, trunk);
-    R(g, x - s * 0.6, y - s * 1.9, s * 1.2 + 2, s, leaf); R(g, x - s * 0.35, y - s * 2.3, s * 0.7 + 2, s * 0.5, leaf);
-    R(g, x - s * 0.6, y - s * 1.15, s * 1.2 + 2, 2, leaf2);
+    const blob = (bx, by, br, col) => { g.fillStyle = col; g.beginPath(); g.arc(bx, by, br, 0, TAU); g.fill(); };
+    blob(x + 1, y - s * 1.5, s * 0.75, leaf2); blob(x - s * 0.4, y - s * 1.3, s * 0.5, leaf2); blob(x + s * 0.5 + 1, y - s * 1.3, s * 0.5, leaf2);
+    blob(x + 1, y - s * 1.65, s * 0.6, leaf); blob(x - s * 0.3, y - s * 1.45, s * 0.35, leaf); blob(x, y - s * 1.9, s * 0.3, '#8ed06a');
   }
   function trunks(col, shade, hi, count, wmin, wmax, seed, canopy) {
     return layer(g => {
@@ -168,8 +183,8 @@ const Backdrop = (() => {
         const r = rng(5);
         for (let i = 0; i < 9; i++) {
           const x = r() * LW, y = 14 + r() * 70, w = 30 + r() * 50;
-          for (let k = 0; k < 6; k++) { const ww = w * (0.3 + r() * 0.5); R(g, x + r() * (w - ww), y - r() * 9, ww, 5 + r() * 5, '#ffffff'); }
-          R(g, x, y + 3, w, 3, '#dceeff');
+          g.fillStyle = '#ffffff'; for (let k = 0; k < 6; k++) { const rr = 4 + r() * 6; g.beginPath(); g.arc(x + 6 + r() * (w - 12), y - r() * 4, rr, Math.PI, 0); g.fill(); }
+          R(g, x, y, w, 4, '#ffffff'); R(g, x + 2, y + 4, w - 4, 2, '#cfd8f4');
         }
       });
       const far = mountains('#92a8dc', '#7e92cc', '#ffffff', 60, 62, 101, 96);
@@ -189,6 +204,60 @@ const Backdrop = (() => {
         Art.glow(c, 300, 44, 60, '#fff6c0', 0.8); c.fillStyle = '#fffbe0'; c.beginPath(); c.arc(300, 44, 11, 0, TAU); c.fill();
         drawLayer(c, clouds, cx * 0.04 + t * 0.05, 1, yo * 0.1);
         drawLayer(c, far, cx, 0.08, yo * 0.2); drawLayer(c, mid, cx, 0.22, yo * 0.35); drawLayer(c, near, cx, 0.42, yo * 0.5);
+      };
+    } else if (id === 'north') {
+      const s = sky(['#050820', '#0a1640', '#16346a', '#2c5a8c', '#6a7aa8', '#d89aa8']);
+      const stars = layer(g => { const r = rng(19); for (let i = 0; i < 110; i++) R(g, r() * LW, r() * 130, 1, 1, r() < 0.25 ? '#ffffff' : '#8fa8d8'); });
+      const [aur, ag] = mk(1, 64); { const gr = ag.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, 'rgba(120,255,190,0)'); gr.addColorStop(0.25, 'rgba(120,255,190,0.9)'); gr.addColorStop(0.6, 'rgba(90,200,255,0.45)'); gr.addColorStop(1, 'rgba(160,110,255,0)'); ag.fillStyle = gr; ag.fillRect(0, 0, 1, 64); }
+      const far = mountains('#5a6ea8', '#46588e', '#f4f8ff', 44, 54, 601, 60);
+      const mid = hills('#22345e', '#e8f0ff', 50, 14, 602, (g, hh, r) => {
+        for (let i = 0; i < 70; i++) { const x = r() * LW | 0, y = H - hh[x] + 2, hgt = 10 + r() * 14 | 0; for (let k = 0; k < hgt; k++) { const wd = 1 + (k / hgt) * 7 | 0; R(g, x - (wd >> 1), y - hgt + k, wd, 1, k % 4 === 0 ? '#dfe9ff' : '#16264a'); } }
+      });
+      const near = hills('#e6eeff', '#ffffff', 30, 9, 603, (g, hh, r) => {
+        for (let x = 0; x < LW; x++) R(g, x, H - hh[x] + 5, 1, hh[x], '#c2d2f0');
+        for (let i = 0; i < 9; i++) {
+          const x = 20 + i * 70 + r() * 30 | 0, y = H - hh[x % LW] + 3, wd = 13 + (r() * 6 | 0);
+          R(g, x, y - 8, wd, 8, i % 3 === 2 ? '#e8c860' : '#b8322a'); R(g, x, y - 8, wd, 1, '#8e2420'); R(g, x - 2, y - 11, wd + 4, 3, '#f4f8ff'); R(g, x, y - 13, wd, 2, '#f4f8ff');
+          R(g, x + 3, y - 6, 3, 3, '#ffd870'); R(g, x + wd - 5, y - 6, 3, 3, '#ffd870'); R(g, x + 2, y - 6, 5, 1, '#f4f8ff'); R(g, x + wd - 4, y - 16, 2, 4, '#5a4a4a');
+        }
+        { const x = 330, y = H - hh[x] + 3; R(g, x, y - 16, 12, 16, '#f0ead8'); R(g, x + 3, y - 30, 6, 14, '#f0ead8'); for (let k = 0; k < 9; k++) R(g, x + 6 - (k >> 1) - (k & 1 ? 0 : 0), y - 39 + k, 1 + k, 1, '#3a4a6a'); R(g, x + 5, y - 26, 2, 4, '#ffd870'); R(g, x + 5, y - 8, 2, 8, '#5a4030'); }
+        for (let i = 0; i < 22; i++) { const x = r() * LW | 0, y = H - hh[x] + 3, hgt = 14 + r() * 12 | 0; for (let k = 0; k < hgt; k++) { const wd = 1 + (k / hgt) * 9 | 0; R(g, x - (wd >> 1), y - hgt + k, wd, 1, k % 5 < 2 ? '#f4f8ff' : '#1c3a44'); } R(g, x, y, 1, 2, '#3a2a20'); }
+      });
+      B = (c, cx, yo, t) => {
+        c.drawImage(s, 0, 0, W, H);
+        drawLayer(c, stars, cx, 0.02, 0);
+        c.save(); c.globalCompositeOperation = 'lighter';
+        for (let x = 0; x < W; x += 3) {
+          const wx = x + cx * 0.03;
+          const y0 = 18 + Math.sin(wx * 0.021 + t * 0.004) * 14 + Math.sin(wx * 0.053 - t * 0.007) * 7;
+          const len = 46 + Math.sin(wx * 0.07 + t * 0.011) * 18 + Math.sin(wx * 0.19 + t * 0.02) * 6;
+          c.globalAlpha = 0.16 + 0.14 * Math.sin(wx * 0.033 + t * 0.006) + 0.08 * Math.sin(wx * 0.4 + t * 0.03);
+          if (c.globalAlpha > 0.02) c.drawImage(aur, x, y0, 3, len);
+        }
+        c.restore();
+        drawLayer(c, far, cx, 0.07, yo * 0.2 + 8); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.4, yo * 0.5);
+      };
+    } else if (id === 'canyon') {
+      const s = sky(['#241a4e', '#5a2a64', '#b4466a', '#ee7a4a', '#ffb45a', '#ffe08a']);
+      const mesa = (col, shade, strata, base, amp, seed, th) => layer(g => {
+        const n = noise(seed, 6), hh = new Float32Array(LW);
+        for (let x = 0; x < LW; x++) hh[x] = base + (n[x] > th ? amp : n[x] > th - 0.25 ? amp * 0.55 : 0);
+        for (let pass = 0; pass < 2; pass++) { for (let x = 1; x < LW * 2; x++) { const a = x % LW, b = (x - 1) % LW; if (hh[a] < hh[b] - 2.2) hh[a] = hh[b] - 2.2; } for (let x = LW * 2 - 2; x >= 0; x--) { const a = x % LW, b = (x + 1) % LW; if (hh[a] < hh[b] - 2.2) hh[a] = hh[b] - 2.2; } }
+        for (let x = 0; x < LW; x++) { const h = hh[x] | 0; R(g, x, H - h, 1, h, col); R(g, x, H - h, 1, 2, strata); if (hh[(x + 1) % LW] < hh[x]) R(g, x, H - h, 1, h, shade); for (let k = 9; k < h - 4; k += 9) R(g, x, H - h + k + ((x * 7 >> 4) & 1), 1, 1, strata); }
+      });
+      const far = mesa('#9a5a7a', '#7e486c', '#b87088', 54, 46, 701, 0.1);
+      const mid = mesa('#6e3a5c', '#582c50', '#8a4c68', 40, 50, 702, 0.2);
+      const near = layer(g => {
+        const n = noise(703, 5), r = rng(704);
+        for (let x = 0; x < LW; x++) { const h = 22 + n[x] * 8 | 0; R(g, x, H - h, 1, h, '#4e1c22'); R(g, x, H - h, 1, 1, '#7a2e30'); }
+        for (let i = 0; i < 12; i++) { const x = r() * LW | 0, y = H - (22 + n[x] * 8 | 0), hgt = 14 + r() * 12 | 0; R(g, x, y - hgt, 3, hgt, '#3a141c'); R(g, x - 4, y - hgt * 0.6, 2, hgt * 0.3, '#3a141c'); R(g, x - 4, y - hgt * 0.35, 4, 2, '#3a141c'); R(g, x + 5, y - hgt * 0.8, 2, hgt * 0.35, '#3a141c'); R(g, x + 3, y - hgt * 0.5, 4, 2, '#3a141c'); }
+      });
+      const clouds = layer(g => { const r = rng(15); for (let i = 0; i < 12; i++) { const x = r() * LW, y = 20 + r() * 70, wd = 40 + r() * 80; R(g, x, y, wd, 2, '#ff9a8a'); R(g, x + wd * 0.2, y - 2, wd * 0.5, 2, '#ffc0a0'); R(g, x + wd * 0.1, y + 2, wd * 0.7, 1, '#d8607a'); } });
+      B = (c, cx, yo, t) => {
+        c.drawImage(s, 0, 0, W, H);
+        Art.glow(c, 250, 132, 90, '#fff0b0', 0.8); c.fillStyle = '#fff6d0'; c.beginPath(); c.arc(250, 132, 20, 0, TAU); c.fill();
+        drawLayer(c, clouds, cx * 0.03 + t * 0.03, 1, 0);
+        drawLayer(c, far, cx, 0.08, yo * 0.2); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.42, yo * 0.5);
       };
     } else if (id === 'wood') {
       const s = sky(['#1f4a44', '#3f7a58', '#8fb870', '#e8e09a', '#fff6c8']);
@@ -285,7 +354,7 @@ const Backdrop = (() => {
 
   /* ---------- ambient particles (screen space) ---------- */
   function makeAmbient(kind) {
-    const n = { pollen: 16, leaves: 22, dust: 26, mist: 14, ash: 50 }[kind] || 0, ps = [];
+    const n = { pollen: 16, leaves: 22, dust: 26, mist: 14, ash: 50, snow: 60 }[kind] || 0, ps = [];
     for (let i = 0; i < n; i++) ps.push({ x: rand(W), y: rand(H), p: rand(TAU), s: rand(0.5, 1.5) });
     return { kind, ps };
   }
@@ -295,6 +364,9 @@ const Backdrop = (() => {
       if (amb.kind === 'pollen') {
         p.x += Math.sin(t * 0.02 + p.p) * 0.2; p.y += Math.cos(t * 0.017 + p.p) * 0.15 - 0.03;
         c.fillStyle = `rgba(255,255,220,${0.4 + 0.3 * Math.sin(t * 0.05 + p.p)})`; c.fillRect(p.x | 0, p.y | 0, 1, 1);
+      } else if (amb.kind === 'snow') {
+        p.x += Math.sin(t * 0.02 + p.p) * 0.3 - 0.12 * p.s; p.y += 0.3 + 0.35 * p.s;
+        c.fillStyle = p.s > 1.2 ? '#ffffff' : 'rgba(220,235,255,0.7)'; c.fillRect(p.x | 0, p.y | 0, p.s > 1.3 ? 2 : 1, p.s > 1.3 ? 2 : 1);
       } else if (amb.kind === 'leaves') {
         p.x += Math.sin(t * 0.03 + p.p) * 0.5 - 0.15; p.y += 0.28 * p.s;
         const f = Math.sin(t * 0.1 + p.p);
@@ -336,6 +408,31 @@ const Backdrop = (() => {
       case 'skull': cv = S(8, 7, g => { const b = '#c8c8b8'; R(g, 1, 0, 6, 5, b); R(g, 2, 5, 4, 2, b); R(g, 2, 2, 1, 2, '#111'); R(g, 5, 2, 1, 2, '#111'); R(g, 3, 6, 1, 1, '#111'); R(g, 5, 6, 1, 1, '#111'); }); break;
       case 'deadbush': cv = S(14, 10, g => { const b = '#3a3028'; for (let i = 0; i < 5; i++) { const a = -1 + i * 0.5; for (let k = 0; k < 9; k++) R(g, 7 + Math.sin(a) * k * 0.8, 9 - Math.cos(a) * k, 1, 1, b); } }); break;
       case 'emberrock': cv = S(12, 8, g => { R(g, 1, 3, 10, 5, '#2a2028'); R(g, 3, 1, 6, 2, '#2a2028'); R(g, 3, 1, 5, 1, '#4a3c44'); R(g, 4, 4, 1, 3, '#ff6a20'); R(g, 5, 6, 3, 1, '#ff6a20'); R(g, 8, 3, 1, 2, '#ffb040'); }); break;
+      case 'snowtuft': cv = S(12, 5, g => { R(g, 1, 2, 10, 3, '#eef4ff'); R(g, 3, 1, 6, 1, '#ffffff'); R(g, 0, 4, 12, 1, '#c2d2f0'); }); break;
+      case 'frostgrass': cv = S(8, 6, g => { for (let i = 0; i < 4; i++) { const h = 2 + r() * 4 | 0; R(g, i * 2, 6 - h, 1, h, i % 2 ? '#a8c0e0' : '#7a94c0'); R(g, i * 2, 6 - h, 1, 1, '#ffffff'); } }); break;
+      case 'rock': cv = S(12, 7, g => { const c1 = v % 2 ? '#8a8496' : '#6e6878'; R(g, 1, 3, 10, 4, c1); R(g, 3, 1, 6, 2, c1); R(g, 3, 1, 5, 1, '#b4aec0'); R(g, 8, 4, 3, 3, '#4c4658'); }); break;
+      case 'drygrass': cv = S(9, 6, g => { for (let i = 0; i < 5; i++) { const h = 2 + r() * 4 | 0; R(g, i * 2, 6 - h, 1, h, i % 2 ? '#e8c070' : '#c89a48'); } }); break;
+      case 'cactus': cv = S(10, 12, g => { const c1 = '#4f8a4a', c2 = '#3a6a3a'; R(g, 4, 1, 3, 11, c1); R(g, 6, 1, 1, 11, c2); R(g, 1, 5, 2, 3, c1); R(g, 1, 7, 4, 2, c1); R(g, 8, 3, 2, 3, c1); R(g, 6, 5, 3, 2, c2); R(g, 5, 0, 1, 1, '#ff8ab0'); }); break;
+      case 'maypole': cv = S(26, 56, g => {
+        R(g, 12, 4, 2, 52, '#e8dcc0'); R(g, 13, 4, 1, 52, '#b8a888'); R(g, 4, 12, 18, 2, '#e8dcc0');
+        for (let y = 4; y < 54; y += 5) R(g, 12, y, 2, 2, '#4ea848');
+        for (const x of [3, 19]) { R(g, x, 15, 4, 1, '#4ea848'); R(g, x - 1, 16, 1, 4, '#4ea848'); R(g, x + 4, 16, 1, 4, '#4ea848'); R(g, x, 20, 4, 1, '#4ea848'); R(g, x + 1, 15, 1, 1, '#ffe060'); R(g, x + 3, 20, 1, 1, '#ff6a8a'); }
+        R(g, 5, 11, 16, 1, '#4ea848'); R(g, 8, 10, 1, 1, '#ffe060'); R(g, 16, 10, 1, 1, '#ff6a8a'); R(g, 11, 1, 4, 3, '#4ea848'); R(g, 12, 0, 2, 1, '#ffe060');
+        R(g, 14, 5, 6, 3, '#2a5aa8'); R(g, 16, 5, 1, 3, '#ffd840'); R(g, 14, 6, 6, 1, '#ffd840');
+      }); break;
+      case 'spruce': cv = S(34, 62, g => {
+        R(g, 15, 50, 4, 12, '#4a3428'); R(g, 15, 50, 1, 12, '#6a4c38');
+        for (let k = 0; k < 52; k++) { const tier = k % 13, wd = 3 + (k / 52) * 22 + tier * 0.9 | 0; R(g, 17 - (wd >> 1), k + 1, wd, 1, tier < 3 ? '#f4f8ff' : tier < 5 ? '#c2d2f0' : (k + v) % 3 ? '#1f4a44' : '#16383a'); }
+        R(g, 16, 0, 2, 2, '#f4f8ff');
+      }); break;
+      case 'saguaro': cv = S(28, 50, g => {
+        const c1 = '#4f8a4a', c2 = '#356a38', c3 = '#7ab868';
+        R(g, 11, 4, 6, 46, c1); R(g, 15, 4, 2, 46, c2); R(g, 11, 4, 1, 46, c3); R(g, 12, 2, 4, 2, c1);
+        R(g, 3, 16, 4, 14, c1); R(g, 3, 16, 1, 14, c3); R(g, 4, 14, 2, 2, c1); R(g, 3, 28, 9, 4, c1); R(g, 3, 31, 9, 1, c2);
+        R(g, 21, 10, 4, 14, c1); R(g, 24, 10, 1, 14, c2); R(g, 22, 8, 2, 2, c1); R(g, 16, 22, 9, 4, c1); R(g, 16, 25, 9, 1, c2);
+        for (let y = 8; y < 48; y += 5) R(g, 13, y, 1, 2, c2);
+        R(g, 13, 1, 2, 1, '#fff0f0'); R(g, 4, 13, 1, 1, '#fff0f0');
+      }); break;
       case 'oak': cv = S(54, 72, g => {
         R(g, 23, 34, 8, 38, '#6a4a2c'); R(g, 23, 34, 2, 38, '#86623c'); R(g, 28, 34, 3, 38, '#4e3420'); R(g, 20, 68, 14, 4, '#6a4a2c'); R(g, 18, 42, 6, 2, '#6a4a2c'); R(g, 30, 46, 7, 2, '#4e3420');
         const blobs = [[27, 20, 22], [14, 28, 13], [40, 28, 13], [20, 12, 12], [34, 12, 12], [27, 30, 16]];

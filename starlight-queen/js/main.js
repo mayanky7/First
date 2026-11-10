@@ -5,7 +5,7 @@
   const [buf, c] = mk(W, H);
   let s = 1; // device pixels per game pixel
 
-  const SERIF = '"Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
+  const SERIF = '"EB Garamond","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
   const TITLE = '"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,serif';
   const UI = {
     ctx, get s() { return s; },
@@ -110,7 +110,7 @@
   document.addEventListener('visibilitychange', () => {
     last = 0;
     const sc = Scenes.cur;
-    if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead) { sc.paused = true; }
+    if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead && !World.card) { sc.paused = true; }
   });
 
   Art.init();
@@ -121,7 +121,8 @@
   Game.loadSave();
 
   const q = new URLSearchParams(location.search);
-  if (q.has('level')) { Game.newGame(clamp((+q.get('level') || 1) - 1, 0, LEVELS.length - 1)); Scenes.go('play', { god: q.has('god') }); }
+  if (document.fonts && document.fonts.load) ['600 20px Cinzel', '20px "EB Garamond"', 'italic 20px "EB Garamond"'].forEach(f => document.fonts.load(f).catch(() => { }));
+  if (q.has('at')) { Game.newGame(); Game.cp = { x: (+q.get('at') || 3) * T + 8, y: (ROWS - (+q.get('alt') || 3)) * T }; if (q.has('met')) Game.metBoy = true; if (q.has('coop')) Game.coop = Game.metBoy = true; Scenes.go('play', { resume: true, god: q.has('god') }); }
   else Scenes.go(q.get('scene') || 'title');
   window.__sq = { Game, World, Scenes, Input, Sound, step, frame };
   requestAnimationFrame(loop);

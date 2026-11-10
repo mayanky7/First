@@ -116,6 +116,10 @@ const Sound = (() => {
       noise({ freq: 3000, freq2: 8000, dur: 1.4, vol: 0.3 });
       [2093, 1568, 2637, 1760, 3136, 2349].forEach((f, i) => tone({ type: 'triangle', f, dur: 0.5, vol: 0.14, delay: i * 0.09 }));
     },
+    gem() {
+      [1047, 1319, 1568, 2093, 2637, 3136].forEach((f, i) => { tone({ type: 'triangle', f, dur: 0.5, vol: 0.2, delay: i * 0.085, vib: i > 3 }); tone({ type: 'sine', f: f / 2, dur: 0.6, vol: 0.12, delay: i * 0.085 }); });
+      noise({ freq: 6000, freq2: 9000, dur: 0.9, vol: 0.06 });
+    },
     star() { tone({ type: 'triangle', f: 1568, f2: 2093, dur: 0.6, vol: 0.16, vib: true }); }
   };
   function sfx(name) { if (ac && FX[name]) FX[name](); }
@@ -163,6 +167,12 @@ const Sound = (() => {
       chords: ['Dm', 'Dm', 'Bb', 'C', 'Dm', 'Dm', 'Bb', 'A'],
       mel: ['D5 D5 A5 D5 F5 D5 A5 D5', 'D5 D5 A5 D5 G5 F5 E5 D5', 'Bb4 Bb4 F5 Bb4 D5 Bb4 F5 Bb4', 'C5 C5 G5 C5 E5 G5 C6.2',
         'D5 D5 A5 D5 F5 D5 A5 D5', 'F5.2 E5.2 D5.2 A4.2', 'Bb4 D5 F5 Bb5 A5 F5 D5 Bb4', 'A4 C#5 E5 A5 G5 E5 C#5.2']
+    },
+    canyon: {
+      step: 0.2, bar: 8, lead: 'whistle', arp: [0, 2, 1, 2, 3, 2, 1, 2], bass: 'march', drums: 'jig',
+      chords: ['Em', 'G', 'D', 'Em', 'C', 'G', 'D', 'Em', 'G', 'D', 'Am', 'Em', 'C', 'G', 'B', 'Em'],
+      mel: ['E5.2 G5 A5 B5.2 A5 G5', 'B5.3 A5 G5.2 D5.2', 'F#5.2 A5 D6 A5.2 F#5.2', 'E5.4 B4.4', 'E5.2 G5 C6 B5.2 G5 E5', 'D5.2 G5.2 B5.4', 'A5.2 F#5 D5 F#5.2 A5.2', 'E5.8',
+        'G5.2 B5 D6 B5.2 G5.2', 'A5.3 F#5 D5.4', 'E5.2 A5 C6 A5.2 E5.2', 'G5.3 E5 B4.4', 'E5 G5 C6 G5 E6.2 C6.2', 'D6.3 B5 G5.4', 'F#5.2 B5.2 D#6.2 B5.2', 'E6.8']
     },
     dawn: {
       step: 0.33, bar: 6, lead: 'flute', arp: [0, 1, 2, 3, 2, 1], bass: 'long',

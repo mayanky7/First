@@ -18,6 +18,14 @@ const Art = (() => {
     }
     return f;
   }
+  function outlined(img, col) {
+    return spr(img.width, img.height, g => {
+      const [tc, tg] = mk(img.width, img.height);
+      tg.drawImage(img, 0, 0); tg.globalCompositeOperation = 'source-in'; tg.fillStyle = col || '#231d3a'; tg.fillRect(0, 0, img.width, img.height);
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) g.drawImage(tc, dx, dy);
+      g.drawImage(img, 0, 0);
+    });
+  }
   function blit(c, img, x, y, flip, flipV) {
     x = Math.round(x); y = Math.round(y);
     if (flip || flipV) {
@@ -34,23 +42,22 @@ const Art = (() => {
   function glowSprite(col) {
     if (glowCache[col]) return glowCache[col];
     const [cv, g] = mk(64, 64);
-    const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-    gr.addColorStop(0, col); gr.addColorStop(0.35, col + '88'); gr.addColorStop(1, col + '00');
-    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    g.fillStyle = col;
+    for (let i = 0; i < 12; i++) { g.globalAlpha = 0.045 + i * 0.012; g.beginPath(); g.arc(32, 32, 32 - i * 2.6, 0, TAU); g.fill(); }
     return glowCache[col] = cv;
   }
   function glow(c, x, y, r, col, a) {
     c.save();
     c.globalCompositeOperation = 'lighter';
     c.globalAlpha = a === undefined ? 0.6 : a;
-    c.imageSmoothingEnabled = true;
-    c.drawImage(glowSprite(col), x - r, y - r, r * 2, r * 2);
+    c.imageSmoothingEnabled = false;
+    c.drawImage(glowSprite(col), Math.round(x - r), Math.round(y - r), Math.round(r * 2), Math.round(r * 2));
     c.restore();
   }
 
   /* ---------- the Queen ---------- */
   const Q = {
-    HAIR: '#f6dc8c', HAIRD: '#cfa652', SKIN: '#f8e2c8', SKIND: '#d9b493', GOWN: '#f1f5ff', GOWND: '#bccaea', GOWNDD: '#8f9fca',
+    HAIR: '#f6dc8c', HAIRD: '#c8963e', SKIN: '#f8e2c8', SKIND: '#d9b493', GOWN: '#eef2ff', GOWND: '#aebde6', GOWNDD: '#8f9fca',
     TRIM: '#39b3a4', CROWN: '#fff2b0', GEM: '#7df4ff', CLOAK: '#2e62b0', CLOAKD: '#1c3f7c', SHOE: '#6b4a2e', EYE: '#27386e'
   };
   function drawQueen(g, pose, f, shoot) {
@@ -143,6 +150,76 @@ const Art = (() => {
       hurt: frames(1, 24, 28, g => drawQueen(g, 'hurt', 0, false))
     });
     S.queen = mkset(false); S.queenShoot = mkset(true);
+    const bset = shoot => ({
+      idle: frames(2, 24, 28, (g, f) => drawBoy(g, 'idle', f, shoot)),
+      run: frames(6, 24, 28, (g, f) => drawBoy(g, 'run', f, shoot)),
+      jump: frames(1, 24, 28, g => drawBoy(g, 'jump', 0, shoot)),
+      fall: frames(2, 24, 28, (g, f) => drawBoy(g, 'fall', f, shoot)),
+      glide: frames(2, 24, 28, (g, f) => drawBoy(g, 'glide', f, shoot)),
+      hurt: frames(1, 24, 28, g => drawBoy(g, 'hurt', 0, false))
+    });
+    S.boy = bset(false); S.boyShoot = bset(true);
+    for (const k of ['queen', 'queenShoot', 'boy', 'boyShoot']) for (const pose in S[k]) S[k][pose] = S[k][pose].map(im => outlined(im));
+  }
+  /* ---------- diamonds ---------- */
+  const gemCache = {};
+  function gemSprite(gem, size) {
+    const key = gem.id + (size || '');
+    if (gemCache[key]) return gemCache[key];
+    const wd = size || Math.round(11 + gem.n * 1.2) | 1, crown = Math.max(3, Math.round(wd * 0.3)), hg = Math.round(wd * 0.86);
+    const dk = mix(gem.tint, '#1c2a52', 0.62), cxm = (wd - 1) / 2;
+    return gemCache[key] = spr(wd, hg, g => {
+      for (let y = 0; y < hg; y++) {
+        const half = y < crown ? wd * 0.3 + (wd * 0.2) * (y / (crown - 1 || 1)) : (wd / 2) * (1 - (y - crown) / (hg - crown));
+        for (let x = 0; x < wd; x++) {
+          const u = (x - cxm) / Math.max(0.5, half);
+          if (Math.abs(u) > 1) continue;
+          const fi = Math.min(3, Math.floor((u + 1) * 2)), edge = Math.abs(u) > 1 - 1.2 / Math.max(1, half);
+          const sh = y < crown ? [0.72, 0.98, 0.6, 0.42][fi] : [0.5, 0.28, 0.86, 0.16][(fi + ((y - crown) > (hg - crown) * 0.45 ? 1 : 0)) % 4];
+          let col = sh > 0.5 ? mix(gem.tint, '#ffffff', (sh - 0.5) * 1.7) : mix(dk, gem.tint, sh * 2);
+          if (edge || y === hg - 1) col = dk;
+          if (y === 0) col = '#ffffff';
+          if (y === crown) col = mix(col, '#ffffff', 0.45);
+          g.fillStyle = col; g.fillRect(x, y, 1, 1);
+        }
+      }
+    });
+  }
+
+  function unused() { }
+
+  /* ---------- Sam ---------- */
+  const B = { HAIR: '#6a4428', SKIN: '#f2c9a2', SKIND: '#d09a78', HAT: '#8f6238', HATD: '#6a4424', SH: '#c9432e', SHD: '#96301f', OV: '#3d5fa3', OVD: '#2a4379', BT: '#4a3020', SC: '#ffd070', SCD: '#d89a30' };
+  function drawBoy(g, pose, f, shoot) {
+    const bob = (pose === 'idle' && f === 1) || (pose === 'run' && (f === 1 || f === 4)) ? 1 : 0;
+    const air = pose === 'jump' || pose === 'fall' || pose === 'glide';
+    const y0 = 5 + bob + (pose === 'hurt' ? 1 : 0);
+    // scarf tail
+    const fl = pose === 'run' ? 1 : air ? 1.6 : 0.3;
+    if (pose === 'glide') { for (let i = 0; i < 9; i++) R(g, 9 - i, y0 + 8 + Math.round(Math.sin(i * 0.9 + f * 2) * 0.8 + i * 0.3), 2, 4 + (i < 6 ? 2 : 0), i % 3 === 2 ? B.SCD : B.SC); }
+    else for (let i = 0; i < 6; i++) R(g, 8 - Math.round(i * fl), y0 + 8 + Math.round(i * (1.1 - fl * 0.5) + Math.sin(i + f * 1.05) * 0.6), 2, 2, i > 3 ? B.SCD : B.SC);
+    // legs
+    if (!air) {
+      const o = pose === 'run' ? [0, 2, 3, 1, -1, -2][f] : 0, lift = pose === 'run' ? [0, 1, 0, 0, 1, 0][f] : 0;
+      R(g, 9 - o, y0 + 16, 3, 22 - y0 - 16 + 4, B.OVD); R(g, 8 - o, 26, 4, 2, B.BT);
+      R(g, 12 + o, y0 + 16, 3, 22 - y0 - 16 + 4 - lift, B.OV); R(g, 12 + o, 26 - lift, 4, 2, B.BT);
+    } else if (pose === 'jump') { R(g, 9, y0 + 16, 3, 4, B.OVD); R(g, 8, y0 + 20, 4, 2, B.BT); R(g, 13, y0 + 15, 3, 3, B.OV); R(g, 13, y0 + 18, 4, 2, B.BT); }
+    else { R(g, 8, y0 + 16, 3, 5, B.OVD); R(g, 7, y0 + 21, 4, 2, B.BT); R(g, 13, y0 + 16, 3, 5, B.OV); R(g, 13, y0 + 21, 4, 2, B.BT); }
+    // torso
+    R(g, 8, y0 + 8, 7, 9, B.SH); R(g, 8, y0 + 8, 1, 9, B.SHD); R(g, 9, y0 + 11, 5, 6, B.OV); R(g, 9, y0 + 9, 1, 3, B.OV); R(g, 13, y0 + 9, 1, 3, B.OV); R(g, 11, y0 + 12, 2, 1, B.SC);
+    R(g, 8, y0 + 7, 7, 2, B.SC); R(g, 8, y0 + 8, 7, 1, B.SCD);
+    // head + hat
+    R(g, 9, y0 + 1, 6, 6, B.SKIN); R(g, 14, y0 + 6, 1, 1, B.SKIND); R(g, 8, y0 + 1, 2, 5, B.HAIR); R(g, 10, y0 + 1, 2, 1, B.HAIR);
+    R(g, 13, y0 + 3, 1, 2, '#2a2a3a'); R(g, 13, y0 + 6, 1, 1, '#c87a6a'); R(g, 10, y0 + 3, 1, 2, B.SKIND);
+    R(g, 6, y0, 12, 1, B.HAT); R(g, 5, y0, 1, 1, B.HATD); R(g, 8, y0 - 3, 7, 3, B.HAT); R(g, 8, y0 - 1, 7, 1, B.SH); R(g, 8, y0 - 3, 1, 3, B.HATD); R(g, 9, y0 - 4, 5, 1, B.HAT);
+    // arms
+    if (shoot) {
+      R(g, 12, y0 + 10, 6, 2, B.SH); R(g, 18, y0 + 10, 1, 2, B.SKIN);
+      R(g, 19, y0 + 8, 1, 6, '#8a5a34'); R(g, 18, y0 + 6, 1, 3, '#8a5a34'); R(g, 20, y0 + 6, 1, 3, '#8a5a34'); R(g, 18, y0 + 6, 3, 1, '#e8e0d0');
+    } else if (pose === 'jump') { R(g, 13, y0 + 7, 2, 4, B.SH); R(g, 14, y0 + 6, 2, 1, B.SKIN); R(g, 7, y0 + 10, 2, 3, B.SHD); }
+    else if (air) { R(g, 13, y0 + 9, 4, 2, B.SH); R(g, 17, y0 + 8, 1, 2, B.SKIN); R(g, 5, y0 + 9, 3, 2, B.SHD); R(g, 4, y0 + 8, 1, 2, B.SKIN); }
+    else if (pose === 'hurt') { R(g, 13, y0 + 6, 2, 4, B.SH); R(g, 14, y0 + 5, 1, 1, B.SKIN); }
+    else { const ax = 11 + (pose === 'run' ? [-1, 0, 1, 1, 0, -1][f] : 0); R(g, ax, y0 + 10, 2, 4, B.SHD); R(g, ax, y0 + 14, 2, 1, B.SKIN); }
   }
 
   /* ---------- foes ---------- */
@@ -269,6 +346,16 @@ const Art = (() => {
       R(g, 5, -1, 2, 1, '#a9b2c4');
       if (f) { R(g, 5, 3, 2, 4, '#fff'); R(g, 4, 4, 4, 2, '#aef4ff'); }
     });
+    S.tonttu = frames(2, 14, 16, (g, f) => {
+      const red = '#c8362c', redD = '#8e2420';
+      for (let y = 0; y < 7; y++) { const wdt = 1 + y * 1.3 | 0; R(g, 7 - (wdt >> 1) + (y < 2 ? 1 + f : 0), y, wdt, 1, y % 3 === 2 ? redD : red); }
+      R(g, 9 + f, 0, 1, 1, '#ffffff'); R(g, 2, 7, 10, 1, redD);
+      R(g, 4, 8, 6, 2, '#f2c9a2'); R(g, 5, 8, 1, 1, '#2a2a3a'); R(g, 8, 8, 1, 1, '#2a2a3a'); R(g, 6, 9, 2, 2, '#e09a84');
+      R(g, 3, 10, 8, 4, '#f6f6f6'); R(g, 4, 14, 6, 1, '#e0e0e8'); R(g, 6, 11, 2, 1, '#e0e0e8');
+      R(g, 2, 11, 1, 4, '#6a7488'); R(g, 11, 11, 1, 4, '#6a7488'); R(g, 1, 12 + f, 1, 2, '#f2c9a2'); R(g, 12, 12, 1, 2, '#f2c9a2');
+      R(g, 3, 15, 3, 1, '#3a2a20'); R(g, 8, 15, 3, 1, '#3a2a20');
+    });
+    S.gemIcon = spr(7, 7, g => { const c1 = '#fff2b0', c2 = '#c8a040'; R(g, 1, 0, 5, 1, '#ffffff'); R(g, 0, 1, 7, 2, c1); R(g, 1, 3, 5, 1, c1); R(g, 2, 4, 3, 1, c2); R(g, 3, 5, 1, 2, c2); R(g, 3, 1, 1, 3, '#ffffff'); });
     S.rune = spr(14, 16, g => {
       R(g, 2, 2, 10, 14, '#767c8c'); R(g, 3, 1, 8, 1, '#767c8c'); R(g, 4, 0, 6, 1, '#8d93a3'); R(g, 2, 2, 1, 14, '#9aa0b0'); R(g, 11, 3, 1, 13, '#565b69');
       R(g, 6, 4, 1, 8, '#9ff4ff'); R(g, 5, 5, 3, 1, '#9ff4ff'); R(g, 8, 7, 1, 2, '#9ff4ff'); R(g, 4, 9, 2, 1, '#9ff4ff');
@@ -303,12 +390,14 @@ const Art = (() => {
         R(g, 0, 0, T, 1, P.light); R(g, 0, 8, T, 1, P.light);
         for (let i = 0; i < 4; i++) R(g, r() * 16, r() * 16, 1, 1, P.speck);
       } else if (P.style === 'rock') {
-        for (let i = 0; i < 7; i++) R(g, r() * 14, r() * 14, 2 + r() * 3, 1 + r() * 2, r() < 0.5 ? P.dark : P.light);
-        if (v === 1) { R(g, 3, 5, 1, 6, P.speck); R(g, 4, 10, 4, 1, P.speck); R(g, 7, 11, 1, 3, P.speck); }
+        for (let i = 0; i < 3; i++) R(g, r() * 12, r() * 14, 3 + r() * 3, 1 + r() * 2, r() < 0.5 ? P.dark : P.light);
+        if (v === 1) { const vein = [[4, 2], [4, 3], [5, 4], [5, 5], [6, 6], [7, 7], [7, 8], [8, 9], [6, 7], [5, 8], [4, 9], [9, 10], [9, 11]]; for (const [x, y] of vein) R(g, x - 1, y, 3, 1, '#6a2010'); for (const [x, y] of vein) R(g, x, y, 1, 1, P.speck); }
         if (v === 3) { R(g, 10, 3, 1, 3, P.dark); }
       } else {
-        for (let i = 0; i < 9; i++) R(g, r() * 15, r() * 15, 1 + r() * 2, 1, r() < 0.6 ? P.dark : P.light);
-        for (let i = 0; i < 2; i++) { const x = r() * 12, y = r() * 12; R(g, x, y, 3, 2, P.speck); R(g, x, y, 2, 1, P.light); }
+        for (let i = 0; i < 3; i++) R(g, r() * 13, r() * 15, 2 + r() * 2, 1, r() < 0.6 ? P.dark : P.light);
+        if (v === 0) { R(g, 3, 5, 5, 3, P.speck); R(g, 4, 4, 3, 1, P.speck); R(g, 3, 5, 4, 1, P.light); R(g, 4, 8, 4, 1, P.dark); }
+        if (v === 2) { R(g, 9, 10, 4, 2, P.speck); R(g, 9, 10, 3, 1, P.light); R(g, 10, 12, 3, 1, P.dark); }
+        if (v === 3) { R(g, 1, 12, 7, 1, P.dark); R(g, 8, 13, 5, 1, P.dark); }
       }
     }));
     for (let v = 0; v < 4; v++) set.cap.push(spr(T, 8, g => {
@@ -353,10 +442,11 @@ const Art = (() => {
   }
 
   /* ---------- small pixel digits for HUD ---------- */
-  const DIG = ['111101101101111', '010110010010111', '111001111100111', '111001111001111', '101101111001001', '111100111001111', '111100111101111', '111001001001001', '111101111101111', '111101111001111'];
+  const DIG = ['010101101101010', '010110010010111', '111001111100111', '111001111001111', '101101111001001', '111100111001111', '111100111101111', '111001001001001', '111101111101111', '111101111001111'];
   function digits(c, str, x, y, col) {
     c.fillStyle = col || '#fff';
     for (const chr of String(str)) {
+      if (chr === '/') { c.fillRect(x + 2, y - 1, 1, 2); c.fillRect(x + 1, y + 1, 1, 3); c.fillRect(x, y + 4, 1, 2); x += 4; continue; }
       if (chr === 'x') { c.fillRect(x, y + 1, 1, 1); c.fillRect(x + 2, y + 1, 1, 1); c.fillRect(x + 1, y + 2, 1, 1); c.fillRect(x, y + 3, 1, 1); c.fillRect(x + 2, y + 3, 1, 1); x += 4; continue; }
       const d = DIG[+chr];
       if (d) for (let i = 0; i < 15; i++) if (d[i] === '1') c.fillRect(x + i % 3, y + (i / 3 | 0), 1, 1);
@@ -365,7 +455,7 @@ const Art = (() => {
     return x;
   }
 
-  function init() { buildQueen(); buildFoes(); buildItems(); }
+  function init() { buildQueen(); buildFoes(); buildItems(); S.shard = S.shard.map(im => { const o = spr(11, 13, g => g.drawImage(im, 1, 1)); return outlined(o, '#1c3a6a'); }); }
 
-  return { S, init, spr, blit, glow, flashOf, tileSet, digits, drawQueen, Q };
+  return { S, init, spr, blit, glow, flashOf, tileSet, digits, drawQueen, Q, gemSprite, outlined };
 })();
