@@ -57,8 +57,8 @@ const Art = (() => {
 
   /* ---------- the Queen ---------- */
   const Q = {
-    HAIR: '#f6dc8c', HAIRD: '#c8963e', SKIN: '#f8e2c8', SKIND: '#d9b493', GOWN: '#eef2ff', GOWND: '#aebde6', GOWNDD: '#8f9fca',
-    TRIM: '#39b3a4', CROWN: '#fff2b0', GEM: '#7df4ff', CLOAK: '#2e62b0', CLOAKD: '#1c3f7c', SHOE: '#6b4a2e', EYE: '#27386e'
+    HAIR: '#f6dc8c', HAIRD: '#c8963e', SKIN: '#f8e2c8', SKIND: '#d9b493', GOWN: '#2aa59c', GOWND: '#1c7d80', GOWNDD: '#145c62',
+    TRIM: '#f2c14e', CROWN: '#fff2b0', GEM: '#7df4ff', CLOAK: '#d8343c', CLOAKD: '#9c2230', SHOE: '#6b4a2e', EYE: '#27386e'
   };
   function drawQueen(g, pose, f, shoot, crown) {
     const bob = (pose === 'idle' && f === 1) || (pose === 'run' && (f === 1 || f === 4)) ? 1 : 0;
@@ -115,7 +115,7 @@ const Art = (() => {
     else { R(g, 8, yEnd, 2, 4, LEGD); R(g, 7, yEnd + 4, 4, 3, BOOTD); R(g, 13, yEnd, 2, 4, LEG); R(g, 13, yEnd + 4, 4, 3, BOOT); }
     // torso
     R(g, 9, y0 + 9, 5, 5, Q.GOWN); R(g, 9, y0 + 9, 1, 5, Q.GOWND);
-    R(g, 10, y0 + 9, 3, 1, Q.TRIM); R(g, 9, y0 + 13, 5, 1, Q.TRIM); R(g, 12, y0 + 13, 1, 1, Q.CROWN);
+    R(g, 9, y0 + 8, 5, 2, Q.CLOAK); R(g, 9, y0 + 9, 5, 1, Q.CLOAKD); R(g, 9, y0 + 13, 5, 1, Q.TRIM); R(g, 12, y0 + 13, 1, 1, '#fff6c8'); R(g, 10, y0 + 10, 1, 3, Q.TRIM);
     R(g, 11, y0 + 8, 2, 1, Q.SKIND);
     // head
     R(g, 9, y0 + 2, 6, 6, Q.SKIN); R(g, 14, y0 + 7, 1, 1, Q.SKIND);
@@ -124,7 +124,8 @@ const Art = (() => {
     R(g, 13, y0 + 7, 1, 1, '#d98a8a');
     // circlet
     if (crown) { R(g, 9, y0 + 1, 6, 1, Q.CROWN); R(g, 10, y0, 1, 1, Q.CROWN); R(g, 12, y0 - 1, 1, 2, Q.CROWN); R(g, 14, y0, 1, 1, Q.CROWN); R(g, 12, y0, 1, 1, Q.GEM); }
-    else { R(g, 9, y0 + 1, 6, 1, '#c8362c'); R(g, 9, y0 + 2, 1, 1, '#c8362c'); R(g, 13, y0 + 1, 1, 1, Q.GEM); } // a red wool band and one star pin
+    else { R(g, 8, y0 + 1, 7, 2, '#d8343c'); R(g, 8, y0 + 2, 7, 1, '#9c2230'); R(g, 13, y0 + 1, 1, 1, Q.GEM); } // a red wool band and one star pin
+    if (!air || pose === 'jump') { R(g, 7, y0 + 13, 3, 4, '#8a5a2b'); R(g, 7, y0 + 13, 3, 1, '#b07a44'); R(g, 8, y0 + 15, 1, 1, Q.TRIM); } // satchel
     // arms
     if (shoot) {
       R(g, 12, y0 + 10, 6, 2, Q.GOWND); R(g, 18, y0 + 10, 1, 2, Q.SKIN);

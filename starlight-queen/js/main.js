@@ -9,6 +9,8 @@
   const SERIF = '"EB Garamond","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
   const TITLE = '"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,serif';
   const cache = new Map();
+  const dropCache = () => { for (const e of cache.values()) e.tc.width = 0; cache.clear(); };
+  if (document.fonts) { document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', dropCache); document.fonts.ready && document.fonts.ready.then(dropCache); }
   const UI = {
     ctx, get s() { return s; },
     font(size, o) { ctx.font = `${o && o.italic ? 'italic ' : ''}${o && o.title ? '600 ' : ''}${size * s}px ${o && o.title ? TITLE : SERIF}`; },
@@ -21,7 +23,7 @@
       const key = str + '|' + size + '|' + (o.color || '') + (o.glow || '') + (o.halo || '') + (o.italic ? 'i' : '') + (o.title ? 't' : '') + (o.ls || 0) + (o.shadow === false ? 'n' : '');
       let e = cache.get(key);
       if (!e) {
-        if (cache.size > 260) cache.clear();
+        if (cache.size > 120) dropCache();
         this.font(size, o);
         const ls = o.ls && 'letterSpacing' in ctx ? o.ls * s : 0;
         ctx.save(); if (ls) ctx.letterSpacing = ls + 'px'; const tw = ctx.measureText(str).width; ctx.restore();
@@ -73,7 +75,7 @@
     cv.width = Math.round(W * s); cv.height = Math.round(H * s);
     const cssK = Math.min(ww / W, wh / H) >= 2 && k >= 2 && Math.floor(k) === k ? k / dpr : Math.min(ww / W, wh / H);
     cv.style.width = (W * cssK) + 'px'; cv.style.height = (H * cssK) + 'px';
-    cache.clear();
+    dropCache();
     const vg = document.getElementById('vig'); if (vg) { vg.style.width = cv.style.width; vg.style.height = cv.style.height; }
   }
   window.addEventListener('resize', resize);
@@ -90,8 +92,8 @@
     ctx.drawImage(buf, 0, 0, cv.width, cv.height);
     // soft bloom: a small, contrast-boosted copy of the frame laid back over it
     bx.globalCompositeOperation = 'source-over'; bx.drawImage(buf, 0, 0, 96, 54);
-    bx.globalCompositeOperation = 'multiply'; bx.drawImage(bcv, 0, 0);
-    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.2;
+    bx.globalCompositeOperation = 'multiply'; bx.drawImage(bcv, 0, 0); bx.drawImage(bcv, 0, 0); // keep only the brightest lights
+    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.24;
     ctx.drawImage(bcv, 0, 0, cv.width, cv.height); ctx.restore();
     if (sc.drawHi) sc.drawHi(UI);
     // soft vignette
@@ -136,7 +138,7 @@
   document.addEventListener('visibilitychange', () => {
     last = 0;
     const sc = Scenes.cur;
-    if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead && !World.card) { sc.paused = true; Sound.duck(true); }
+    if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead && !World.card && !World.gemFx) { sc.paused = true; sc.armR = false; Sound.duck(true); }
   });
 
   Art.init();

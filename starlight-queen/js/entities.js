@@ -97,7 +97,8 @@ function updatePlayer(w, p) {
 
   // shoot
   if (p.arrows < 3) { p.arrowT++; if (p.arrowT >= 48) { p.arrows++; p.arrowT = 0; } }
-  if (ctl && act(p, 'fire', true)) {
+  const fireNow = ctl && (act(p, 'fire', true) || p.fireBuf); p.fireBuf = false;
+  if (fireNow) {
     if (p.arrows > 0) {
       p.arrows--; p.shootT = 14;
       w.ents.push(makeEnt({ t: 'arrow', x: p.x + 5 + p.face * 9, y: p.y + 10, dir: p.face }));
@@ -196,7 +197,7 @@ function slay(w, e, how) {
   if (e.dead) return;
   e.dead = true; Game.stats.foes++;
   const img = e.img || Art.S.goblin[0];
-  w.hitstop = Math.max(w.hitstop || 0, 3);
+  if (how !== 'lava') w.hitstop = Math.max(w.hitstop || 0, 3);
   for (let i = 0; i < 7; i++) { const a = i / 7 * TAU; w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: Math.cos(a) * 1.6, vy: Math.sin(a) * 1.6, life: 16, col: i % 2 ? '#fff6b0' : '#ffffff', glow: 1, sz: 2 }); }
   w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: how === 'stomp' ? 0 : rand(-1, 1), vy: how === 'stomp' ? 0 : -3, life: how === 'stomp' ? 22 : 60, img, flipV: how !== 'stomp', squash: how === 'stomp', g: how === 'stomp' ? 0 : 0.25, flip: e.dir < 0 });
   for (let i = 0; i < 8; i++) w.parts.push({ x: e.x + rand(e.w), y: e.y + rand(e.h), vx: rand(-0.8, 0.8), vy: rand(-1.4, -0.2), life: rand(20, 40), col: i % 2 ? '#2a2038' : '#4a3a5a', sz: 2, g: -0.01 });
@@ -362,7 +363,7 @@ function pickup(kind) {
       const p = touch(w, e);
       if (p) {
         e.dead = true;
-        if (kind === 'cake') { if (p.hp < 3) { p.hp++; Sound.sfx('heal'); } else { Sound.sfx('item'); for (let i = 0; i < 5; i++) World.gainShard(e.x + 6, e.y, true); } World.sparkle(e.x + 6, e.y + 5, '#7af0c0', 10); }
+        if (kind === 'cake') { if (p.hp < 3) { p.hp++; Sound.sfx('heal'); } else { Sound.sfx('item'); p.arrows = 3; p.radiant = Math.max(p.radiant, 150); } World.sparkle(e.x + 6, e.y + 5, '#7af0c0', 10); }
         if (kind === 'bloom') { p.radiant = 600; Sound.sfx('power'); World.sparkle(e.x + 7, e.y + 6, '#fff6b0', 18); w.flash = 0.4; }
       }
     },
@@ -677,7 +678,7 @@ ENT.boy = {
     e.dir = p.x < e.x ? -1 : 1;
     if (near) {
       if (!Game.metBoy) { Game.metBoy = true; Sound.sfx('oneup'); World.sparkle(e.x + 5, e.y + 6, '#ffd070', 14); Game.save(); }
-      w.signText = 'Sam: “You came all the way from Finland? I dig for diamonds here.|Let’s go together!”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
+      w.signText = 'Sam: “You walked here from Finland? Alone? Not any more.|I know where the diamonds hide. Let’s go together!”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
     }
   },
   draw(c, w, e, ox, oy) {

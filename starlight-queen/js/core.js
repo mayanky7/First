@@ -59,7 +59,7 @@ const Input = (() => {
 
   window.addEventListener('keydown', e => {
     first();
-    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if ((e.ctrlKey || e.metaKey || e.altKey) && !/^(Control|Shift|Alt|Meta)/.test(e.code)) return;
     const a = KEYMAP[e.code], m = MENU_ALIAS[e.code];
     if (a || m) e.preventDefault();
     if (e.repeat) return;

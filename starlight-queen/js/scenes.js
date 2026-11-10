@@ -65,7 +65,7 @@ function drawGemCard(u, gem, t, a, footer) {
   g.strokeStyle = 'rgba(214,186,120,0.3)'; g.lineWidth = Math.max(1, s * 0.3); g.strokeRect(17 * s, 17 * s, (W - 34) * s, (H - 34) * s);
   const r = 24 + 24 * Math.log10(gem.carat + 1) / Math.log10(531);
   g.scale(s, s);
-  g.fillStyle = gem.tint; for (let i = 0; i < 14; i++) { const an = i / 14 * TAU + t * 0.004, wdt = 0.05 + (i % 2) * 0.05, len = 74 + (i % 3) * 18; g.globalAlpha = a * 0.05; g.beginPath(); g.moveTo(92, 96); g.lineTo(92 + Math.cos(an - wdt) * len, 96 + Math.sin(an - wdt) * len); g.lineTo(92 + Math.cos(an + wdt) * len, 96 + Math.sin(an + wdt) * len); g.fill(); }
+  g.fillStyle = gem.tint; for (let i = 0; i < 22; i++) { const an = i / 22 * TAU + t * 0.003, wdt = 0.018 + (i % 3) * 0.012, len = 70 + (i * 7 % 5) * 9; g.globalAlpha = a * 0.07; g.beginPath(); g.moveTo(92, 96); g.lineTo(92 + Math.cos(an - wdt) * len, 96 + Math.sin(an - wdt) * len); g.lineTo(92 + Math.cos(an + wdt) * len, 96 + Math.sin(an + wdt) * len); g.fill(); }
   g.globalAlpha = a;
   drawGemHi(g, 92, 96, r * Math.min(1, 0.4 + t / 50), gem, t);
   g.restore();
@@ -116,7 +116,7 @@ const Vista = (() => {
       c.fillStyle = '#39406a'; c.beginPath(); c.moveTo(0, H); c.lineTo(0, 150); c.lineTo(40, 146); c.lineTo(96, 150); c.lineTo(132, 154); c.lineTo(146, 166); c.lineTo(160, 196); c.lineTo(190, H); c.fill();
       c.fillStyle = '#f4f8ff'; c.beginPath(); c.moveTo(0, 150); c.lineTo(40, 146); c.lineTo(96, 150); c.lineTo(132, 154); c.lineTo(146, 166); c.lineTo(140, 164); c.lineTo(126, 158); c.lineTo(96, 155); c.lineTo(40, 151); c.lineTo(0, 155); c.fill();
       R(c, 150, 190, 60, 26, '#39406a');
-      Art.glow(c, 104, 122, 40 + Math.sin(t * 0.05) * 4, '#9fd8ff', 0.5);
+      Art.glow(c, 104, 122, 30 + Math.sin(t * 0.05) * 3, '#9fd8ff', 0.3);
       c.drawImage(Art.S.queen.idle[(t >> 5) % 2], 80, 94, 48, 56);
       c.drawImage(Art.S.tonttu[(t >> 5) % 2], 44, 118, 30, 34);
       if (!snow) snow = Backdrop.makeAmbient('snow');
@@ -177,8 +177,8 @@ Scenes.list.title = {
     if (Input.hit('dn')) { this.sel = (this.sel + 1) % n; Sound.sfx('select'); }
     if (Input.hit('vault')) { Scenes.go('vault'); return; }
     if (Input.hit('enter') && this.t > 20) {
-      Sound.sfx('confirm');
       if (Input.hit('tap')) { const k = Math.round((Input.tapY - 136) / 15); if (k < 0 || k >= this.items.length || Math.abs(Input.tapX - 254) > 110) return; this.sel = k; }
+      Sound.sfx('confirm');
       const it = this.items[this.sel];
       if (it === 'continue') { Game.resume(); Scenes.go('map'); }
       else if (it === 'vault') Scenes.go('vault');
@@ -193,11 +193,11 @@ Scenes.list.title = {
     u.rule(254, 96, 118, '#c8a860', a);
     u.text('Ana & the Mountain of Light', 254, 108, 10.5, { color: '#cfe4ff', italic: true, alpha: a });
     const b = clamp((t - 60) / 40, 0, 1), vn = Object.keys(Game.vault).length;
-    u.panel(160, 124, 188, this.items.length * 15 + (Game.best ? 62 : 8), 0.5 * b, '#070a1c'); u.panel(0, 198, W, 18, 0.55 * b, '#070a1c');
+    u.panel(160, 124, 188, this.items.length * 15 + 8, 0.78 * b, '#0a1030'); if (Game.best) u.panel(140, 181, 228, 13, 0.78 * b, '#0a1030'); u.panel(0, 198, W, 18, 0.7 * b, '#070a1c');
     this.items.forEach((it, i) => {
       const on = i === this.sel, y = 136 + i * 15;
       const label = it === 'new' ? (Game.saved ? 'New Journey' : 'Begin the Journey') : it === 'continue' ? `Continue  ·  ${MAP_NAMES[Game.saved.region || 0]}` : `The Vault  ·  ${vn} of ${GEMS.length} diamonds`;
-      u.text(label, 254, y, 10.5, { color: on ? '#ffffff' : '#8a98b8', alpha: b * (on ? 0.78 + 0.22 * Math.sin(t * 0.1) : 0.9), glow: on ? '#9fd8ff' : null });
+      u.text(label, 254, y, 10.5, { color: on ? '#ffffff' : '#b9c3e0', alpha: b * (on ? 0.78 + 0.22 * Math.sin(t * 0.1) : 0.9), glow: on ? '#9fd8ff' : null });
       if (on) { const hw = u.width(label, 10.5) / 2 + 9; u.text('✦', 254 - hw, y, 7, { color: '#bff4ff', alpha: b }); u.text('✦', 254 + hw, y, 7, { color: '#bff4ff', alpha: b }); }
     });
     if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 254, 188, 6.4, { color: '#d6ba78', alpha: b, italic: true });
@@ -352,11 +352,11 @@ Scenes.list.play = {
   update(busy) {
     const w = World;
     if (busy) { if (w.player.dead || w.state === 'clear') w.update(); return; }
-    if (Input.hit('pause') && w.state === 'play' && !w.player.dead && !w.card) { this.paused = !this.paused; this.armR = false; Sound.duck(this.paused); Sound.sfx('select'); return; }
+    if (Input.hit('pause') && w.state === 'play' && !w.player.dead && !w.card && !w.gemFx) { this.paused = !this.paused; this.armR = false; Sound.duck(this.paused); Sound.sfx('select'); return; }
     if (this.paused) {
       let pick = Input.hit('restart') ? 1 : Input.hit('quit') ? 3 : Input.hit('enter') && !Input.hit('tap') ? 0 : -1;
       if (Input.hit('tap')) { const k = Math.round((Input.tapY - 96) / 14); if (k >= 0 && k < 4 && Math.abs(Input.tapX - 192) < 110) pick = k; }
-      if (pick === 0) { this.paused = false; Sound.duck(false); }
+      if (pick === 0) { this.paused = false; this.armR = false; Sound.duck(false); }
       else if (pick === 1) { if (this.armR) Scenes.go('play', { respawn: true }); else { this.armR = true; Sound.sfx('select'); } }
       else if (pick === 2) { Sound.toggleMute(); }
       else if (pick === 3) { Game.save(); Scenes.go('title'); }
@@ -398,7 +398,7 @@ Scenes.list.play = {
     if (w.fight && w.boss && w.boss.st === 'intro') {
       const a = clamp(w.boss.t0 / 30, 0, 1) * clamp((110 - w.boss.t0) / 20, 0, 1);
       u.text('THE HOARDER KING', 192, 70, 22, { color: '#ffb070', glow: '#ff3a10', alpha: a, title: true, ls: 4 });
-      u.text('Keeper of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
+      u.text('Thief of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     } else if (w.fight && w.boss && !w.boss.dead) u.text('THE HOARDER KING', 192, H - 21, 5, { color: '#ffc8a0', alpha: 0.9, ls: 1.5, title: true });
     if (Game.metBoy && !Game.coop && w.state === 'play' && !w.card && !this.paused && !Input.touch) { u.panel(W - 109, 30, 106, 10, 0.5, '#080a14'); u.text('PLAYER 2  ·  PRESS 2 TO JOIN', W - 7, 35.2, 4.8, { color: '#ffd070', align: 'right', ls: 0.9, title: true }); }
     if (w.players.length > 1 && !w.card) { u.text('ANA', 57.5, 9.5, 4.8, { color: '#bff4ff', align: 'right', ls: 0.4, title: true }); u.text('SAM', 57.5, 33.5, 4.8, { color: '#ffd070', align: 'right', ls: 0.6, title: true }); }
@@ -407,7 +407,7 @@ Scenes.list.play = {
       u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
       u.text(`${Game.carats().toFixed(2)} carats carried home`, 192, 78, 8.5, { color: '#dffbff', alpha: clamp((w.clearT - 120) / 40, 0, 1), italic: true });
     }
-    if (w.combo >= 4 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.player.x + 5 - w.cam.x, w.player.y - 8 - w.cam.y - (55 - w.comboT) * 0.15, 8 + Math.min(5, w.combo * 0.3), { color: '#dffbff', glow: '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
+    if (w.combo >= 4 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.comboX - w.cam.x, w.comboY - 12 - w.cam.y - (55 - w.comboT) * 0.15, 8 + Math.min(5, w.combo * 0.3), { color: '#dffbff', glow: '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
     if (w.card) drawGemCard(u, w.card.gem, w.card.t, clamp(w.card.t / 25, 0, 1), w.card.t > 70 ? (Input.touch ? 'TAP TO CONTINUE' : 'ENTER TO CONTINUE') : '');
     if (this.paused) {
       u.panel(0, 0, W, H, 0.66, '#04050d');
@@ -464,8 +464,8 @@ Scenes.list.vault = {
 const EPILOGUE = [
   'The Hoarder King is fallen, and the Mountain of Light shines for everyone again.',
   'Ana does not keep it. Great diamonds, she has learned, are only ever borrowed — from the deep earth, and from everyone who comes after.',
-  'In Kaamos the long night ends. The tonttu at the end of the lane sets a lantern in the window, in case she should come home.',
-  'She does come home — for a week. Then the road calls again. And in Kaamos they tell it still: the girl who walked out past the last gate, and came back a queen of starlight.'
+  'In Kaamos the long night ends. The Tonttu sets a lantern in the window, in case she should come home.',
+  'She does come home — for a week, with Sam, who has never seen snow. Then the road calls. And in Kaamos they tell it still: the girl who walked out past the last gate, and came back queen of nothing but starlight.'
 ];
 Scenes.list.ending = {
   enter() { this.t = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },

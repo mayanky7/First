@@ -22,11 +22,12 @@ const World = (() => {
     Object.assign(w, {
       t: 0, state: 'play', grid: L.grid, rows: L.rows, cols: L.cols, parts: [], bumps: [], torches: L.torches, zones: L.zones,
       shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, hitstop: 0, combo: 0, comboT: 0, hudPop: 0,
-      gemBlocks: L.gemBlocks, arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
+      gemBlocks: L.gemBlocks, popN: L.popN, gemQ: [], arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
     });
     w.colTheme = new Array(w.cols);
     for (let cx = 0; cx < w.cols; cx++) w.colTheme[cx] = THEMES[zoneAt(cx * T + 8).theme];
     for (const k in L.gemBlocks) if (Game.gems[L.gemBlocks[k]]) { const [gx, gy] = k.split(',').map(Number); w.grid[gy][gx] = 'U'; }
+    for (const k in L.popN) if (Game.meleeGot[L.popN[k]]) { const [gx, gy] = k.split(',').map(Number); w.grid[gy][gx] = 'U'; }
     w.ents = L.ents.filter(s => !(s.t === 'shard' && Game.meleeGot[s.n]) && !(s.t === 'gem' && Game.gems[s.gem]) && !(s.t === 'boss' && Game.bossDown)).map(makeEnt);
     if (Game.bossDown) { setGate(w.arena.gr, '.'); if (!Game.gems.kohinoor) w.ents.push(makeEnt({ t: 'gem', x: (w.arena.x0 + w.arena.x1) / 2, y: w.arena.floor - 30, gem: 'kohinoor' })); }
     w.plats = w.ents.filter(e => e.type === 'plat');
@@ -93,11 +94,14 @@ const World = (() => {
   function toast(s, long) { w.toastText = s; w.toastT = long ? 420 : 240; w.toastMax = w.toastT; }
   function gainShard(x, y, quiet, n) {
     if (n !== undefined) { Game.meleeGot[n] = 1; Game.melee++; }
-    if (!quiet) { w.combo = w.comboT > 0 ? w.combo + 1 : 1; w.comboT = 55; w.hudPop = 8; Sound.sfx('shard', w.combo); sparkle(x, y, '#9ff4ff', 5 + Math.min(8, w.combo)); }
+    if (!quiet) { w.combo = w.comboT > 0 ? w.combo + 1 : 1; w.comboT = 55; w.comboX = x; w.comboY = y; w.hudPop = 8; Sound.sfx('shard', w.combo); sparkle(x, y, '#9ff4ff', 5 + Math.min(8, w.combo)); }
   }
   function gainGem(e) {
     const gem = GEM_BY_ID[e.gem];
-    Game.gems[gem.id] = 1; w.gemFx = { gem, x: e.x + e.w / 2, y: e.y + e.h / 2, t: 0 };
+    Game.gems[gem.id] = 1;
+    const fx = { gem, x: e.x + e.w / 2, y: e.y + e.h / 2, t: 0 };
+    if (w.gemFx || w.card) { (w.gemQ || (w.gemQ = [])).push(fx); Game.save(); return; }
+    w.gemFx = fx;
     Sound.sfx('gem'); Sound.duck(true); w.flash = 0.5;
     sparkle(e.x + e.w / 2, e.y + e.h / 2, gem.tint, 40);
     Game.save();
@@ -116,7 +120,7 @@ const World = (() => {
     if (ch === 'U') { Sound.sfx('bump'); return; }
     w.grid[cy][cx] = 'U';
     if (ch === 'G') { const id = w.gemBlocks[cx + ',' + cy]; if (id && !Game.gems[id]) { w.ents.push(makeEnt({ t: 'gem', x, y: y - 6, gem: id })); sparkle(x, y - 8, '#fff6c8', 24); Sound.sfx('power'); toast('Something bright was buried here…'); } }
-    else if (ch === '?') { w.ents.push(makeEnt({ t: 'pop', x, y: y - 12 })); gainShard(x, y - 8); Sound.sfx('bump'); }
+    else if (ch === '?') { w.ents.push(makeEnt({ t: 'pop', x, y: y - 12 })); gainShard(x, y - 8, false, w.popN[cx + ',' + cy]); Sound.sfx('bump'); }
     else { w.ents.push(makeEnt({ t: ch === 'H' ? 'cake' : 'bloom', x, y })); Sound.sfx('item'); }
   }
   function checkpoint(x, y) { Game.cp = { x, y }; Game.save(); for (const p of w.players) if (!p.dead) p.hp = 3; }
@@ -138,7 +142,7 @@ const World = (() => {
   function clearHazards() { for (const e of w.ents) if (e.type === 'wave' || e.type === 'fall') e.dead = true; }
   function bossDefeated(x) {
     w.fight = false; setGate(w.arena.gr, '.'); setGate(w.arena.gl, '.'); w.minX = 0; w.maxX = w.cols * T;
-    w.dawning = true; Sound.music('dawn'); toast('The Hoarder King is fallen — take the Mountain of Light!');
+    w.dawning = true; Sound.music('dawn'); toast('The Hoarder King is fallen — set the Mountain of Light free!');
     Game.stats.foes++; Game.bossDown = true;
     w.ents.push(makeEnt({ t: 'gem', x: clamp(x, w.arena.x0 + 40, w.arena.x1 - 40), y: w.arena.floor - 30, gem: 'kohinoor' }));
     Game.save();
@@ -157,10 +161,13 @@ const World = (() => {
       if (fx.t >= 55) { w.card = { gem: fx.gem, t: 0 }; w.gemFx = null; }
       return;
     }
-    if (w.hitstop > 0) { w.hitstop--; return; }
+    if (w.hitstop > 0) { // a held frame: presses made during it are kept, not lost
+      for (const p of w.players) { if (act(p, 'jump', true)) p.jbuf = 8 + w.hitstop; if (act(p, 'fire', true)) p.fireBuf = true; }
+      w.hitstop--; return;
+    }
     if (w.card) {
       w.card.t++;
-      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.duck(false); Sound.sfx('confirm'); }
+      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.sfx('confirm'); if (w.gemQ && w.gemQ.length) { w.gemFx = w.gemQ.shift(); Sound.sfx('gem'); } else Sound.duck(false); }
       return;
     }
     w.t++;
@@ -346,7 +353,7 @@ const World = (() => {
       const x = q.x - ox, y = q.y - oy;
       if (q.img) {
         if (q.squash) c.drawImage(q.img, Math.round(x - q.img.width / 2 - 2), Math.round(y + q.img.height / 2 - 5), q.img.width + 4, 5);
-        else if (q.fade) { c.globalAlpha = q.life / q.max * 0.45; Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2 - 5, q.flip); c.globalAlpha = 1; }
+        else if (q.fade) { c.globalAlpha = q.life / q.max * 0.45; Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip); c.globalAlpha = 1; }
         else Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip, q.flipV);
       } else { c.fillStyle = q.col; const s = q.sz || 1; c.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s); }
     }
@@ -392,7 +399,7 @@ const World = (() => {
     drawParts(c, ox, oy, true);
     Backdrop.drawAmbient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
     { // near silhouettes sliding past in front of everything: depth
-      const f = Backdrop.fore(bl.a.theme), fx0 = -(((w.cam.x * 1.7) % Backdrop.LW + Backdrop.LW) % Backdrop.LW) | 0;
+      const f = Backdrop.fore(bl.a.theme), fx0 = -(((w.cam.x * 1.4) % Backdrop.LW + Backdrop.LW) % Backdrop.LW) | 0;
       c.drawImage(f, fx0, H - f.height); if (fx0 + Backdrop.LW < W) c.drawImage(f, fx0 + Backdrop.LW, H - f.height);
     }
     if (w.gemFx) {

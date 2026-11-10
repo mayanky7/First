@@ -201,7 +201,7 @@ const Backdrop = (() => {
       });
       B = (c, cx, yo, t) => {
         c.drawImage(s, 0, 0, W, H);
-        Art.glow(c, 300, 44, 60, '#fff6c0', 0.8); c.fillStyle = '#fffbe0'; c.beginPath(); c.arc(300, 44, 11, 0, TAU); c.fill();
+        Art.glow(c, 300, 44, 40, '#fff6c0', 0.7); c.fillStyle = '#fffbe0'; c.beginPath(); c.arc(300, 44, 11, 0, TAU); c.fill();
         drawLayer(c, clouds, cx * 0.04 + t * 0.05, 1, yo * 0.1);
         drawLayer(c, far, cx, 0.08, yo * 0.2); drawLayer(c, mid, cx, 0.22, yo * 0.35); drawLayer(c, near, cx, 0.42, yo * 0.5);
       };
@@ -227,12 +227,12 @@ const Backdrop = (() => {
         c.drawImage(s, 0, 0, W, H);
         drawLayer(c, stars, cx, 0.02, 0);
         c.save(); c.globalCompositeOperation = 'lighter';
-        for (let x = 0; x < W; x += 6) {
+        for (let x = 0; x < W; x += 3) {
           const wx = x + cx * 0.03;
           const y0 = 18 + Math.sin(wx * 0.021 + t * 0.004) * 14 + Math.sin(wx * 0.053 - t * 0.007) * 7;
           const len = 46 + Math.sin(wx * 0.07 + t * 0.011) * 18 + Math.sin(wx * 0.19 + t * 0.02) * 6;
           c.globalAlpha = 0.16 + 0.14 * Math.sin(wx * 0.033 + t * 0.006) + 0.08 * Math.sin(wx * 0.4 + t * 0.03);
-          if (c.globalAlpha > 0.02) c.drawImage(aur, x, y0 | 0, 6, len | 0);
+          if (c.globalAlpha > 0.05) c.drawImage(aur, x, y0 | 0, 3, len | 0);
         }
         c.restore();
         drawLayer(c, far, cx, 0.07, yo * 0.2 + 8); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.4, yo * 0.5);
@@ -287,6 +287,9 @@ const Backdrop = (() => {
           const x = ((i * 128 + 64 - cx * 0.14) % LW + LW) % LW - 30, fl = 0.5 + 0.2 * Math.sin(t * 0.2 + i * 1.7);
           Art.glow(c, x, 96, 26, '#ff8a30', fl * 0.6); R(c, x - 1, 94, 3, 3, '#ffc860');
         }
+        c.save(); c.globalCompositeOperation = 'lighter'; // pale shafts from cracks in the roof
+        for (let i = 0; i < 4; i++) { const x = ((i * 170 - cx * 0.2) % 620 + 620) % 620 - 110; c.fillStyle = `rgba(150,190,255,${0.05 + 0.02 * Math.sin(t * 0.012 + i * 2)})`; c.beginPath(); c.moveTo(x + 60, 0); c.lineTo(x + 78, 0); c.lineTo(x + 26, H); c.lineTo(x - 6, H); c.fill(); }
+        c.restore();
         drawLayer(c, near, cx, 0.36, 0);
         const g = c.createLinearGradient(0, H - 70, 0, H);
         g.addColorStop(0, 'rgba(255,90,20,0)'); g.addColorStop(1, 'rgba(255,90,20,0.28)');
@@ -328,7 +331,7 @@ const Backdrop = (() => {
         const fl = (Math.sin(t * 0.013) > 0.985 || Math.sin(t * 0.031 + 2) > 0.992) ? 0.3 : 0;
         if (fl) { c.fillStyle = `rgba(255,200,160,${fl})`; c.fillRect(0, 0, W, H); }
         // Mount Gloam
-        const vx = 250 - cx * 0.03;
+        const vx = 262 - (cx * 0.006) % 50;
         c.fillStyle = '#12060a';
         c.beginPath(); c.moveTo(vx - 150, H); c.lineTo(vx - 26, 62); c.lineTo(vx - 14, 68); c.lineTo(vx, 60); c.lineTo(vx + 16, 67); c.lineTo(vx + 28, 61); c.lineTo(vx + 170, H); c.fill();
         Art.glow(c, vx, 58, 46 + Math.sin(t * 0.05) * 6, '#ff5a10', 0.85);
@@ -496,17 +499,16 @@ const Backdrop = (() => {
     return props[key] = cv;
   }
   const fores = {};
-  function fore(id) {
+  function fore(id) { // a few big, soft-edged shapes close to the lens — never a continuous band
     if (fores[id]) return fores[id];
-    const P = { north: ['#0e1838', '#cfe0ff'], meads: ['#174a26', '#2f7a3a'], halls: ['#07080f', '#151a2c'], canyon: ['#3a1220', '#5a2030'], gloam: ['#090405', '#2a0c0c'], wood: ['#0e2a1c', '#1c4a30'] }[id] || ['#000', '#111'];
-    const [cv, g] = mk(LW, 24), r = rng(id.length * 91 + 7);
-    for (let x = 0; x < LW; x++) { const h = 2 + Math.sin(x * 0.07) * 1.5 + Math.sin(x * 0.19 + 2) * 1; R(g, x, 24 - h, 1, h + 1, P[0]); }
-    for (let i = 0; i < 150; i++) { const x = r() * LW | 0, h = 3 + r() * 7 | 0; R(g, x, 24 - h, 1, h, P[0]); if (id === 'north' && r() < 0.4) R(g, x, 24 - h, 1, 1, P[1]); }
-    for (let i = 0; i < 16; i++) {
-      const x = r() * LW | 0, k = r();
-      if (id === 'halls' || id === 'gloam') { const h = 8 + r() * 12 | 0; for (let y = 0; y < h; y++) R(g, x - (y >> 2), 24 - h + y, 1 + (y >> 1), 1, P[0]); R(g, x, 24 - h, 1, h, P[1]); }
-      else if (k < 0.5) { g.fillStyle = P[0]; g.beginPath(); g.arc(x, 24, 5 + r() * 5, Math.PI, 0); g.fill(); if (id === 'north') { g.fillStyle = P[1]; g.fillRect(x - 3, 24 - 8, 5, 1); } }
-      else { const h = 10 + r() * 10 | 0; for (let b = -2; b <= 2; b++) for (let y = 0; y < h - Math.abs(b) * 2; y++) R(g, x + b * 2 + Math.round(b * y * 0.12), 24 - y, 1, 1, y > h - Math.abs(b) * 2 - 2 ? P[1] : P[0]); }
+    const P = { north: ['#0b1430', '#dfe9ff'], meads: ['#14401f', '#2f7a3a'], halls: ['#07070c', '#1a1f34'], canyon: ['#3a1024', '#5c1c34'], gloam: ['#0a0506', '#3a0e0e'], wood: ['#0e2a1c', '#1c4a30'] }[id] || ['#000', '#111'];
+    const [cv, g] = mk(LW, 52), r = rng(id.length * 91 + 7), B = 52;
+    for (let k = 0; k < 5; k++) {
+      const x = 40 + k * 128 + (r() * 50 | 0);
+      if (id === 'north') { for (let t3 = 0; t3 < 3; t3++) { const bx = x + t3 * 13 - 13, hgt = 26 + r() * 20 | 0; for (let y = 0; y < hgt; y++) { const wd = 2 + (y / hgt) * 16 + (y % 8) * 0.8 | 0; R(g, bx - (wd >> 1), B - hgt + y, wd, 1, y % 8 < 2 ? P[1] : P[0]); } } }
+      else if (id === 'meads' || id === 'wood') { for (let i = 0; i < 9; i++) { g.fillStyle = P[0]; g.beginPath(); g.arc(x + (r() - 0.5) * 44, B - r() * 14, 7 + r() * 9, 0, TAU); g.fill(); } for (let i = 0; i < 8; i++) R(g, x + (r() - 0.5) * 40, B - 8 - r() * 20, 3, 2, P[1]); for (let i = 0; i < 3; i++) R(g, x + (r() - 0.5) * 30, B - 16 - r() * 12, 2, 2, i ? '#ff6a8a' : '#ffe060'); }
+      else if (id === 'canyon') { g.fillStyle = P[0]; g.beginPath(); g.arc(x, B + 4, 22, Math.PI, 0); g.fill(); g.beginPath(); g.arc(x + 20, B + 6, 14, Math.PI, 0); g.fill(); R(g, x - 12, B - 16, 14, 2, P[1]); if (k % 2) { R(g, x - 26, B - 40, 6, 40, P[0]); R(g, x - 34, B - 28, 4, 12, P[0]); R(g, x - 34, B - 18, 10, 4, P[0]); R(g, x - 18, B - 34, 4, 14, P[0]); R(g, x - 22, B - 22, 6, 4, P[0]); R(g, x - 26, B - 40, 2, 40, P[1]); } }
+      else { for (let t3 = 0; t3 < 3; t3++) { const bx = x + t3 * 18 - 18, rad = 10 + r() * 12; g.fillStyle = P[0]; g.beginPath(); g.arc(bx, B + 3, rad, Math.PI, 0); g.fill(); R(g, bx - rad * 0.5, B + 3 - rad * 0.8, rad * 0.6, 2, P[1]); } }
     }
     return fores[id] = cv;
   }
