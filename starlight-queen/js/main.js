@@ -3,6 +3,7 @@
 (() => {
   const cv = document.getElementById('game'), ctx = cv.getContext('2d');
   const [buf, c] = mk(W, H);
+  const bcv = document.createElement('canvas'); bcv.width = 96; bcv.height = 54; const bx = bcv.getContext('2d');
   let s = 1; // device pixels per game pixel
 
   const SERIF = '"EB Garamond","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
@@ -87,11 +88,21 @@
     ctx.imageSmoothingEnabled = false;
     ctx.globalAlpha = 1;
     ctx.drawImage(buf, 0, 0, cv.width, cv.height);
+    // soft bloom: a small, contrast-boosted copy of the frame laid back over it
+    bx.globalCompositeOperation = 'source-over'; bx.drawImage(buf, 0, 0, 96, 54);
+    bx.globalCompositeOperation = 'multiply'; bx.drawImage(bcv, 0, 0);
+    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.2;
+    ctx.drawImage(bcv, 0, 0, cv.width, cv.height); ctx.restore();
     if (sc.drawHi) sc.drawHi(UI);
     // soft vignette
     const mode = sc === Scenes.list.play && !World.card && !sc.paused ? 'play' : 'menu';
     if (mode !== lastMode) { document.body.classList.toggle('menu', mode === 'menu'); lastMode = mode; }
-    if (Scenes.fade > 0) { ctx.fillStyle = `rgba(4,5,13,${Scenes.fade})`; ctx.fillRect(0, 0, cv.width, cv.height); }
+    if (Scenes.fade > 0) { // iris wipe, closing on the traveller
+      const f = Scenes.fade; let ix = cv.width / 2, iy = cv.height / 2;
+      if (sc === Scenes.list.play && World.player) { ix = (World.player.x + 5 - World.cam.x) * s; iy = (World.player.y + 10 - World.cam.y) * s; }
+      ctx.fillStyle = '#04050d'; ctx.beginPath(); ctx.rect(0, 0, cv.width, cv.height);
+      ctx.arc(ix, iy, Math.hypot(cv.width, cv.height) * (1 - f) * (1 - f), 0, Math.PI * 2); ctx.fill('evenodd');
+    }
     if (muteT > 0) { muteT--; UI.text(Sound.muted ? 'Sound off' : 'Sound on', W - 8, H - 8, 7, { color: '#dfe8ff', align: 'right', alpha: Math.min(1, muteT / 20) }); }
   }
 

@@ -76,7 +76,9 @@ const Sound = (() => {
   const FX = {
     jump() { tone({ type: 'triangle', f: 330, f2: 660, dur: 0.16, vol: 0.22 }); },
     glide() { noise({ ftype: 'bandpass', freq: 900, freq2: 1600, dur: 0.25, vol: 0.16 }); },
-    shard() { tone({ type: 'triangle', f: 1319, dur: 0.07, vol: 0.2 }); tone({ type: 'triangle', f: 1760, dur: 0.2, vol: 0.2, delay: 0.06 }); },
+    shard(n) { const k = Math.pow(2, [0, 2, 4, 7, 9, 12, 14, 16, 19][Math.min(8, (n || 1) - 1)] / 12); tone({ type: 'triangle', f: 1319 * k, dur: 0.07, vol: 0.2 }); tone({ type: 'triangle', f: 1760 * k, dur: 0.2, vol: 0.2, delay: 0.06 }); },
+    step() { noise({ ftype: 'lowpass', freq: 520, dur: 0.035, vol: 0.07 }); },
+    land() { noise({ ftype: 'lowpass', freq: 380, dur: 0.08, vol: 0.16 }); tone({ type: 'sine', f: 120, f2: 60, dur: 0.08, vol: 0.12 }); },
     stomp() { tone({ type: 'square', f: 300, f2: 90, dur: 0.14, vol: 0.2 }); noise({ ftype: 'lowpass', freq: 900, dur: 0.08, vol: 0.2 }); },
     arrow() { tone({ type: 'triangle', f: 1400, f2: 500, dur: 0.13, vol: 0.16 }); noise({ freq: 5000, dur: 0.06, vol: 0.06 }); },
     empty() { tone({ type: 'square', f: 140, dur: 0.05, vol: 0.08 }); },
@@ -122,7 +124,7 @@ const Sound = (() => {
     },
     star() { tone({ type: 'triangle', f: 1568, f2: 2093, dur: 0.6, vol: 0.16, vib: true }); }
   };
-  function sfx(name) { if (ac && FX[name]) FX[name](); }
+  function sfx(name, arg) { if (ac && FX[name]) FX[name](arg); }
 
   /* ---------- music ---------- */
   // Each song: step (seconds per eighth), bar (steps per bar), chords per bar, melody per bar ("N4.2" = note, length in steps).

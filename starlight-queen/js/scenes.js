@@ -65,6 +65,8 @@ function drawGemCard(u, gem, t, a, footer) {
   g.strokeStyle = 'rgba(214,186,120,0.3)'; g.lineWidth = Math.max(1, s * 0.3); g.strokeRect(17 * s, 17 * s, (W - 34) * s, (H - 34) * s);
   const r = 24 + 24 * Math.log10(gem.carat + 1) / Math.log10(531);
   g.scale(s, s);
+  g.fillStyle = gem.tint; for (let i = 0; i < 14; i++) { const an = i / 14 * TAU + t * 0.004, wdt = 0.05 + (i % 2) * 0.05, len = 74 + (i % 3) * 18; g.globalAlpha = a * 0.05; g.beginPath(); g.moveTo(92, 96); g.lineTo(92 + Math.cos(an - wdt) * len, 96 + Math.sin(an - wdt) * len); g.lineTo(92 + Math.cos(an + wdt) * len, 96 + Math.sin(an + wdt) * len); g.fill(); }
+  g.globalAlpha = a;
   drawGemHi(g, 92, 96, r * Math.min(1, 0.4 + t / 50), gem, t);
   g.restore();
   u.text(`${gem.carat} ct`, 92, 158, 15, { color: '#fff6dc', alpha: a, title: true, ls: 1 });
@@ -89,7 +91,7 @@ function drawGemCard(u, gem, t, a, footer) {
 }
 
 const Vista = (() => {
-  let L = null;
+  let L = null, snow = null;
   function build() {
     L = {
       night: Backdrop.sky(['#04050d', '#0a1030', '#18244e', '#2a3868', '#4a4a78']),
@@ -109,6 +111,18 @@ const Vista = (() => {
   }
   function draw(c, t, dawn, scroll) {
     if (!L) build();
+    if (!dawn) { // Kaamos under the aurora: Ana at the edge of town, looking out
+      Backdrop.build('north')(c, scroll * 2.2, 0, t);
+      c.fillStyle = '#39406a'; c.beginPath(); c.moveTo(0, H); c.lineTo(0, 150); c.lineTo(40, 146); c.lineTo(96, 150); c.lineTo(132, 154); c.lineTo(146, 166); c.lineTo(160, 196); c.lineTo(190, H); c.fill();
+      c.fillStyle = '#f4f8ff'; c.beginPath(); c.moveTo(0, 150); c.lineTo(40, 146); c.lineTo(96, 150); c.lineTo(132, 154); c.lineTo(146, 166); c.lineTo(140, 164); c.lineTo(126, 158); c.lineTo(96, 155); c.lineTo(40, 151); c.lineTo(0, 155); c.fill();
+      R(c, 150, 190, 60, 26, '#39406a');
+      Art.glow(c, 104, 122, 40 + Math.sin(t * 0.05) * 4, '#9fd8ff', 0.5);
+      c.drawImage(Art.S.queen.idle[(t >> 5) % 2], 80, 94, 48, 56);
+      c.drawImage(Art.S.tonttu[(t >> 5) % 2], 44, 118, 30, 34);
+      if (!snow) snow = Backdrop.makeAmbient('snow');
+      Backdrop.drawAmbient(c, snow, t, 0.3);
+      return;
+    }
     c.drawImage(dawn ? L.dawn : L.night, 0, 0, W, H);
     if (!dawn) {
       Backdrop.drawLayer(c, L.stars, scroll * 0.2, 1, 0);
@@ -136,7 +150,7 @@ const Vista = (() => {
     Backdrop.drawLayer(c, dawn ? L.hD : L.hN, dawn ? 0 : scroll * 1.6, 1, 4);
     cliff(c, dawn ? '#2a5a3c' : '#05080f', dawn ? '#6ab868' : '#1a2440');
     // the Queen
-    const img = Art.S.queen.idle[(t >> 5) % 2];
+    const img = Art.S.queenCrown[(t >> 5) % 2];
     if (dawn && Game.metBoy) c.drawImage(Art.S.boy.idle[(t >> 5) % 2], 36, 94, 48, 56);
     Art.glow(c, 104, 122, 44 + Math.sin(t * 0.05) * 4, dawn ? '#fff6d0' : '#9fd8ff', dawn ? 0.5 : 0.6);
     c.drawImage(img, 80, 94, 48, 56);
@@ -179,6 +193,7 @@ Scenes.list.title = {
     u.rule(254, 96, 118, '#c8a860', a);
     u.text('Ana & the Mountain of Light', 254, 108, 10.5, { color: '#cfe4ff', italic: true, alpha: a });
     const b = clamp((t - 60) / 40, 0, 1), vn = Object.keys(Game.vault).length;
+    u.panel(160, 124, 188, this.items.length * 15 + (Game.best ? 62 : 8), 0.5 * b, '#070a1c'); u.panel(0, 198, W, 18, 0.55 * b, '#070a1c');
     this.items.forEach((it, i) => {
       const on = i === this.sel, y = 136 + i * 15;
       const label = it === 'new' ? (Game.saved ? 'New Journey' : 'Begin the Journey') : it === 'continue' ? `Continue  ·  ${MAP_NAMES[Game.saved.region || 0]}` : `The Vault  ·  ${vn} of ${GEMS.length} diamonds`;
@@ -192,12 +207,12 @@ Scenes.list.title = {
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  'In Kaamos, a small town at the top of Finland, the winter night lasts more than fifty days.',
-  'Ana lives at the end of the last lane. The town calls her the quiet girl. The forest calls her what she is — the last queen of the elves of the north.',
-  'Far to the west a Hoarder King sits upon a mesa, gathering the great diamonds of the world one by one, so that their light is his alone.',
-  'The greatest of them is the Koh-i-Noor — the Mountain of Light.',
-  'So Ana laces her boots and leaves the small town behind. Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a faraway world called America.',
-  'The road goes west. Gather every light you can.'
+  'Ana loves adventure more than anything in the world.',
+  'But Kaamos is a small town at the top of Finland, where the winter night lasts more than fifty days, every road leads back to the square, and nothing has ever happened.',
+  'She has read every tale of quests in the little library — twice. She knows there are mountains beyond the last lane. She has never once been past the gate.',
+  'Then, one long night, the Tonttu brings news. Far to the west a Hoarder King is gathering the great diamonds of the world, so that their light is his alone. The greatest of them is the Koh-i-Noor — the Mountain of Light.',
+  'Somebody small will have to go and fetch it back. Ana has already laced her boots.',
+  'Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a faraway world called America. The road goes west.'
 ];
 Scenes.list.intro = {
   enter() { this.t = 0; this.i = 0; this.pt = 0; Sound.music('title'); },
@@ -216,8 +231,8 @@ Scenes.list.intro = {
     const r = rng(5);
     for (let i = 0; i < 60; i++) R(c, r() * W, r() * H, 1, 1, r() < 0.3 ? '#55628e' : '#2a3458');
     // the great diamonds, drawn west into the Hoarder's keeping during the third verse
-    const gone = this.i > 2 ? 1 : this.i === 2 ? clamp((this.pt - 60) / 200, 0, 1) : 0;
-    Vista.STARS.forEach(([x, y], i) => {
+    const gone = this.i > 3 ? 1 : this.i === 3 ? clamp((this.pt - 60) / 200, 0, 1) : 0;
+    if (this.i >= 3) Vista.STARS.forEach(([x, y], i) => {
       const k = clamp(gone * 7 - i, 0, 1);
       if (k >= 1) return;
       const sx = lerp(x, -20, k * k), sy = lerp(y + 18, 150, k), gem = GEMS[5 + i] || GEMS[11];
@@ -225,9 +240,9 @@ Scenes.list.intro = {
       Art.glow(c, sx, sy, 11 + tw * 4, gem.tint, 0.7 * tw);
       const img = Art.gemSprite(gem, 11); c.drawImage(img, Math.round(sx - 5), Math.round(sy - 5));
     });
-    if (this.i >= 2) Art.glow(c, 0, 150, 60 * clamp(gone + (this.i > 2 ? 1 : 0), 0, 1), '#ff3a10', 0.6);
-    if (this.i === 1 || this.i >= 4) {
-      const a = clamp(this.pt / 80, 0, 1);
+    if (this.i >= 3) Art.glow(c, 0, 150, 60 * clamp(gone + (this.i > 3 ? 1 : 0), 0, 1), '#ff3a10', 0.6);
+    if (this.i !== 3) {
+      const a = this.i === 0 || this.i === 4 ? clamp(this.pt / 80, 0, 1) : 1;
       c.globalAlpha = a;
       Art.glow(c, 192, 66, 40 + Math.sin(t * 0.05) * 4, '#9fd8ff', 0.7 * a);
       c.drawImage(Art.S.queen.idle[(t >> 5) % 2], 168, 36, 48, 56);
@@ -236,8 +251,8 @@ Scenes.list.intro = {
   },
   drawHi(u) {
     const a = clamp(this.pt / 40, 0, 1);
-    const lines = u.wrap(PROLOGUE[this.i], 268, 11.5, { italic: true });
-    lines.forEach((ln, k) => u.text(ln, 192, 136 + k * 16 - (lines.length - 1) * 8 + 8, 11.5, { color: '#e6ecff', alpha: a, italic: true }));
+    const lines = u.wrap(PROLOGUE[this.i], 290, 10.5, { italic: true });
+    lines.forEach((ln, k) => u.text(ln, 192, 144 + k * 14 - (lines.length - 1) * 7, 10.5, { color: '#e6ecff', alpha: a, italic: true }));
     u.text(Input.touch ? 'TAP TO CONTINUE' : 'ENTER  CONTINUE   ·   ESC  SKIP', 192, 205, 5.6, { color: '#98a6cc', ls: 1.2, title: true });
   }
 };
@@ -352,7 +367,7 @@ Scenes.list.play = {
       if (Game.coop) { w.addPlayer2(); w.toast('ANA   A D walk  ·  W leap  ·  X arrow|SAM   ← → walk  ·  ↑ leap  ·  K sling', true); } else { w.dropPlayer2(); w.toast('Sam waves, and falls behind. Press [2] to call him back.'); }
       Game.save();
     }
-    if (!Game.seen.hello && w.state === 'play') { Game.seen.hello = 1; w.toast(Input.touch ? '◀ ▶ walk   ·   ▲ leap   ·   ✦ arrow' : '← → walk   ·   SPACE leap   ·   X arrow', true); }
+    if (!Game.seen.hello && w.state === 'play' && w.introT <= 0) { Game.seen.hello = 1; w.toast(Input.touch ? '◀ ▶ walk   ·   ▲ leap   ·   ✦ arrow' : '← → walk   ·   SPACE leap   ·   X arrow', true); }
     w.update();
   },
   draw(c) { World.draw(c); },
@@ -392,6 +407,7 @@ Scenes.list.play = {
       u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
       u.text(`${Game.carats().toFixed(2)} carats carried home`, 192, 78, 8.5, { color: '#dffbff', alpha: clamp((w.clearT - 120) / 40, 0, 1), italic: true });
     }
+    if (w.combo >= 4 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.player.x + 5 - w.cam.x, w.player.y - 8 - w.cam.y - (55 - w.comboT) * 0.15, 8 + Math.min(5, w.combo * 0.3), { color: '#dffbff', glow: '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
     if (w.card) drawGemCard(u, w.card.gem, w.card.t, clamp(w.card.t / 25, 0, 1), w.card.t > 70 ? (Input.touch ? 'TAP TO CONTINUE' : 'ENTER TO CONTINUE') : '');
     if (this.paused) {
       u.panel(0, 0, W, H, 0.66, '#04050d');
@@ -449,7 +465,7 @@ const EPILOGUE = [
   'The Hoarder King is fallen, and the Mountain of Light shines for everyone again.',
   'Ana does not keep it. Great diamonds, she has learned, are only ever borrowed — from the deep earth, and from everyone who comes after.',
   'In Kaamos the long night ends. The tonttu at the end of the lane sets a lantern in the window, in case she should come home.',
-  'But the road is long, and the world is wide, and Ana has only just begun.'
+  'She does come home — for a week. Then the road calls again. And in Kaamos they tell it still: the girl who walked out past the last gate, and came back a queen of starlight.'
 ];
 Scenes.list.ending = {
   enter() { this.t = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },

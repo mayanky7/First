@@ -21,7 +21,7 @@ const World = (() => {
     const L = buildWorld();
     Object.assign(w, {
       t: 0, state: 'play', grid: L.grid, rows: L.rows, cols: L.cols, parts: [], bumps: [], torches: L.torches, zones: L.zones,
-      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0,
+      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, hitstop: 0, combo: 0, comboT: 0, hudPop: 0,
       gemBlocks: L.gemBlocks, arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
     });
     w.colTheme = new Array(w.cols);
@@ -78,6 +78,9 @@ const World = (() => {
       }
     }
     const A = w.arena;
+    const gy = (w.rows - 3) * T + 1; // Kaamos: the last few houses, and the gate Ana has never passed
+    [[2, 0], [13, 1], [21, 2], [30, 0]].forEach(([cx, v]) => w.back.push({ img: Backdrop.prop('cottage', v), x: cx * T, y: gy }));
+    w.back.push({ img: Backdrop.prop('gate', 0), x: 39 * T, y: gy });
     w.back.push({ img: Backdrop.prop('throne', 0), x: A.x1 - 26, y: A.floor });
     for (let i = 0; i < 5; i++) w.back.push({ img: Backdrop.prop('banner', 0), x: A.x0 + 40 + i * 76, y: A.floor - 62, hang: true });
     for (let i = 0; i < 4; i++) w.torches.push({ x: A.x0 + 78 + i * 76, y: A.floor - 40 });
@@ -90,11 +93,11 @@ const World = (() => {
   function toast(s, long) { w.toastText = s; w.toastT = long ? 420 : 240; w.toastMax = w.toastT; }
   function gainShard(x, y, quiet, n) {
     if (n !== undefined) { Game.meleeGot[n] = 1; Game.melee++; }
-    if (!quiet) { Sound.sfx('shard'); sparkle(x, y, '#9ff4ff', 5); }
+    if (!quiet) { w.combo = w.comboT > 0 ? w.combo + 1 : 1; w.comboT = 55; w.hudPop = 8; Sound.sfx('shard', w.combo); sparkle(x, y, '#9ff4ff', 5 + Math.min(8, w.combo)); }
   }
   function gainGem(e) {
     const gem = GEM_BY_ID[e.gem];
-    Game.gems[gem.id] = 1; w.card = { gem, t: 0 };
+    Game.gems[gem.id] = 1; w.gemFx = { gem, x: e.x + e.w / 2, y: e.y + e.h / 2, t: 0 };
     Sound.sfx('gem'); Sound.duck(true); w.flash = 0.5;
     sparkle(e.x + e.w / 2, e.y + e.h / 2, gem.tint, 40);
     Game.save();
@@ -144,6 +147,17 @@ const World = (() => {
   /* ---------- simulation ---------- */
   const ALWAYS = { boss: 1, wave: 1, fall: 1 };
   function update() {
+    w.fxT = (w.fxT || 0) + 1;
+    if (w.gemFx) { // a held breath before the card: the stone rises in a wheel of light
+      const fx = w.gemFx; fx.t++; fx.y -= 0.25;
+      for (const q of w.parts) { q.x += q.vx; q.y += q.vy; q.life--; }
+      w.parts = w.parts.filter(q => q.life > 0);
+      if (fx.t % 3 === 0) sparkle(fx.x, fx.y, fx.gem.tint, 3);
+      if (w.flash > 0) w.flash = Math.max(0, w.flash - 0.03);
+      if (fx.t >= 55) { w.card = { gem: fx.gem, t: 0 }; w.gemFx = null; }
+      return;
+    }
+    if (w.hitstop > 0) { w.hitstop--; return; }
     if (w.card) {
       w.card.t++;
       if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.duck(false); Sound.sfx('confirm'); }
@@ -154,6 +168,7 @@ const World = (() => {
     if (w.flash > (calm ? 0.2 : 0.6)) w.flash = calm ? 0.2 : 0.6;
     if (w.shake > (calm ? 3 : 18)) w.shake = calm ? 3 : 18;
     if (w.introT > 0) w.introT--;
+    if (w.comboT > 0) w.comboT--; if (w.hudPop > 0) w.hudPop--;
     if (w.toastT > 0) w.toastT--;
     if (w.shake > 0) w.shake *= 0.86;
     if (w.flash > 0) w.flash = Math.max(0, w.flash - 0.03);
@@ -331,6 +346,7 @@ const World = (() => {
       const x = q.x - ox, y = q.y - oy;
       if (q.img) {
         if (q.squash) c.drawImage(q.img, Math.round(x - q.img.width / 2 - 2), Math.round(y + q.img.height / 2 - 5), q.img.width + 4, 5);
+        else if (q.fade) { c.globalAlpha = q.life / q.max * 0.45; Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2 - 5, q.flip); c.globalAlpha = 1; }
         else Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip, q.flipV);
       } else { c.fillStyle = q.col; const s = q.sz || 1; c.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s); }
     }
@@ -375,6 +391,18 @@ const World = (() => {
     for (const e of w.ents) { const d = ENT[e.type]; if (d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     drawParts(c, ox, oy, true);
     Backdrop.drawAmbient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
+    { // near silhouettes sliding past in front of everything: depth
+      const f = Backdrop.fore(bl.a.theme), fx0 = -(((w.cam.x * 1.7) % Backdrop.LW + Backdrop.LW) % Backdrop.LW) | 0;
+      c.drawImage(f, fx0, H - f.height); if (fx0 + Backdrop.LW < W) c.drawImage(f, fx0 + Backdrop.LW, H - f.height);
+    }
+    if (w.gemFx) {
+      const fx = w.gemFx, x = fx.x - ox, y = fx.y - oy, k = Math.min(1, fx.t / 30);
+      c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = fx.gem.tint;
+      for (let i = 0; i < 12; i++) { const a = i / 12 * TAU + w.fxT * 0.02, len = (60 + (i % 3) * 40) * k, wd = 0.05 + (i % 2) * 0.04; c.globalAlpha = 0.22 * k; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a - wd) * len, y + Math.sin(a - wd) * len); c.lineTo(x + Math.cos(a + wd) * len, y + Math.sin(a + wd) * len); c.fill(); }
+      c.restore();
+      Art.glow(c, x, y, 30 + 20 * k, '#ffffff', 0.6);
+      const im = Art.gemSprite(fx.gem), sc = 1 + k * 0.8; c.drawImage(im, Math.round(x - im.width * sc / 2), Math.round(y - im.height * sc / 2), Math.round(im.width * sc), Math.round(im.height * sc));
+    }
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
     if (!w.card) hud(c);
     // embers about to leap from lava below the screen are announced at its edge
@@ -392,7 +420,7 @@ const World = (() => {
       if (p.radiant > 0) R(c, 6, y + 20, Math.round(32 * p.radiant / 600), 1, (w.t >> 2) % 2 ? '#fff6b0' : '#9ff4ff');
     });
     c.drawImage(S.shard[0], W - 50, 5, 7, 9);
-    Art.digits(c, String(Game.melee), W - 40, 7, '#dffbff');
+    Art.digits(c, String(Game.melee), W - 40, 7 - (w.hudPop > 4 ? 1 : 0), w.hudPop > 0 ? '#ffffff' : '#dffbff');
     c.drawImage(S.gemIcon, W - 51, 17);
     Art.digits(c, Object.keys(Game.gems).length + '/' + GEMS.length, W - 40, 19, '#fff2b0');
     if (w.fight && w.boss && !w.boss.dead && w.boss.st !== 'intro') {

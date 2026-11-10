@@ -68,7 +68,7 @@ function updatePlayer(w, p) {
   if (jHit) p.jbuf = 7; else p.jbuf--;
   if (p.jbuf > 0 && p.coy > 0) {
     if (act(p, 'down') && p.onGround && standingOnPlat(w, p)) { p.drop = 10; p.y += 1; }
-    else { p.vy = -5.6; p.jumping = true; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
+    else { p.vy = -5.6; p.jumping = true; p.sq = 1.22; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
     p.jbuf = 0; p.coy = 0; p.onGround = false; p.ride = null;
   } else if (jHit && !p.onGround && p.glide > 0) { p.gliding = true; Sound.sfx('glide'); }
   if (p.jumping && p.vy < 0 && !jHeld) { p.vy *= 0.45; p.jumping = false; }
@@ -89,7 +89,10 @@ function updatePlayer(w, p) {
       p.y = pl.y - p.h; p.vy = 0; p.onGround = true; p.ride = pl; break;
     }
   }
-  if (p.onGround && !wasGround && fallV > 2.5) World.dust(p.x + 5, p.y + p.h, 5);
+  if (p.onGround && !wasGround && fallV > 2.5) { World.dust(p.x + 5, p.y + p.h, 6); p.sq = 0.78; Sound.sfx('land'); }
+  p.sq = p.sq ? 1 + (p.sq - 1) * 0.8 : 1;
+  if (p.onGround && Math.abs(p.vx) > 1) { p.stepT += Math.abs(p.vx); if (p.stepT > 24) { p.stepT = 0; World.dust(p.x + 5 - p.face * 3, p.y + p.h, 1); Sound.sfx('step'); } }
+  if ((p.gliding || p.radiant > 0) && w.t % 3 === 0) { const im = drawPlayer.last && drawPlayer.last[p.id]; if (im) w.parts.push({ x: p.x + 5, y: p.y + 8, vx: 0, vy: 0, life: 14, max: 14, img: im, flip: p.face < 0, fade: 1 }); }
   if (p.hitCeil) World.bump(p.hitCeil.cx, p.hitCeil.cy);
 
   // shoot
@@ -131,7 +134,7 @@ function hurtPlayer(w, p, fromX) {
   if (p.inv > 0 || p.dead || p.radiant > 0 || w.state !== 'play' || w.god) return false;
   p.hp--; Game.stats.hits++;
   if (p.hp <= 0) { killPlayer(w, p); return true; }
-  p.inv = 110; p.hurtT = 22; p.vy = -3.2; p.vx = (fromX ? Math.sign(p.x + 5 - fromX) || -p.face : -p.face) * 2.2;
+  w.hitstop = 5; p.inv = 110; p.hurtT = 22; p.vy = -3.2; p.vx = (fromX ? Math.sign(p.x + 5 - fromX) || -p.face : -p.face) * 2.2;
   p.gliding = false; p.ride = null;
   Sound.sfx('hurt'); w.shake = 8; w.flash = 0.35;
   return true;
@@ -153,9 +156,16 @@ function drawPlayer(c, w, p, ox, oy) {
   else if (Math.abs(p.vx) > 0.4) img = set.run[Math.floor(p.anim) % 6];
   else img = set.idle[(w.t >> 5) % 2];
   const x = p.x - ox + 5 - 12, y = p.y - oy + 22 - 28;
+  (drawPlayer.last || (drawPlayer.last = {}))[p.id] = img;
   if (p.radiant > 0 && (p.radiant > 90 || (p.radiant >> 2) % 2)) {
     Art.glow(c, p.x - ox + 5, p.y - oy + 11, 26 + Math.sin(w.t * 0.3) * 3, '#fff6b0', 0.7);
-    Art.blit(c, (w.t >> 1) % 3 === 0 ? Art.flashOf(img) : img, x, y, p.face < 0);
+    img = (w.t >> 1) % 3 === 0 ? Art.flashOf(img) : img;
+  }
+  const sq = p.sq || 1;
+  if (Math.abs(sq - 1) > 0.03) { // squash and stretch, anchored at the feet
+    const sx = 2 - sq, wd = img.width * sx, hg = img.height * sq;
+    c.save(); c.translate(Math.round(x + 12), Math.round(y + 28)); c.scale(p.face < 0 ? -1 : 1, 1);
+    c.drawImage(img, -wd / 2, -hg, wd, hg); c.restore();
   } else Art.blit(c, img, x, y, p.face < 0);
 }
 
@@ -186,6 +196,8 @@ function slay(w, e, how) {
   if (e.dead) return;
   e.dead = true; Game.stats.foes++;
   const img = e.img || Art.S.goblin[0];
+  w.hitstop = Math.max(w.hitstop || 0, 3);
+  for (let i = 0; i < 7; i++) { const a = i / 7 * TAU; w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: Math.cos(a) * 1.6, vy: Math.sin(a) * 1.6, life: 16, col: i % 2 ? '#fff6b0' : '#ffffff', glow: 1, sz: 2 }); }
   w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: how === 'stomp' ? 0 : rand(-1, 1), vy: how === 'stomp' ? 0 : -3, life: how === 'stomp' ? 22 : 60, img, flipV: how !== 'stomp', squash: how === 'stomp', g: how === 'stomp' ? 0 : 0.25, flip: e.dir < 0 });
   for (let i = 0; i < 8; i++) w.parts.push({ x: e.x + rand(e.w), y: e.y + rand(e.h), vx: rand(-0.8, 0.8), vy: rand(-1.4, -0.2), life: rand(20, 40), col: i % 2 ? '#2a2038' : '#4a3a5a', sz: 2, g: -0.01 });
 }
@@ -537,7 +549,7 @@ ENT.boss = {
 };
 function bossHit(w, e, n, hx, hy) {
   if (!ENT.boss.vulnerable(e) || e.invT > 0) return false;
-  e.hp -= n; e.stunDmg += n; e.flash = 10; e.invT = 12; Sound.sfx('bosshit'); w.shake = 8;
+  e.hp -= n; e.stunDmg += n; e.flash = 10; e.invT = 12; Sound.sfx('bosshit'); w.shake = 8; w.hitstop = 6;
   World.sparkle(hx, hy, '#ffc040', 10);
   if (e.hp <= 0) { e.hp = 0; e.st = 'dying'; e.t0 = 0; Sound.music(null); w.bossAlive = false; World.clearHazards(); }
   return true;

@@ -8,7 +8,8 @@ const REGIONS = [
     theme: 'north', cols: 232, title: 'Finland', sub: 'Kaamos, in the long winter night', map: 0,
     build(L) {
       L.g(0, 40, 3); L.start(3, 3);
-      L.sign(8, 3, 'Tonttu: “Leaving at last, Ana? Good. The road goes west.”|[←] [→] to walk  ·  [SPACE] to leap — hold it to leap higher');
+      L.sign(8, 3, 'Tonttu: “Leaving at last, Ana? Good. Adventures do not come to Kaamos.”|[←] [→] to walk  ·  [SPACE] to leap — hold it to leap higher');
+      L.sign(36, 3, 'The last gate of Kaamos. Ana has never been past it.|Until tonight.');
       L.s(13, 4, 4);
       L.b(20, 6, '?');
       L.sign(23, 3, 'Tonttu: “Hiisi-goblins. Leap on their heads — they hate that.”');

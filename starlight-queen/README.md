@@ -1,10 +1,11 @@
 # Starlight Queen — Ana & the Mountain of Light
 
-A classic side-scrolling 2D platformer for the browser. You are **Ana**, the quiet girl at the
-end of the last lane in Kaamos, a small town at the top of Finland — and the last queen of the
-northern elves. A Hoarder King is gathering the world's great diamonds for himself. Leave the
-small town, cross the frozen gulf to the manic midsummer lands of Sweden, sail to a far-away
-world called America, meet Sam, and win back the Koh-i-Noor.
+A classic side-scrolling 2D platformer for the browser. **Ana** loves adventure more than
+anything, and she is stuck in Kaamos, a small town at the top of Finland where nothing has ever
+happened. Then word comes that a Hoarder King is gathering the world's great diamonds for
+himself. Somebody small will have to fetch them back. Walk out past the last gate, cross the
+frozen gulf to the manic midsummer lands of Sweden, sail to a faraway world called America,
+meet Sam, and win back the Koh-i-Noor — and come home a queen of starlight.
 
 One long, continuous road. No build step, no dependencies, no asset files: every sprite,
 backdrop, sound and tune is generated in code.

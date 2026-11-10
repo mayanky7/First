@@ -408,6 +408,21 @@ const Backdrop = (() => {
       case 'skull': cv = S(8, 7, g => { const b = '#c8c8b8'; R(g, 1, 0, 6, 5, b); R(g, 2, 5, 4, 2, b); R(g, 2, 2, 1, 2, '#111'); R(g, 5, 2, 1, 2, '#111'); R(g, 3, 6, 1, 1, '#111'); R(g, 5, 6, 1, 1, '#111'); }); break;
       case 'deadbush': cv = S(14, 10, g => { const b = '#3a3028'; for (let i = 0; i < 5; i++) { const a = -1 + i * 0.5; for (let k = 0; k < 9; k++) R(g, 7 + Math.sin(a) * k * 0.8, 9 - Math.cos(a) * k, 1, 1, b); } }); break;
       case 'emberrock': cv = S(12, 8, g => { R(g, 1, 3, 10, 5, '#2a2028'); R(g, 3, 1, 6, 2, '#2a2028'); R(g, 3, 1, 5, 1, '#4a3c44'); R(g, 4, 4, 1, 3, '#ff6a20'); R(g, 5, 6, 3, 1, '#ff6a20'); R(g, 8, 3, 1, 2, '#ffb040'); }); break;
+      case 'cottage': cv = S(40, 34, g => {
+        const wall = ['#b8322a', '#d8b648', '#a82c26'][v % 3], wd = '#8e2420';
+        R(g, 4, 14, 32, 20, wall); R(g, 4, 14, 32, 1, wd); for (let x = 9; x < 36; x += 5) R(g, x, 15, 1, 19, wd);
+        for (let i = 0; i < 10; i++) R(g, 2 + i, 13 - i, 36 - i * 2, 1, '#f4f8ff'); for (let i = 0; i < 9; i++) R(g, 4 + i, 13 - i, 2, 1, '#c2d2f0');
+        R(g, 8, 20, 7, 7, '#ffd870'); R(g, 8, 20, 7, 1, '#f4f8ff'); R(g, 11, 20, 1, 7, '#f4f8ff'); R(g, 8, 23, 7, 1, '#f4f8ff'); R(g, 7, 27, 9, 1, '#f4f8ff');
+        R(g, 22, 22, 7, 12, '#5a3a26'); R(g, 22, 22, 7, 1, '#f4f8ff'); R(g, 27, 28, 1, 1, '#ffd870'); R(g, 28, 3, 4, 7, '#6a5a5a'); R(g, 27, 2, 6, 2, '#f4f8ff');
+        R(g, 0, 33, 40, 1, '#dfe9ff');
+      }); break;
+      case 'gate': cv = S(40, 52, g => {
+        const wdc = '#6a4a30', wdd = '#4a3220';
+        R(g, 3, 8, 4, 44, wdc); R(g, 33, 8, 4, 44, wdc); R(g, 3, 8, 1, 44, '#8a6844'); R(g, 36, 8, 1, 44, wdd);
+        R(g, 0, 8, 40, 4, wdc); R(g, 0, 11, 40, 1, wdd); R(g, 0, 5, 40, 3, '#f4f8ff'); R(g, 2, 4, 36, 1, '#f4f8ff');
+        R(g, 10, 13, 20, 8, '#e8dcc0'); R(g, 10, 13, 20, 1, '#b8a888'); R(g, 13, 16, 14, 1, '#6a4a30'); R(g, 15, 18, 10, 1, '#6a4a30');
+        R(g, 18, 21, 1, 5, wdd); R(g, 16, 26, 5, 6, '#ffd870'); R(g, 15, 25, 7, 1, wdd); R(g, 15, 32, 7, 1, wdd);
+      }); break;
       case 'snowtuft': cv = S(12, 5, g => { R(g, 1, 2, 10, 3, '#eef4ff'); R(g, 3, 1, 6, 1, '#ffffff'); R(g, 0, 4, 12, 1, '#c2d2f0'); }); break;
       case 'frostgrass': cv = S(8, 6, g => { for (let i = 0; i < 4; i++) { const h = 2 + r() * 4 | 0; R(g, i * 2, 6 - h, 1, h, i % 2 ? '#a8c0e0' : '#7a94c0'); R(g, i * 2, 6 - h, 1, 1, '#ffffff'); } }); break;
       case 'rock': cv = S(12, 7, g => { const c1 = v % 2 ? '#8a8496' : '#6e6878'; R(g, 1, 3, 10, 4, c1); R(g, 3, 1, 6, 2, c1); R(g, 3, 1, 5, 1, '#b4aec0'); R(g, 8, 4, 3, 3, '#4c4658'); }); break;
@@ -480,6 +495,21 @@ const Backdrop = (() => {
     }
     return props[key] = cv;
   }
+  const fores = {};
+  function fore(id) {
+    if (fores[id]) return fores[id];
+    const P = { north: ['#0e1838', '#cfe0ff'], meads: ['#174a26', '#2f7a3a'], halls: ['#07080f', '#151a2c'], canyon: ['#3a1220', '#5a2030'], gloam: ['#090405', '#2a0c0c'], wood: ['#0e2a1c', '#1c4a30'] }[id] || ['#000', '#111'];
+    const [cv, g] = mk(LW, 24), r = rng(id.length * 91 + 7);
+    for (let x = 0; x < LW; x++) { const h = 2 + Math.sin(x * 0.07) * 1.5 + Math.sin(x * 0.19 + 2) * 1; R(g, x, 24 - h, 1, h + 1, P[0]); }
+    for (let i = 0; i < 150; i++) { const x = r() * LW | 0, h = 3 + r() * 7 | 0; R(g, x, 24 - h, 1, h, P[0]); if (id === 'north' && r() < 0.4) R(g, x, 24 - h, 1, 1, P[1]); }
+    for (let i = 0; i < 16; i++) {
+      const x = r() * LW | 0, k = r();
+      if (id === 'halls' || id === 'gloam') { const h = 8 + r() * 12 | 0; for (let y = 0; y < h; y++) R(g, x - (y >> 2), 24 - h + y, 1 + (y >> 1), 1, P[0]); R(g, x, 24 - h, 1, h, P[1]); }
+      else if (k < 0.5) { g.fillStyle = P[0]; g.beginPath(); g.arc(x, 24, 5 + r() * 5, Math.PI, 0); g.fill(); if (id === 'north') { g.fillStyle = P[1]; g.fillRect(x - 3, 24 - 8, 5, 1); } }
+      else { const h = 10 + r() * 10 | 0; for (let b = -2; b <= 2; b++) for (let y = 0; y < h - Math.abs(b) * 2; y++) R(g, x + b * 2 + Math.round(b * y * 0.12), 24 - y, 1, 1, y > h - Math.abs(b) * 2 - 2 ? P[1] : P[0]); }
+    }
+    return fores[id] = cv;
+  }
   function torch(c, x, y, t) {
     R(c, x - 1, y - 12, 2, 12, '#5a4a3a'); R(c, x - 3, y - 14, 6, 3, '#7a7f92');
   }
@@ -489,5 +519,5 @@ const Backdrop = (() => {
     R(c, x - 2 * s, y - 5 * s, 4 * s, 5 * s, '#ff7a1a'); R(c, x - 1 * s + f * 0.5, y - 8 * s, 2 * s, 4 * s, '#ff9a2a'); R(c, x + f, y - 10 * s, 1 * s, 3 * s, '#ffc040');
     R(c, x - 1 * s, y - 4 * s, 2 * s, 4 * s, '#ffe890');
   }
-  return { build, makeAmbient, drawAmbient, prop, torch, flame, sky, layer, hills, mountains, drawLayer, LW, mist };
+  return { build, makeAmbient, drawAmbient, prop, torch, flame, fore, sky, layer, hills, mountains, drawLayer, LW, mist };
 })();

@@ -60,12 +60,12 @@ const Art = (() => {
     HAIR: '#f6dc8c', HAIRD: '#c8963e', SKIN: '#f8e2c8', SKIND: '#d9b493', GOWN: '#eef2ff', GOWND: '#aebde6', GOWNDD: '#8f9fca',
     TRIM: '#39b3a4', CROWN: '#fff2b0', GEM: '#7df4ff', CLOAK: '#2e62b0', CLOAKD: '#1c3f7c', SHOE: '#6b4a2e', EYE: '#27386e'
   };
-  function drawQueen(g, pose, f, shoot) {
+  function drawQueen(g, pose, f, shoot, crown) {
     const bob = (pose === 'idle' && f === 1) || (pose === 'run' && (f === 1 || f === 4)) ? 1 : 0;
     const air = pose === 'jump' || pose === 'fall' || pose === 'glide';
     const y0 = 2 + bob + (pose === 'hurt' ? 1 : 0);
     const lift = pose === 'jump' ? -0.5 : pose === 'fall' ? 2.4 : pose === 'glide' ? 3 : pose === 'run' ? 1.3 : pose === 'hurt' ? 1.8 : 0;
-    const yEnd = pose === 'jump' ? 24 : air ? 25 : 26;
+    const yEnd = pose === 'jump' ? 19 : air ? 20 : 21; // a travelling tunic, cut for running
     // cloak
     if (pose === 'glide') {
       for (let i = 0; i < 10; i++) {
@@ -79,7 +79,7 @@ const Art = (() => {
       for (let i = 0; i < 15; i++) {
         const sway = pose === 'run' ? Math.sin(i * 0.5 + f * 1.05) * 0.7 : pose === 'idle' ? (f ? 0.3 : 0) * (i / 14) : 0;
         const xl = Math.round(9 - i * k + sway), yy = Math.round(y0 + 9 + i * (1 - rise));
-        if (yy > yEnd - 1) break;
+        if (yy > yEnd + 2) break;
         R(g, xl, yy, 11 - xl, 1, Q.CLOAK); R(g, xl, yy, 1, 1, Q.CLOAKD);
       }
     }
@@ -106,10 +106,13 @@ const Art = (() => {
       }
     }
     // feet
+    const LEG = '#35477e', LEGD = '#26345e', BOOT = '#7a4a2a', BOOTD = '#553218';
     if (!air) {
-      const o = pose === 'run' ? [0, 1, 2, 1, 0, -1][f] : 0;
-      R(g, 9 + o, 27, 2, 1, Q.SHOE); R(g, 13 - o, 27, 2, 1, Q.SHOE);
-    } else { R(g, 10, yEnd + 1, 2, 1, Q.SHOE); R(g, 13, yEnd + (pose === 'jump' ? 0 : 1), 2, 1, Q.SHOE); }
+      const o = pose === 'run' ? [0, 2, 3, 1, -1, -2][f] : 0, lift = pose === 'run' ? [0, 1, 2, 0, 0, 1][f] : 0;
+      R(g, 9 - o, yEnd, 2, 25 - yEnd, LEGD); R(g, 8 - o, 25, 4, 3, BOOTD); R(g, 8 - o, 25, 4, 1, '#e8eefc');
+      R(g, 12 + o, yEnd, 2, 25 - yEnd - lift, LEG); R(g, 12 + o, 25 - lift, 4, 3, BOOT); R(g, 12 + o, 25 - lift, 4, 1, '#ffffff');
+    } else if (pose === 'jump') { R(g, 9, yEnd, 2, 3, LEGD); R(g, 8, yEnd + 3, 4, 3, BOOTD); R(g, 13, yEnd - 1, 2, 2, LEG); R(g, 13, yEnd + 1, 4, 3, BOOT); }
+    else { R(g, 8, yEnd, 2, 4, LEGD); R(g, 7, yEnd + 4, 4, 3, BOOTD); R(g, 13, yEnd, 2, 4, LEG); R(g, 13, yEnd + 4, 4, 3, BOOT); }
     // torso
     R(g, 9, y0 + 9, 5, 5, Q.GOWN); R(g, 9, y0 + 9, 1, 5, Q.GOWND);
     R(g, 10, y0 + 9, 3, 1, Q.TRIM); R(g, 9, y0 + 13, 5, 1, Q.TRIM); R(g, 12, y0 + 13, 1, 1, Q.CROWN);
@@ -120,8 +123,8 @@ const Art = (() => {
     R(g, 13, y0 + 4, 1, 2, Q.EYE); R(g, 10, y0 + 4, 1, 2, Q.SKIND); R(g, 9, y0 + 3, 1, 1, Q.SKIN);
     R(g, 13, y0 + 7, 1, 1, '#d98a8a');
     // circlet
-    R(g, 9, y0 + 1, 6, 1, Q.CROWN); R(g, 10, y0, 1, 1, Q.CROWN); R(g, 12, y0 - 1, 1, 2, Q.CROWN); R(g, 14, y0, 1, 1, Q.CROWN);
-    R(g, 12, y0, 1, 1, Q.GEM);
+    if (crown) { R(g, 9, y0 + 1, 6, 1, Q.CROWN); R(g, 10, y0, 1, 1, Q.CROWN); R(g, 12, y0 - 1, 1, 2, Q.CROWN); R(g, 14, y0, 1, 1, Q.CROWN); R(g, 12, y0, 1, 1, Q.GEM); }
+    else { R(g, 9, y0 + 1, 6, 1, '#c8362c'); R(g, 9, y0 + 2, 1, 1, '#c8362c'); R(g, 13, y0 + 1, 1, 1, Q.GEM); } // a red wool band and one star pin
     // arms
     if (shoot) {
       R(g, 12, y0 + 10, 6, 2, Q.GOWND); R(g, 18, y0 + 10, 1, 2, Q.SKIN);
@@ -150,6 +153,7 @@ const Art = (() => {
       hurt: frames(1, 24, 28, g => drawQueen(g, 'hurt', 0, false))
     });
     S.queen = mkset(false); S.queenShoot = mkset(true);
+    S.queenCrown = frames(2, 24, 28, (g, f) => drawQueen(g, 'idle', f, false, true)).map(im => outlined(im));
     const bset = shoot => ({
       idle: frames(2, 24, 28, (g, f) => drawBoy(g, 'idle', f, shoot)),
       run: frames(6, 24, 28, (g, f) => drawBoy(g, 'run', f, shoot)),
