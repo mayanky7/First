@@ -14,7 +14,7 @@ const Sound = (() => {
   const hz = m => 440 * Math.pow(2, (m - 69) / 12);
 
   function init() {
-    if (ac) { if (ac.state === 'suspended') ac.resume(); return; }
+    if (ac) { if (ac.state !== 'running') ac.resume(); return; }
     const AC = window.AudioContext || window.webkitAudioContext;
     if (!AC) return;
     ac = new AC();
@@ -75,7 +75,7 @@ const Sound = (() => {
   /* ---------- sound effects ---------- */
   const FX = {
     jump() { tone({ type: 'triangle', f: 330, f2: 660, dur: 0.16, vol: 0.22 }); },
-    glide() { noise({ ftype: 'bandpass', freq: 900, freq2: 1600, dur: 0.25, vol: 0.05 }); },
+    glide() { noise({ ftype: 'bandpass', freq: 900, freq2: 1600, dur: 0.25, vol: 0.16 }); },
     shard() { tone({ type: 'triangle', f: 1319, dur: 0.07, vol: 0.2 }); tone({ type: 'triangle', f: 1760, dur: 0.2, vol: 0.2, delay: 0.06 }); },
     stomp() { tone({ type: 'square', f: 300, f2: 90, dur: 0.14, vol: 0.2 }); noise({ ftype: 'lowpass', freq: 900, dur: 0.08, vol: 0.2 }); },
     arrow() { tone({ type: 'triangle', f: 1400, f2: 500, dur: 0.13, vol: 0.16 }); noise({ freq: 5000, dur: 0.06, vol: 0.06 }); },
@@ -102,12 +102,12 @@ const Sound = (() => {
         tone({ type: 'triangle', f: f * 1.5, dur: l, vol: 0.08, delay: d, sustain: true });
       });
     },
-    deflect() { tone({ type: 'square', f: 1800, f2: 2400, dur: 0.06, vol: 0.1 }); },
+    deflect() { tone({ type: 'square', f: 1800, f2: 2400, dur: 0.06, vol: 0.18 }); },
     bosshit() { tone({ type: 'sawtooth', f: 220, f2: 55, dur: 0.3, vol: 0.25 }); noise({ ftype: 'lowpass', freq: 2500, dur: 0.2, vol: 0.2 }); },
     slam() { tone({ type: 'sine', f: 110, f2: 30, dur: 0.5, vol: 0.5 }); noise({ ftype: 'lowpass', freq: 700, freq2: 100, dur: 0.45, vol: 0.4 }); },
     roar() { tone({ type: 'sawtooth', f: 90, f2: 50, dur: 1.1, vol: 0.3 }); tone({ type: 'sawtooth', f: 134, f2: 70, dur: 1.1, vol: 0.2 }); noise({ ftype: 'lowpass', freq: 600, dur: 1.0, vol: 0.2 }); },
-    warn() { tone({ type: 'square', f: 196, dur: 0.12, vol: 0.12 }); tone({ type: 'square', f: 185, dur: 0.2, vol: 0.12, delay: 0.14 }); },
-    ember() { noise({ ftype: 'bandpass', freq: 1200, freq2: 300, dur: 0.25, vol: 0.14 }); },
+    warn() { tone({ type: 'square', f: 196, dur: 0.12, vol: 0.2 }); tone({ type: 'square', f: 185, dur: 0.2, vol: 0.2, delay: 0.14 }); },
+    ember() { noise({ ftype: 'bandpass', freq: 1200, freq2: 300, dur: 0.25, vol: 0.3 }); },
     wraith() { tone({ type: 'sine', f: 700, f2: 300, dur: 0.6, vol: 0.12, vib: true }); tone({ type: 'sine', f: 740, f2: 280, dur: 0.6, vol: 0.08 }); },
     growl() { tone({ type: 'sawtooth', f: 110, f2: 80, dur: 0.25, vol: 0.12 }); },
     select() { tone({ type: 'triangle', f: 660, dur: 0.06, vol: 0.14 }); },
@@ -134,7 +134,7 @@ const Sound = (() => {
         'D5.2 F5.2 A5.2', 'Bb5.4 A5.2', 'A5.2 F5.2 C5.2', 'E5.4 G5.2', 'G5.2 Bb5.2 A5.2', 'F5.4 D5.2', 'E5.2 C#5.2 E5.2', 'D5.6']
     },
     meads: {
-      step: 0.17, bar: 6, lead: 'whistle', arp: [0, 2, 3, 1, 2, 3], bass: 'jig', drums: 'jig',
+      step: 0.17, bar: 6, lead: 'whistle', arp: [0, 2, 3, 1, 2, 3], bass: 'jig', drums: 'jig', vary: true,
       chords: ['G', 'G', 'C', 'G', 'Em', 'C', 'D', 'G', 'C', 'G', 'D', 'G', 'C', 'G', 'D', 'G'],
       mel: ['G4 B4 D5 G5.2 D5', 'B4 D5 B4 A4 B4 G4', 'E5.2 C5 E5 G5 E5', 'D5.3 B4.2 D5', 'E5.2 G5 F#5 E5 D5', 'C5 E5 G5 E5.2 C5', 'D5 F#5 A5 F#5 E5 D5', 'G5.3 G4.3',
         'E5 G5 E5 C5.2 E5', 'D5 G5 D5 B4.2 D5', 'A4 D5 F#5 A5.2 F#5', 'G5.2 D5 B4.3', 'C5 E5 G5 C6.2 G5', 'B5.2 G5 D5.2 G5', 'A5 F#5 D5 E5 F#5 A5', 'G5.6']
@@ -149,7 +149,7 @@ const Sound = (() => {
       step: 0.25, bar: 8, lead: 'horn', arp: [0, -1, 1, -1, 2, -1, 1, -1], bass: 'march', drums: 'march',
       chords: ['Dm', 'Dm', 'Bb', 'A', 'Dm', 'Gm', 'A', 'Dm', 'F', 'C', 'Gm', 'A', 'Dm', 'Bb', 'A', 'Dm'],
       mel: ['D4.3 D4 F4.2 E4.2', 'D4.4 A3.4', 'Bb3.3 D4 F4.2 D4.2', 'E4.4 C#4.4', 'D4.3 D4 F4.2 A4.2', 'Bb4.4 G4.2 Bb4.2', 'A4.2 G4.2 E4.2 C#4.2', 'D4.8',
-        'F4.3 F4 A4.2 C5.2', 'C5.4 G4.4', 'Bb4.3 A4 G4.2 D4.2', 'E4.4 A4.4', 'D4.3 D4 F4.2 A4.2', 'D5.4 Bb4.2 F4.2', 'E4.2 A4.2 G4.2 E4.2', 'D4.8']
+        'F4.3 F4 A4.2 C5.2', 'C5.4 G4.4', 'Bb4.3 A4 G4.2 D4.2', 'E4.4 A4.4', 'D4.3 D4 F4.2 A4.2', 'D5.4 Bb4.2 F4.2', 'E4.2 A4.2 E4.2 C#4.2', 'D4.4 F4.2 E4.2']
     },
     fens: {
       step: 0.33, bar: 8, lead: 'flute', arp: [0, -1, 2, -1, 3, -1, 2, -1], bass: 'long',
@@ -157,19 +157,21 @@ const Sound = (() => {
       mel: ['B4.4 -.2 E5.2', 'F5.4 E5.2 C5.2', 'B4.6 G4.2', 'A4.4 F4.4', 'B4.4 -.2 E5.2', 'F5.2 A5.4 F5.2', 'E5.2 D5.2 A4.4', 'B4.8']
     },
     gloam: {
-      step: 0.155, bar: 8, lead: 'lead', arp: [0, 2, 1, 2, 0, 2, 1, 2], bass: 'pulse', drums: 'drive',
+      step: 0.172, bar: 8, lead: 'lead', arp: [0, 2, 1, 2, 0, 2, 1, 2], bass: 'pulse', drums: 'drive', vary: true,
       chords: ['Cm', 'Cm', 'Ab', 'Bb', 'Cm', 'Cm', 'Ab', 'G', 'Fm', 'Cm', 'Ab', 'G', 'Fm', 'Cm', 'G', 'Cm'],
-      mel: ['C5.2 Eb5 G5 C5.2 Eb5 G5', 'G5.3 F5 Eb5.2 D5.2', 'C5.2 Eb5 Ab5 C5.2 Eb5 Ab5', 'Bb5.3 Ab5 G5.2 F5.2', 'C5.2 Eb5 G5 C6.2 Bb5 G5', 'Eb5.2 D5.2 C5.4', 'Ab5.2 G5 F5 Eb5.2 D5.2', 'D5.2 G5.2 B5.4',
-        'F5.2 Ab5 C6 F5.2 Ab5 C6', 'Eb6.3 D6 C6.2 G5.2', 'Ab5.2 C6 Eb6 Ab5.2 C6 Eb6', 'D6.3 C6 B5.2 G5.2', 'F5.2 Ab5.2 C6.2 Ab5.2', 'G5.2 Eb5.2 C5.4', 'D5.2 G5.2 B5.2 D6.2', 'C6.8']
+      mel: ['C5.2 Eb5 G5 C5.2 Eb5 G5', 'G5.3 F5 Eb5.2 D5.2', 'C5.2 Eb5 Ab5 C5.2 Eb5 Ab5', 'Bb5.3 Ab5 G5.2 F5.2', 'C5.2 Eb5 G5 C6.2 Bb5 G5', 'Eb5.2 D5.2 C5.4', 'Ab5.2 G5 F5 Eb5.2 C5.2', 'D5.2 G5.2 B5.4',
+        'F5.2 Ab5 C6 F5.2 Ab5 C6', 'Eb6.3 D6 C6.2 G5.2', 'Ab5.2 C6 Eb6 Ab5.2 C6 Eb6', 'D6.3 C6 B5.2 G5.2', 'F5.2 Ab5.2 C6.2 Ab5.2', 'G5.2 Eb5.2 C5.4', 'D5.2 G5.2 B5.2 D6.2', 'C6.4 Eb6.2 D6.2']
     },
     boss: {
       step: 0.135, bar: 8, lead: 'lead', arp: [0, 0, 2, 0, 1, 0, 2, 0], bass: 'pulse', drums: 'drive',
-      chords: ['Dm', 'Dm', 'Bb', 'C', 'Dm', 'Dm', 'Bb', 'A'],
+      chords: ['Dm', 'Dm', 'Bb', 'C', 'Dm', 'Dm', 'Bb', 'A', 'Gm', 'Gm', 'Dm', 'Dm', 'Bb', 'C', 'A', 'A'],
       mel: ['D5 D5 A5 D5 F5 D5 A5 D5', 'D5 D5 A5 D5 G5 F5 E5 D5', 'Bb4 Bb4 F5 Bb4 D5 Bb4 F5 Bb4', 'C5 C5 G5 C5 E5 G5 C6.2',
-        'D5 D5 A5 D5 F5 D5 A5 D5', 'F5.2 E5.2 D5.2 A4.2', 'Bb4 D5 F5 Bb5 A5 F5 D5 Bb4', 'A4 C#5 E5 A5 G5 E5 C#5.2']
+        'D5 D5 A5 D5 F5 D5 A5 D5', 'F5.2 E5.2 D5.2 A4.2', 'Bb4 D5 F5 Bb5 F5 D5 Bb4.2', 'A4 C#5 E5 A5 G5 E5 C#5.2',
+        'D6 Bb5 G5 Bb5 D6.2 Bb5.2', 'G5 G5 D6 G5 Bb5 G5 D6 G5', 'A5 A5 D6 A5 F5 A5 D6 A5', 'F5.2 E5.2 D5.2 A4.2',
+        'Bb4 D5 F5 Bb5 D6.2 Bb5.2', 'C5 E5 G5 C6 E6.2 C6.2', 'A5 E5 C#5 E5 A5 E5 C#5 E5', 'A4 C#5 E5 A5 C#6.2 A5.2']
     },
     canyon: {
-      step: 0.2, bar: 8, lead: 'whistle', arp: [0, 2, 1, 2, 3, 2, 1, 2], bass: 'march', drums: 'jig',
+      step: 0.2, bar: 8, lead: 'whistle', arp: [0, 2, 1, 2, 3, 2, 1, 2], bass: 'march', drums: 'jig', vary: true,
       chords: ['Em', 'G', 'D', 'Em', 'C', 'G', 'D', 'Em', 'G', 'D', 'Am', 'Em', 'C', 'G', 'B', 'Em'],
       mel: ['E5.2 G5 A5 B5.2 A5 G5', 'B5.3 A5 G5.2 D5.2', 'F#5.2 A5 D6 A5.2 F#5.2', 'E5.4 B4.4', 'E5.2 G5 C6 B5.2 G5 E5', 'D5.2 G5.2 B5.4', 'A5.2 F#5 D5 F#5.2 A5.2', 'E5.8',
         'G5.2 B5 D6 B5.2 G5.2', 'A5.3 F#5 D5.4', 'E5.2 A5 C6 A5.2 E5.2', 'G5.3 E5 B4.4', 'E5 G5 C6 G5 E6.2 C6.2', 'D6.3 B5 G5.4', 'F#5.2 B5.2 D#6.2 B5.2', 'E6.8']
@@ -190,7 +192,8 @@ const Sound = (() => {
       const m = /^([A-G][#b]?)(m?)$/.exec(ch);
       const pc = (midi(m[1] + '2') - 36) % 12;
       const third = m[2] ? 3 : 4;
-      const tones = [48 + pc, 55 + pc, 60 + pc, 60 + pc + third, 67 + pc, 72 + pc];
+      const vp = pc > 7 ? pc - 12 : pc;
+      const tones = [48 + vp, 55 + vp, 60 + vp, 60 + vp + third, 67 + vp, 72 + vp];
       const s0 = bi * song.bar, root = 36 + pc + (pc > 7 ? -12 : 0) + 12;
       if (song.bass === 'long') { add(s0, song.bar, root, 'bass', 0.3); }
       else if (song.bass === 'jig') { add(s0, 2, root, 'bass', 0.3); add(s0 + 3, 2, root + 7, 'bass', 0.22); }
@@ -207,14 +210,14 @@ const Sound = (() => {
       for (const tok of song.mel[bi].split(/\s+/)) {
         const [n, d] = tok.split('.');
         const dur = d ? +d : 1;
-        if (n !== '-') add(s, dur, midi(n), song.lead, 1);
+        if (n !== '-') { add(s, dur, midi(n), song.lead, 1); ev[ev.length - 1].lead = bi < 8; }
         s += dur;
       }
     });
     const byStep = [];
     for (let i = 0; i < len; i++) byStep.push([]);
     ev.forEach(e => byStep[e.s].push(e));
-    return { step: song.step, len, byStep };
+    return { step: song.step, len, byStep, vary: !!song.vary };
   }
 
   function playNote(e, t, step) {
@@ -224,7 +227,7 @@ const Sound = (() => {
       case 'whistle': tone({ at: t, type: 'triangle', f: e.f, dur: dur * 0.9, vol: 0.3, attack: 0.012, sustain: true, dest: musicBus });
         tone({ at: t, type: 'square', f: e.f, dur: dur * 0.6, vol: 0.035, dest: musicBus }); break;
       case 'horn': tone({ at: t, type: 'sawtooth', f: e.f, dur: dur * 0.95, vol: 0.3, attack: 0.05, sustain: true, dest: hornLP });
-        tone({ at: t, type: 'triangle', f: e.f / 2, dur: dur * 0.95, vol: 0.2, attack: 0.05, sustain: true, dest: musicBus }); break;
+        tone({ at: t, type: 'triangle', f: e.f / 2, dur: dur * 0.95, vol: 0.09, attack: 0.05, sustain: true, dest: musicBus }); break;
       case 'lead': tone({ at: t, type: 'square', f: e.f, dur: dur * 0.9, vol: 0.085, sustain: true, dest: musicBus });
         tone({ at: t, type: 'triangle', f: e.f, dur: dur * 0.9, vol: 0.17, sustain: true, dest: musicBus }); break;
       case 'pluck': tone({ at: t, type: 'triangle', f: e.f, dur: Math.max(0.25, dur), vol: e.vol, dest: musicBus }); break;
@@ -240,8 +243,10 @@ const Sound = (() => {
   const cache = {};
   function tick() {
     if (!ac || !cur) return;
+    if (cur.next < ac.currentTime) { const st = cur.c.step * cur.rate, k = Math.ceil((ac.currentTime - cur.next) / st); cur.i = (cur.i + k) % cur.c.len; cur.next += k * st; }
     while (cur.next < ac.currentTime + 0.28) {
-      for (const e of cur.c.byStep[cur.i]) playNote(e, cur.next, cur.c.step * cur.rate);
+      if (cur.i === 0) cur.pass = (cur.pass || 0) + 1;
+      for (const e of cur.c.byStep[cur.i]) { if (e.lead && cur.c.vary && cur.pass % 2 === 0) continue; playNote(e, cur.next, cur.c.step * cur.rate); }
       cur.next += cur.c.step * cur.rate;
       cur.i = (cur.i + 1) % cur.c.len;
     }

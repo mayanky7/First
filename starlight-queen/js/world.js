@@ -54,7 +54,7 @@ const World = (() => {
   function addPlayer2() {
     if (w.players.length > 1) return;
     const p = w.player, q = makePlayer(p.x + 5, p.y + p.h, 1);
-    q.inv = 90; w.players.push(q); sparkle(q.x + 5, q.y + 10, '#ffd070', 20); Sound.sfx('power');
+    q.inv = 90; w.players.push(q); sparkle(q.x + 5, q.y + 10, '#ffd070', 20); Sound.sfx('oneup');
   }
   function dropPlayer2() { if (w.players.length > 1) { w.players.length = 1; w.player = w.players[0]; } }
 

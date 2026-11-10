@@ -227,12 +227,12 @@ const Backdrop = (() => {
         c.drawImage(s, 0, 0, W, H);
         drawLayer(c, stars, cx, 0.02, 0);
         c.save(); c.globalCompositeOperation = 'lighter';
-        for (let x = 0; x < W; x += 3) {
+        for (let x = 0; x < W; x += 6) {
           const wx = x + cx * 0.03;
           const y0 = 18 + Math.sin(wx * 0.021 + t * 0.004) * 14 + Math.sin(wx * 0.053 - t * 0.007) * 7;
           const len = 46 + Math.sin(wx * 0.07 + t * 0.011) * 18 + Math.sin(wx * 0.19 + t * 0.02) * 6;
           c.globalAlpha = 0.16 + 0.14 * Math.sin(wx * 0.033 + t * 0.006) + 0.08 * Math.sin(wx * 0.4 + t * 0.03);
-          if (c.globalAlpha > 0.02) c.drawImage(aur, x, y0, 3, len);
+          if (c.globalAlpha > 0.02) c.drawImage(aur, x, y0 | 0, 6, len | 0);
         }
         c.restore();
         drawLayer(c, far, cx, 0.07, yo * 0.2 + 8); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.4, yo * 0.5);

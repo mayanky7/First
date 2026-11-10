@@ -7,6 +7,7 @@
 
   const SERIF = '"EB Garamond","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
   const TITLE = '"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,serif';
+  const cache = new Map();
   const UI = {
     ctx, get s() { return s; },
     font(size, o) { ctx.font = `${o && o.italic ? 'italic ' : ''}${o && o.title ? '600 ' : ''}${size * s}px ${o && o.title ? TITLE : SERIF}`; },
@@ -14,19 +15,30 @@
     text(str, x, y, size, o) {
       o = o || {};
       const a = o.alpha === undefined ? 1 : o.alpha;
-      if (a <= 0.01) return;
-      ctx.save();
-      this.font(size, o);
-      ctx.globalAlpha = a; ctx.textAlign = o.align || 'center'; ctx.textBaseline = 'middle';
-      let px = x * s;
-      if (o.ls && 'letterSpacing' in ctx) { ctx.letterSpacing = (o.ls * s) + 'px'; if (!o.align) px += o.ls * s / 2; }
-      if (o.halo) { ctx.strokeStyle = o.halo; ctx.lineWidth = size * s * 0.32; ctx.lineJoin = 'round'; ctx.strokeText(str, px, y * s); }
-      if (o.glow) { ctx.shadowColor = o.glow; ctx.shadowBlur = size * s * 0.55; ctx.fillStyle = o.color || '#fff'; ctx.fillText(str, px, y * s); }
-      if (o.shadow !== false) { ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = Math.max(2, size * s * 0.18); ctx.shadowOffsetY = Math.max(1, s * 0.5); }
-      else { ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; }
-      ctx.fillStyle = o.color || '#fff';
-      ctx.fillText(str, px, y * s);
-      ctx.restore();
+      if (a <= 0.01 || !str) return;
+      // text is rendered once (with its glow and shadow) and re-used; blurred shadows are costly per frame
+      const key = str + '|' + size + '|' + (o.color || '') + (o.glow || '') + (o.halo || '') + (o.italic ? 'i' : '') + (o.title ? 't' : '') + (o.ls || 0) + (o.shadow === false ? 'n' : '');
+      let e = cache.get(key);
+      if (!e) {
+        if (cache.size > 260) cache.clear();
+        this.font(size, o);
+        const ls = o.ls && 'letterSpacing' in ctx ? o.ls * s : 0;
+        ctx.save(); if (ls) ctx.letterSpacing = ls + 'px'; const tw = ctx.measureText(str).width; ctx.restore();
+        const pad = Math.ceil(size * s * 0.75 + 4), cw = Math.ceil(tw + pad * 2), ch = Math.ceil(size * s * 1.7 + pad * 2);
+        const tc = document.createElement('canvas'); tc.width = cw; tc.height = ch;
+        const g = tc.getContext('2d');
+        g.font = ctx.font; g.textAlign = 'left'; g.textBaseline = 'middle'; if (ls) g.letterSpacing = ls + 'px';
+        const px = pad, py = ch / 2;
+        if (o.halo) { g.strokeStyle = o.halo; g.lineWidth = size * s * 0.32; g.lineJoin = 'round'; g.strokeText(str, px, py); }
+        if (o.glow) { g.shadowColor = o.glow; g.shadowBlur = size * s * 0.55; g.fillStyle = o.color || '#fff'; g.fillText(str, px, py); }
+        if (o.shadow !== false) { g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = Math.max(2, size * s * 0.18); g.shadowOffsetY = Math.max(1, s * 0.5); }
+        else { g.shadowColor = 'transparent'; g.shadowBlur = 0; }
+        g.fillStyle = o.color || '#fff'; g.fillText(str, px, py);
+        e = { tc, pad, tw: tw - ls, ch }; cache.set(key, e);
+      }
+      const al = o.align || 'center';
+      const x0 = x * s - e.pad - (al === 'center' ? e.tw / 2 : al === 'right' ? e.tw : 0);
+      ctx.globalAlpha = a; ctx.drawImage(e.tc, Math.round(x0), Math.round(y * s - e.ch / 2)); ctx.globalAlpha = 1;
     },
     wrap(str, maxW, size, o) {
       this.font(size, o || { italic: true });
@@ -56,9 +68,12 @@
     const ww = window.innerWidth, wh = window.innerHeight;
     let k = Math.min(ww / W, wh / H) * dpr; // device px per game px
     if (k >= 2 && Math.floor(k) / k > 0.9) k = Math.floor(k); // integer scaling keeps pixels even, unless it wastes much screen
-    s = Math.max(1, k);
+    s = Math.max(1, Math.min(k, 5));
     cv.width = Math.round(W * s); cv.height = Math.round(H * s);
-    cv.style.width = (cv.width / dpr) + 'px'; cv.style.height = (cv.height / dpr) + 'px';
+    const cssK = Math.min(ww / W, wh / H) >= 2 && k >= 2 && Math.floor(k) === k ? k / dpr : Math.min(ww / W, wh / H);
+    cv.style.width = (W * cssK) + 'px'; cv.style.height = (H * cssK) + 'px';
+    cache.clear();
+    const vg = document.getElementById('vig'); if (vg) { vg.style.width = cv.style.width; vg.style.height = cv.style.height; }
   }
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
@@ -74,12 +89,6 @@
     ctx.drawImage(buf, 0, 0, cv.width, cv.height);
     if (sc.drawHi) sc.drawHi(UI);
     // soft vignette
-    if (!vig || vig.width !== cv.width) {
-      const v = ctx.createRadialGradient(cv.width / 2, cv.height / 2, cv.height * 0.45, cv.width / 2, cv.height / 2, cv.width * 0.72);
-      v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.38)');
-      vig = v; vig.width = cv.width;
-    }
-    ctx.fillStyle = vig; ctx.fillRect(0, 0, cv.width, cv.height);
     const mode = sc === Scenes.list.play && !World.card && !sc.paused ? 'play' : 'menu';
     if (mode !== lastMode) { document.body.classList.toggle('menu', mode === 'menu'); lastMode = mode; }
     if (Scenes.fade > 0) { ctx.fillStyle = `rgba(4,5,13,${Scenes.fade})`; ctx.fillRect(0, 0, cv.width, cv.height); }

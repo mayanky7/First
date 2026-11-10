@@ -312,7 +312,7 @@ Scenes.list.map = {
     u.text('N', 346, 23, 6.5, { color: ink, shadow: false, title: true });
     u.text('THE ROAD WEST', 192, 25, 12, { color: ink, ls: 5, shadow: false, title: true });
     u.text('from Kaamos to the Mountain of Light', 192, 37, 6.8, { color: '#6a4a28', italic: true, shadow: false });
-    const lbl = [['Kaamos', 'FINLAND', 334, 164], ['Midsummer Lands', 'SWEDEN', 262, 84], ['Iron Deeps', 'KIRUNA', 192, 152], ['Red Rock Country', 'UNITED STATES', 126, 76], ['The Hoarder’s Mesa', '', 62, 137]];
+    const lbl = [['Kaamos', 'FINLAND', 350, 150], ['Midsummer Lands', 'SWEDEN', 262, 84], ['Iron Deeps', 'KIRUNA', 192, 152], ['Red Rock Country', 'UNITED STATES', 126, 76], ['The Hoarder’s Mesa', '', 62, 137]];
     lbl.forEach(([a, b, x, y], i) => {
       const lw = Math.max(u.width(a, 7.2, { italic: true }), b ? u.width(b, 5, { title: true }) + b.length * 0.8 : 0) + 8;
       u.panel(x - lw / 2, y - 5.5, lw, b ? 18 : 11, 0.88, '#dcc79a');
