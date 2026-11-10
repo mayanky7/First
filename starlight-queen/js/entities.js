@@ -89,7 +89,7 @@ function updatePlayer(w, p) {
       p.y = pl.y - p.h; p.vy = 0; p.onGround = true; p.ride = pl; break;
     }
   }
-  if (p.onGround && !wasGround && fallV > 2.5) { World.dust(p.x + 5, p.y + p.h, 6); p.sq = 0.78; Sound.sfx('land'); }
+  if (p.onGround && !wasGround && fallV > 2.5) { World.dust(p.x + 5, p.y + p.h, 6, true); p.sq = 0.78; Sound.sfx('land'); if (fallV > 4.6) w.shake = Math.max(w.shake, 2.5); }
   p.sq = p.sq ? 1 + (p.sq - 1) * 0.8 : 1;
   if (p.onGround && Math.abs(p.vx) > 1) { p.stepT += Math.abs(p.vx); if (p.stepT > 24) { p.stepT = 0; World.dust(p.x + 5 - p.face * 3, p.y + p.h, 1); Sound.sfx('step'); } }
   if ((p.gliding || p.radiant > 0) && w.t % 3 === 0) { const im = drawPlayer.last && drawPlayer.last[p.id]; if (im) w.parts.push({ x: p.x + 5, y: p.y + 8, vx: 0, vy: 0, life: 14, max: 14, img: im, flip: p.face < 0, fade: 1 }); }
@@ -102,6 +102,7 @@ function updatePlayer(w, p) {
     if (p.arrows > 0) {
       p.arrows--; p.shootT = 14;
       w.ents.push(makeEnt({ t: 'arrow', x: p.x + 5 + p.face * 9, y: p.y + 10, dir: p.face }));
+      p.vx -= p.face * 0.7; w.parts.push({ x: p.x + 5 + p.face * 12, y: p.y + 11, vx: 0, vy: 0, life: 3, col: '#ffffff', glow: 1, sz: 6 }, { x: p.x + 5 + p.face * 12, y: p.y + 11, vx: 0, vy: 0, life: 5, col: '#bff4ff', glow: 1, sz: 3 });
       Sound.sfx('arrow');
     } else Sound.sfx('empty');
   }
@@ -135,9 +136,10 @@ function hurtPlayer(w, p, fromX) {
   if (p.inv > 0 || p.dead || p.radiant > 0 || w.state !== 'play' || w.god) return false;
   p.hp--; Game.stats.hits++;
   if (p.hp <= 0) { killPlayer(w, p); return true; }
-  w.hitstop = 5; p.inv = 110; p.hurtT = 22; p.vy = -3.2; p.vx = (fromX ? Math.sign(p.x + 5 - fromX) || -p.face : -p.face) * 2.2;
+  w.hitstop = 7; w.hurtFx = 16; p.inv = 110; p.hurtT = 22;
+  for (let i = 0; i < 8; i++) { const a = rand(TAU); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * 2, vy: Math.sin(a) * 2 - 0.5, life: 18, col: i % 2 ? '#ff5a6a' : '#ffffff', sz: 2, g: 0.1 }); } p.vy = -3.2; p.vx = (fromX ? Math.sign(p.x + 5 - fromX) || -p.face : -p.face) * 2.2;
   p.gliding = false; p.ride = null;
-  Sound.sfx('hurt'); w.shake = 8; w.flash = 0.35;
+  Sound.sfx('hurt'); w.shake = 8;
   return true;
 }
 function killPlayer(w, p, pit) {
@@ -145,6 +147,7 @@ function killPlayer(w, p, pit) {
   if (w.god && !pit) return;
   p.dead = 1; p.hp = 0; Sound.sfx('die'); w.shake = 10; Game.stats.deaths++;
   if (w.players.every(q => q.dead)) Sound.duck(true);
+  w.hitstop = 8; { const im = drawPlayer.last && drawPlayer.last[p.id]; if (im) w.parts.push({ x: p.x + 5, y: p.y + 8, vx: -p.face * 0.8, vy: -4, g: 0.22, life: 46, max: 46, img: im, spin: 0.25 }); }
   for (let i = 0; i < 26; i++) { const a = rand(TAU), s = rand(0.5, 2.6); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, life: rand(40, 80), col: i % 2 ? '#bff4ff' : '#fff6b0', g: -0.01, glow: 1, sz: 1 + (i % 2) }); }
 }
 function drawPlayer(c, w, p, ox, oy) {
@@ -197,7 +200,7 @@ function slay(w, e, how) {
   if (e.dead) return;
   e.dead = true; Game.stats.foes++;
   const img = e.img || Art.S.goblin[0];
-  if (how !== 'lava') w.hitstop = Math.max(w.hitstop || 0, 3);
+  if (how !== 'lava' && how !== 'radiant') w.hitstop = Math.max(w.hitstop || 0, 3);
   for (let i = 0; i < 7; i++) { const a = i / 7 * TAU; w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: Math.cos(a) * 1.6, vy: Math.sin(a) * 1.6, life: 16, col: i % 2 ? '#fff6b0' : '#ffffff', glow: 1, sz: 2 }); }
   w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: how === 'stomp' ? 0 : rand(-1, 1), vy: how === 'stomp' ? 0 : -3, life: how === 'stomp' ? 22 : 60, img, flipV: how !== 'stomp', squash: how === 'stomp', g: how === 'stomp' ? 0 : 0.25, flip: e.dir < 0 });
   for (let i = 0; i < 8; i++) w.parts.push({ x: e.x + rand(e.w), y: e.y + rand(e.h), vx: rand(-0.8, 0.8), vy: rand(-1.4, -0.2), life: rand(20, 40), col: i % 2 ? '#2a2038' : '#4a3a5a', sz: 2, g: -0.01 });
@@ -207,6 +210,7 @@ function damageFoe(w, e, n, how) {
   e.hp = (e.hp || 1) - n;
   if (e.hp <= 0) { slay(w, e, how); Sound.sfx(how === 'stomp' ? 'stomp' : 'hit'); }
   else { e.flash = 10; e.invT = 14; Sound.sfx('hit'); }
+  if (how === 'arrow') { e.flash = Math.max(e.flash, 4); w.parts.push({ x: e.x + e.w / 2, y: e.y + e.h / 2, vx: 0, vy: 0, life: 4, col: '#ffffff', glow: 1, sz: 7 }); }
   return true;
 }
 
@@ -214,7 +218,7 @@ ENT.goblin = {
   foe: true, stomp: true, arrow: true,
   init(e) { e.w = 12; e.h = 13; e.x -= 6; e.y -= 13; e.img = Art.S.goblin[0]; },
   update(w, e) { walker(w, e, 0.45 * e.manic); e.img = Art.S.goblin[(w.t >> (e.manic > 1 ? 2 : 3)) % 2]; },
-  draw(c, w, e, ox, oy) { Art.blit(c, e.img, e.x - ox - 2, e.y - oy - 3, e.dir < 0); }
+  draw(c, w, e, ox, oy) { Art.blit(c, e.flash > 0 ? Art.flashOf(e.img) : e.img, e.x - ox - 2, e.y - oy - 3, e.dir < 0); }
 };
 ENT.wolf = {
   foe: true, stomp: true, arrow: true,
@@ -227,7 +231,7 @@ ENT.wolf = {
     else walker(w, e, (e.charge ? 1.75 : 0.5) * (e.manic > 1 ? 1.12 : 1), e.charge > 0);
     e.img = Art.S.wolf[e.wait > 0 ? 0 : (w.t >> (e.charge ? 2 : 3)) % 2];
   },
-  draw(c, w, e, ox, oy) { Art.blit(c, e.img, e.x - ox - 3, e.y - oy - 4, e.dir < 0); }
+  draw(c, w, e, ox, oy) { Art.blit(c, e.flash > 0 ? Art.flashOf(e.img) : e.img, e.x - ox - 3, e.y - oy - 4, e.dir < 0); }
 };
 ENT.spider = {
   foe: true, stomp: true, arrow: true,
@@ -420,7 +424,7 @@ ENT.lantern = {
   init(e) { e.w = 12; e.h = 26; e.x -= 6; e.y -= 26; e.on = false; },
   update(w, e) {
     if (!e.on && touch(w, e)) {
-      e.on = true; World.checkpoint(e.x + 6, e.y + 26); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — you will return here if you fall');
+      e.on = true; World.checkpoint(e.x + 6, e.y + 26); World.ring(e.x + 6, e.y + 5, 3, 44, 18, '#bff4ff'); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — you will return here if you fall');
     }
   },
   draw(c, w, e, ox, oy) {
@@ -472,7 +476,8 @@ ENT.boss = {
     switch (e.st) {
       case 'wait': return;
       case 'intro':
-        if (e.t0 === 30) { Sound.sfx('roar'); w.shake = 20; }
+        for (const q of w.players) { q.control = e.t0 > 105; if (e.t0 <= 105) q.vx *= 0.8; }
+        if (e.t0 === 30) { Sound.sfx('roar'); w.shake = 24; World.ring(e.x + 11, e.y + 10, 6, 160, 30, '#ff6a20'); }
         if (e.t0 > 110) go('idle');
         break;
       case 'idle': {
@@ -537,7 +542,8 @@ ENT.boss = {
         if (e.t0 === 130) {
           Sound.sfx('shatter'); w.flash = 1; w.shake = 30; e.dead = true;
           for (let i = 0; i < 7; i++) w.ents.push(makeEnt({ t: 'star', x: e.x + 11, y: e.y + 2, i }));
-          for (let i = 0; i < 40; i++) { const a = rand(TAU), s = rand(1, 4); w.parts.push({ x: e.x + 11, y: e.y + 20, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(40, 90), col: i % 2 ? '#3a3a4a' : '#ff7a20', g: 0.05, sz: 2, glow: i % 2 }); }
+          World.ring(e.x + 11, e.y + 20, 8, 150, 24, '#ffffff'); World.ring(e.x + 11, e.y + 20, 4, 90, 30, '#ffb040');
+          for (let i = 0; i < 70; i++) { const a = rand(TAU), s = rand(1, 5); w.parts.push({ x: e.x + 11, y: e.y + 20, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(40, 90), col: i % 2 ? '#3a3a4a' : '#ff7a20', g: 0.05, sz: 2, glow: i % 2 }); }
           World.bossDefeated(e.x + 11);
         }
         break;
@@ -552,7 +558,7 @@ function bossHit(w, e, n, hx, hy) {
   if (!ENT.boss.vulnerable(e) || e.invT > 0) return false;
   e.hp -= n; e.stunDmg += n; e.flash = 10; e.invT = 12; Sound.sfx('bosshit'); w.shake = 8; w.hitstop = 6;
   World.sparkle(hx, hy, '#ffc040', 10);
-  if (e.hp <= 0) { e.hp = 0; e.st = 'dying'; e.t0 = 0; Sound.music(null); w.bossAlive = false; World.clearHazards(); }
+  if (e.hp <= 0) { e.hp = 0; e.st = 'dying'; e.t0 = 0; Sound.music(null); w.bossAlive = false; World.clearHazards(); w.hitstop = 18; w.slow = 80; w.flash = 1; World.ring(hx, hy, 6, 140, 26, '#ffffff'); Sound.sfx('slam'); }
   return true;
 }
 function drawBoss(c, w, e, fx, fy) {
@@ -596,7 +602,7 @@ function drawBoss(c, w, e, fx, fy) {
   c.restore();
   R(c, -13, by + 18, 4, 12, A); R(c, -13, by + 30, 4, 3, A2);
   c.restore();
-  if (e.flash > 0) { Art.glow(c, fx, fy - 26, 34, '#ffffff', 0.7); }
+  if (e.flash > 6) { Art.glow(c, fx, fy - 26, 26, '#ffffff', 0.5); }
   if (!stun && st !== 'wait' && st !== 'dying') Art.glow(c, fx + e.dir * lean, fy - 54 + kneel, 16 + Math.sin(t * 0.2) * 3, '#ff6a20', 0.75);
   if (st === 'tele_embers' || st === 'embers') Art.glow(c, fx, fy - 60, 30, '#ff4a10', 0.8);
   if (stun && (t >> 3) % 2) { for (let i = 0; i < 3; i++) { const a = t * 0.1 + i * 2.1; R(c, fx + Math.cos(a) * 10, fy - 52 + Math.sin(a) * 3, 2, 2, '#fff6b0'); } }

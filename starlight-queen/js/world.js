@@ -11,6 +11,8 @@ const World = (() => {
   const [bc, bg2] = mk(W, H);
   const [holeImg, hg] = mk(128, 128);
   { const g = hg.createRadialGradient(64, 64, 10, 64, 64, 64); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)'); hg.fillStyle = g; hg.fillRect(0, 0, 128, 128); }
+  const [hurtImg, hug] = mk(W, H);
+  { const g = hug.createRadialGradient(W / 2, H / 2, H * 0.42, W / 2, H / 2, W * 0.62); g.addColorStop(0, 'rgba(255,40,60,0)'); g.addColorStop(1, 'rgba(255,40,60,0.6)'); hug.fillStyle = g; hug.fillRect(0, 0, W, H); }
   const [lavaImg, lvg] = mk(1, 64);
   { const g = lvg.createLinearGradient(0, 0, 0, 64); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.9, 'rgba(0,0,0,0.85)'); g.addColorStop(1, 'rgba(0,0,0,0.85)'); lvg.fillStyle = g; lvg.fillRect(0, 0, 1, 64); }
   let lastCamX = 0;
@@ -21,7 +23,7 @@ const World = (() => {
     const L = buildWorld();
     Object.assign(w, {
       t: 0, state: 'play', grid: L.grid, rows: L.rows, cols: L.cols, parts: [], bumps: [], torches: L.torches, zones: L.zones,
-      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, hitstop: 0, combo: 0, comboT: 0, hudPop: 0,
+      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, hitstop: 0, combo: 0, comboT: 0, hudPop: 0, rings: [], slow: 0, hurtFx: 0,
       gemBlocks: L.gemBlocks, popN: L.popN, gemQ: [], arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
     });
     w.colTheme = new Array(w.cols);
@@ -36,6 +38,7 @@ const World = (() => {
     w.players = [makePlayer(sp.x, sp.y, 0)];
     if (Game.coop) w.players.push(makePlayer(sp.x - 14, sp.y, 1));
     w.player = w.players[0];
+    if (cp) { for (const p of w.players) p.sq = 1.3; for (let i = 0; i < 18; i++) { const a = i / 18 * TAU; w.parts.push({ x: sp.x + Math.cos(a) * 26, y: sp.y - 11 + Math.sin(a) * 26, vx: -Math.cos(a) * 2, vy: -Math.sin(a) * 2, life: 13, col: i % 2 ? '#bff4ff' : '#ffffff', glow: 1, sz: 2 }); } }
     for (const e of w.ents) if ((e.type === 'lantern' || (e.type === 'beacon' && !e.final)) && e.x + e.w / 2 <= sp.x + 1) { e.on = true; e.fire = 1; }
     w.cam.x = clamp(w.player.x - W / 2, 0, w.cols * T - W);
     w.cam.y = clamp(w.player.y - H * 0.55, 0, w.rows * T - H);
@@ -50,7 +53,7 @@ const World = (() => {
     if (!w.fight) { Sound.music(Game.bossDown && z.theme === 'gloam' ? 'dawn' : w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
     Game.region = z.map;
     const key = z.title + '|' + z.sub;
-    if (!Game.seen[key]) { Game.seen[key] = 1; w.introT = 250; w.introZone = z; }
+    if (!Game.seen[key]) { Game.seen[key] = 1; w.introT = 180; w.introZone = z; }
   }
   function addPlayer2() {
     if (w.players.length > 1) return;
@@ -88,7 +91,9 @@ const World = (() => {
   }
 
   /* ---------- effects ---------- */
-  function dust(x, y, n) { for (let i = 0; i < n; i++) w.parts.push({ x: x + rand(-4, 4), y: y - 1, vx: rand(-0.6, 0.6), vy: rand(-0.6, -0.1), life: rand(10, 20), col: 'rgba(230,230,220,0.7)', sz: 2 }); }
+  function dustCol() { const P = w.theme.tiles; return w.t & 1 ? P.capDark : P.light; }
+  function dust(x, y, n, spread) { for (let i = 0; i < n; i++) w.parts.push({ x: x + rand(-4, 4), y: y - 1, vx: rand(-0.6, 0.6) + (spread ? (i % 2 ? 1.2 : -1.2) : 0), vy: rand(-0.7, -0.1), life: rand(10, 20), col: dustCol(), sz: 2 }); }
+  function ring(x, y, r0, r1, frames, col) { w.rings.push({ x, y, r0, r1, life: frames, max: frames, col }); }
   function spark(x, y, col, n) { for (let i = 0; i < n; i++) w.parts.push({ x, y, vx: rand(-0.3, 0.3), vy: rand(-0.4, 0.3), life: rand(14, 26), col, glow: 1, sz: 1 }); }
   function sparkle(x, y, col, n) { for (let i = 0; i < n; i++) { const a = rand(TAU), s = rand(0.4, 1.8); w.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(14, 30), col: i % 3 ? col : '#ffffff', glow: 1, sz: 1 + (i % 2) }); } }
   function toast(s, long) { w.toastText = s; w.toastT = long ? 420 : 240; w.toastMax = w.toastT; }
@@ -125,7 +130,7 @@ const World = (() => {
   }
   function checkpoint(x, y) { Game.cp = { x, y }; Game.save(); for (const p of w.players) if (!p.dead) p.hp = 3; }
   function lightBeacon(e) {
-    Sound.sfx('beacon'); w.flash = 0.6; w.shake = 6;
+    Sound.sfx('beacon'); w.flash = 0.6; w.shake = 6; ring(e.x + 20, e.y, 4, 210, 34, '#ffb040'); ring(e.x + 20, e.y, 4, 120, 26, '#fff6b0');
     if (!e.final) { checkpoint(e.x + 20, e.y + 56); toast(e.text); setTimeout(() => Sound.sfx('fanfare'), 500); return; }
     w.state = 'clear'; w.clearT = 0; w.clearText = e.text;
     for (const p of w.players) { p.control = false; p.auto = 0; p.inv = 0; }
@@ -158,7 +163,8 @@ const World = (() => {
       w.parts = w.parts.filter(q => q.life > 0);
       if (fx.t % 3 === 0) sparkle(fx.x, fx.y, fx.gem.tint, 3);
       if (w.flash > 0) w.flash = Math.max(0, w.flash - 0.03);
-      if (fx.t >= 55) { w.card = { gem: fx.gem, t: 0 }; w.gemFx = null; }
+      if (fx.t > 44) w.flash = Math.min(1, (fx.t - 44) / 10);
+      if (fx.t >= 55) { w.card = { gem: fx.gem, t: 0 }; w.gemFx = null; w.flash = 0; }
       return;
     }
     if (w.hitstop > 0) { // a held frame: presses made during it are kept, not lost
@@ -172,13 +178,16 @@ const World = (() => {
     }
     w.t++;
     const calm = World.calm;
-    if (w.flash > (calm ? 0.2 : 0.6)) w.flash = calm ? 0.2 : 0.6;
-    if (w.shake > (calm ? 3 : 18)) w.shake = calm ? 3 : 18;
+    if (calm) { if (w.flash > 0.2) w.flash = 0.2; if (w.shake > 3) w.shake = 3; }
+    else { if (w.flash > 1) w.flash = 1; if (w.shake > 28) w.shake = 28; }
+    if (w.slow > 0 && (--w.slow & 1)) return; // half speed for a held breath
+    if (w.hurtFx > 0) w.hurtFx--;
+    for (const q of w.rings) q.life--; if (w.rings.length) w.rings = w.rings.filter(q => q.life > 0);
     if (w.introT > 0) w.introT--;
     if (w.comboT > 0) w.comboT--; if (w.hudPop > 0) w.hudPop--;
     if (w.toastT > 0) w.toastT--;
     if (w.shake > 0) w.shake *= 0.86;
-    if (w.flash > 0) w.flash = Math.max(0, w.flash - 0.03);
+    if (w.flash > 0) w.flash = w.flash > 0.6 ? w.flash * 0.8 : Math.max(0, w.flash - 0.03);
     if (w.dawning && w.dawn < 1) w.dawn = Math.min(1, w.dawn + 0.004);
     w.signText = null; w.signNear = null;
     for (const pl of w.plats) ENT.plat.pre(w, pl);
@@ -220,7 +229,9 @@ const World = (() => {
         damageFoe(w, e, 1, 'stomp');
         const hold = act(p, 'jump');
         p.vy = hold ? -5.3 : -3.6; p.jumping = hold; p.glide = GLIDE_MAX; p.y = Math.min(p.y, e.y - p.h + 2);
-        sparkle(p.x + 5, p.y + p.h, '#ffffff', 4);
+        w.hitstop = Math.max(w.hitstop, 5); w.shake = Math.max(w.shake, 4); p.sq = 1.28;
+        ring(p.x + 5, p.y + p.h, 5, 24, 9, '#ffffff');
+        for (let i = 0; i < 10; i++) w.parts.push({ x: p.x + 5, y: p.y + p.h, vx: (i < 5 ? -1 : 1) * rand(0.8, 2.6), vy: rand(-1.2, -0.1), life: rand(12, 22), col: i % 2 ? '#ffffff' : dustCol(), sz: 2 });
       } else hurtPlayer(w, p, e.x + e.w / 2);
     }
     if (w.ents.some(e => e.dead)) { w.ents = w.ents.filter(e => !e.dead); }
@@ -246,7 +257,7 @@ const World = (() => {
     w.cam.y = clamp(w.cam.y, 0, w.rows * T - H);
 
     if (w.state === 'clear') { w.clearT++; if (w.clearT === 330) Game.finish(); }
-    else if (!alive.length) { if (++w.deadT === 105) Game.playerDied(); }
+    else if (!alive.length) { if (++w.deadT === 62) Game.playerDied(); }
     else if (w.state === 'play') Game.stats.frames++;
   }
 
@@ -352,7 +363,8 @@ const World = (() => {
       if (!!q.glow !== glow) continue;
       const x = q.x - ox, y = q.y - oy;
       if (q.img) {
-        if (q.squash) c.drawImage(q.img, Math.round(x - q.img.width / 2 - 2), Math.round(y + q.img.height / 2 - 5), q.img.width + 4, 5);
+        if (q.squash) { const im = q.life > 17 ? Art.flashOf(q.img) : q.img, k = Math.min(1, (22 - q.life) / 4), wd = im.width * (1 + 0.6 * k), hg = im.height * (1 - 0.7 * k); c.drawImage(im, Math.round(x - wd / 2), Math.round(y + q.img.height / 2 - hg), Math.round(wd), Math.max(2, Math.round(hg))); }
+        else if (q.spin) { c.save(); c.translate(Math.round(x), Math.round(y)); c.rotate(q.spin * (q.max - q.life)); c.drawImage(q.img, -q.img.width / 2, -q.img.height / 2); c.restore(); }
         else if (q.fade) { c.globalAlpha = q.life / q.max * 0.45; Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip); c.globalAlpha = 1; }
         else Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip, q.flipV);
       } else { c.fillStyle = q.col; const s = q.sz || 1; c.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s); }
@@ -397,10 +409,16 @@ const World = (() => {
     for (const tq of w.torches) { Art.glow(c, tq.x - ox, tq.y - oy - 4, 20 + Math.sin(w.t * 0.3 + tq.x) * 2, '#ff9a30', 0.55); Backdrop.flame(c, tq.x - ox, tq.y - oy, w.t, 1); }
     for (const e of w.ents) { const d = ENT[e.type]; if (d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     drawParts(c, ox, oy, true);
+    for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.85 * (1 - k); c.strokeStyle = q.col; c.lineWidth = r > 60 ? 2 : 1; c.beginPath(); c.arc(Math.round(q.x - ox), Math.round(q.y - oy), r, 0, TAU); c.stroke(); }
+    c.globalAlpha = 1;
     Backdrop.drawAmbient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
     { // near silhouettes sliding past in front of everything: depth
-      const f = Backdrop.fore(bl.a.theme), fx0 = -(((w.cam.x * 1.4) % Backdrop.LW + Backdrop.LW) % Backdrop.LW) | 0;
-      c.drawImage(f, fx0, H - f.height); if (fx0 + Backdrop.LW < W) c.drawImage(f, fx0 + Backdrop.LW, H - f.height);
+      const f = Backdrop.fore(bl.a.theme), LWf = Backdrop.LW, sx0 = (((w.cam.x * 1.4) % LWf) + LWf) % LWf | 0, fy = H - f.height + Math.max(0, Math.round((w.rows * T - H - w.cam.y) * 0.9));
+      // drawn in slices, and never over a pit, lava or water: hazards must stay readable
+      if (fy < H) for (let x = 0; x < W; x += T) {
+        const cxw = Math.floor((ox + x + 8) / T); if (cxw < 0 || cxw >= w.cols || w.grid[w.rows - 1][cxw] !== '#' || w.grid[w.rows - 3][cxw] !== '#') continue;
+        c.drawImage(f, (sx0 + x) % LWf, 0, T, f.height, x, fy, T, f.height);
+      }
     }
     if (w.gemFx) {
       const fx = w.gemFx, x = fx.x - ox, y = fx.y - oy, k = Math.min(1, fx.t / 30);
@@ -410,6 +428,7 @@ const World = (() => {
       Art.glow(c, x, y, 30 + 20 * k, '#ffffff', 0.6);
       const im = Art.gemSprite(fx.gem), sc = 1 + k * 0.8; c.drawImage(im, Math.round(x - im.width * sc / 2), Math.round(y - im.height * sc / 2), Math.round(im.width * sc), Math.round(im.height * sc));
     }
+    if (w.hurtFx > 0) { c.globalAlpha = (w.hurtFx / 16) * (w.hurtFx / 16); c.drawImage(hurtImg, 0, 0); c.globalAlpha = 1; }
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
     if (!w.card) hud(c);
     // embers about to leap from lava below the screen are announced at its edge
@@ -438,5 +457,5 @@ const World = (() => {
     }
   }
 
-  return Object.assign(w, { load, update, draw, dust, spark, sparkle, toast, gainShard, gainGem, bump, lightBeacon, checkpoint, bossDefeated, clearHazards, addPlayer2, dropPlayer2, zoneAt });
+  return Object.assign(w, { load, update, draw, ring, dust, spark, sparkle, toast, gainShard, gainGem, bump, lightBeacon, checkpoint, bossDefeated, clearHazards, addPlayer2, dropPlayer2, zoneAt });
 })();

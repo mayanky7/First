@@ -373,8 +373,8 @@ Scenes.list.play = {
   draw(c) { World.draw(c); },
   drawHi(u) {
     const w = World, z = w.introZone;
-    if (w.introT > 0 && z && w.state === 'play' && !w.card) {
-      const a = clamp(w.introT / 40, 0, 1) * clamp((250 - w.introT) / 30, 0, 1);
+    if (w.introT > 0 && z && w.state === 'play' && !w.card && !w.gemFx) {
+      const a = clamp(w.introT / 40, 0, 1) * clamp((180 - w.introT) / 30, 0, 1);
       u.panel(0, 46, W, 60, 0.3 * a, '#060814');
       u.text(z.title.toUpperCase(), 192, 66, 24, { color: '#f6e2a0', glow: '#ffb040', alpha: a, title: true, ls: 6 });
       u.rule(192, 84, 96, '#c8a860', a);
@@ -397,7 +397,8 @@ Scenes.list.play = {
     }
     if (w.fight && w.boss && w.boss.st === 'intro') {
       const a = clamp(w.boss.t0 / 30, 0, 1) * clamp((110 - w.boss.t0) / 20, 0, 1);
-      u.text('THE HOARDER KING', 192, 70, 22, { color: '#ffb070', glow: '#ff3a10', alpha: a, title: true, ls: 4 });
+      const bar = 14 * clamp(w.boss.t0 / 12, 0, 1) * clamp((112 - w.boss.t0) / 10, 0, 1); u.panel(0, 0, W, bar, 1, '#04050d'); u.panel(0, H - bar, W, bar + 1, 1, '#04050d');
+      u.text('THE HOARDER KING', 192, 70, 22 * (1 + 0.4 * clamp(1 - (w.boss.t0 - 30) / 6, 0, 1)), { color: '#ffb070', glow: '#ff3a10', alpha: w.boss.t0 < 30 ? 0 : clamp((110 - w.boss.t0) / 20, 0, 1), title: true, ls: 4 });
       u.text('Thief of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     } else if (w.fight && w.boss && !w.boss.dead) u.text('THE HOARDER KING', 192, H - 21, 5, { color: '#ffc8a0', alpha: 0.9, ls: 1.5, title: true });
     if (Game.metBoy && !Game.coop && w.state === 'play' && !w.card && !this.paused && !Input.touch) { u.panel(W - 109, 30, 106, 10, 0.5, '#080a14'); u.text('PLAYER 2  ·  PRESS 2 TO JOIN', W - 7, 35.2, 4.8, { color: '#ffd070', align: 'right', ls: 0.9, title: true }); }
@@ -407,7 +408,8 @@ Scenes.list.play = {
       u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
       u.text(`${Game.carats().toFixed(2)} carats carried home`, 192, 78, 8.5, { color: '#dffbff', alpha: clamp((w.clearT - 120) / 40, 0, 1), italic: true });
     }
-    if (w.combo >= 4 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.comboX - w.cam.x, w.comboY - 12 - w.cam.y - (55 - w.comboT) * 0.15, 8 + Math.min(5, w.combo * 0.3), { color: '#dffbff', glow: '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
+    if (w.combo >= 2 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.comboX - w.cam.x, w.comboY - 12 - w.cam.y - (55 - w.comboT) * 0.15, Math.round((7 + Math.min(5, w.combo * 0.35)) * (1 + 0.6 * clamp((w.comboT - 47) / 8, 0, 1)) * 2) / 2, { color: w.combo >= 8 ? '#ffe9a0' : '#dffbff', glow: w.combo >= 8 ? '#ffb040' : '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
+    if (w.card && w.card.t < 22) u.panel(0, 0, W, H, 1 - w.card.t / 22, '#ffffff');
     if (w.card) drawGemCard(u, w.card.gem, w.card.t, clamp(w.card.t / 25, 0, 1), w.card.t > 70 ? (Input.touch ? 'TAP TO CONTINUE' : 'ENTER TO CONTINUE') : '');
     if (this.paused) {
       u.panel(0, 0, W, H, 0.66, '#04050d');
