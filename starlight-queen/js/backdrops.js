@@ -46,7 +46,7 @@ const THEMES = {
   gloam: {
     id: 'gloam', seed: 53, music: 'gloam', dark: 0.34, darkCol: '20,2,2', amb: 'ash',
     tiles: { style: 'rock', body: '#2e2630', dark: '#1e181f', light: '#40363f', speck: '#ff6a20', cap: '#5a5058', capHi: '#8a7e84', capDark: '#241c24',
-      plat: '#4a4048', platHi: '#7a6e74', platDark: '#241c24', platStyle: 'stone', brick: '#4a2e2e', brickHi: '#6e4444', brickDark: '#2a1818', spike: '#3a3038', spikeHi: '#ff9a50' },
+      plat: '#4a4048', platHi: '#7a6e74', platDark: '#241c24', platStyle: 'stone', brick: '#4a2e2e', brickHi: '#6e4444', brickDark: '#2a1818', spike: '#d8d2c8', spikeHi: '#ff7a2a' },
     liquid: { top: '#fff0a0', body: '#ff6a10', deep: '#b82800', glow: '#ff5a10' },
     scatter: [['rubble', 0.25], ['bones', 0.08], ['emberrock', 0.1]], trees: 'charred'
   }

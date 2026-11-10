@@ -34,7 +34,7 @@ const Sound = (() => {
     noiseBuf = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
     const ch = noiseBuf.getChannelData(0);
     for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
-    if (pending) { const p = pending; pending = null; music(p); }
+    if (pending) { const p = pending; pending = null; curName = null; music(p); }
   }
 
   function tone(o) {

@@ -47,7 +47,7 @@ const Input = (() => {
   };
   const MENU_ALIAS = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'dn', KeyS: 'dn', Space: 'enter', KeyZ: 'enter', KeyX: 'enter' };
   const held = {}, queued = {}, sources = {};
-  let anyQueued = false, onFirst = null, usedTouch = false;
+  let anyQueued = false, onFirst = null, usedTouch = false, tapX = 0, tapY = 0;
 
   function set(action, src, on) {
     const s = sources[action] || (sources[action] = {});
@@ -59,6 +59,7 @@ const Input = (() => {
 
   window.addEventListener('keydown', e => {
     first();
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
     const a = KEYMAP[e.code], m = MENU_ALIAS[e.code];
     if (a || m) e.preventDefault();
     if (e.repeat) return;
@@ -73,6 +74,7 @@ const Input = (() => {
   });
   window.addEventListener('blur', () => {
     for (const a in sources) { sources[a] = {}; held[a] = false; }
+    for (const k in padPrev) delete padPrev[k];
   });
 
   function bindTouch() {
@@ -91,6 +93,7 @@ const Input = (() => {
     cv.addEventListener('pointerdown', e => {
       first();
       if (e.pointerType === 'touch' && !usedTouch) { usedTouch = true; document.body.classList.add('touch'); }
+      const rc = cv.getBoundingClientRect(); tapX = (e.clientX - rc.left) / rc.width * W; tapY = (e.clientY - rc.top) / rc.height * H;
       set('enter', 'tap', true); set('tap', 'tap', true);
       setTimeout(() => { set('enter', 'tap', false); set('tap', 'tap', false); }, 60);
     });
@@ -98,17 +101,18 @@ const Input = (() => {
   }
 
   /* gamepad */
-  const padPrev = {};
+  const padPrev = {}, padSfx = {};
   function pollPad() {
     const pads = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter(q => q && q.connected);
     pads.slice(0, 2).forEach((p, idx) => {
       const sfx = (idx === 1 || (pads.length === 1 && typeof Game !== 'undefined' && Game.coop)) ? '2' : '';
+      if (padSfx[idx] !== sfx) { for (const a in sources) { delete sources[a]['pad' + idx]; held[a] = Object.keys(sources[a]).length > 0; } padPrev[idx] = {}; padSfx[idx] = sfx; }
       const b = i => !!(p.buttons[i] && p.buttons[i].pressed);
       const ax = p.axes[0] || 0, ay = p.axes[1] || 0;
       const st = {
         ['left' + sfx]: ax < -0.35 || b(14), ['right' + sfx]: ax > 0.35 || b(15), ['down' + sfx]: ay > 0.5 || b(13),
         ['jump' + sfx]: b(0) || b(1), ['fire' + sfx]: b(2) || b(3) || b(5) || b(7),
-        up: ay < -0.5 || b(12), dn: ay > 0.5 || b(13), enter: b(0) || b(9), pause: b(9), join: idx === 1 && b(9)
+        up: ay < -0.5 || b(12), dn: ay > 0.5 || b(13), enter: b(0), pause: idx === 0 && b(9), join: idx === 1 && b(9)
       };
       const prev = padPrev[idx] || (padPrev[idx] = {});
       for (const a in st) if (st[a] !== !!prev[a]) { if (st[a]) first(); set(a, 'pad' + idx, st[a]); prev[a] = st[a]; }
@@ -124,6 +128,7 @@ const Input = (() => {
     bindTouch,
     onFirst(f) { onFirst = f; },
     get touch() { return usedTouch; },
+    get tapX() { return tapX; }, get tapY() { return tapY; },
     _set: set
   };
 })();

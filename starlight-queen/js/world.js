@@ -9,6 +9,10 @@ const World = (() => {
   };
   const [lc, lg] = mk(W, H);
   const [bc, bg2] = mk(W, H);
+  const [holeImg, hg] = mk(128, 128);
+  { const g = hg.createRadialGradient(64, 64, 10, 64, 64, 64); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)'); hg.fillStyle = g; hg.fillRect(0, 0, 128, 128); }
+  const [lavaImg, lvg] = mk(1, 64);
+  { const g = lvg.createLinearGradient(0, 0, 0, 64); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.9, 'rgba(0,0,0,0.85)'); g.addColorStop(1, 'rgba(0,0,0,0.85)'); lvg.fillStyle = g; lvg.fillRect(0, 0, 1, 64); }
   let lastCamX = 0;
 
   const zoneAt = x => { for (const z of w.zones) if (x < z.x1) return z; return w.zones[w.zones.length - 1]; };
@@ -18,10 +22,11 @@ const World = (() => {
     Object.assign(w, {
       t: 0, state: 'play', grid: L.grid, rows: L.rows, cols: L.cols, parts: [], bumps: [], torches: L.torches, zones: L.zones,
       shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0,
-      arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
+      gemBlocks: L.gemBlocks, arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
     });
     w.colTheme = new Array(w.cols);
     for (let cx = 0; cx < w.cols; cx++) w.colTheme[cx] = THEMES[zoneAt(cx * T + 8).theme];
+    for (const k in L.gemBlocks) if (Game.gems[L.gemBlocks[k]]) { const [gx, gy] = k.split(',').map(Number); w.grid[gy][gx] = 'U'; }
     w.ents = L.ents.filter(s => !(s.t === 'shard' && Game.meleeGot[s.n]) && !(s.t === 'gem' && Game.gems[s.gem]) && !(s.t === 'boss' && Game.bossDown)).map(makeEnt);
     if (Game.bossDown) { setGate(w.arena.gr, '.'); if (!Game.gems.kohinoor) w.ents.push(makeEnt({ t: 'gem', x: (w.arena.x0 + w.arena.x1) / 2, y: w.arena.floor - 30, gem: 'kohinoor' })); }
     w.plats = w.ents.filter(e => e.type === 'plat');
@@ -41,7 +46,7 @@ const World = (() => {
   function enterZone(z) {
     w.zone = z; w.theme = THEMES[z.theme];
     w.amb = Backdrop.makeAmbient(w.theme.amb);
-    if (!w.fight) { Sound.music(w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
+    if (!w.fight) { Sound.music(Game.bossDown && z.theme === 'gloam' ? 'dawn' : w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
     Game.region = z.map;
     const key = z.title + '|' + z.sub;
     if (!Game.seen[key]) { Game.seen[key] = 1; w.introT = 250; w.introZone = z; }
@@ -82,10 +87,9 @@ const World = (() => {
   function dust(x, y, n) { for (let i = 0; i < n; i++) w.parts.push({ x: x + rand(-4, 4), y: y - 1, vx: rand(-0.6, 0.6), vy: rand(-0.6, -0.1), life: rand(10, 20), col: 'rgba(230,230,220,0.7)', sz: 2 }); }
   function spark(x, y, col, n) { for (let i = 0; i < n; i++) w.parts.push({ x, y, vx: rand(-0.3, 0.3), vy: rand(-0.4, 0.3), life: rand(14, 26), col, glow: 1, sz: 1 }); }
   function sparkle(x, y, col, n) { for (let i = 0; i < n; i++) { const a = rand(TAU), s = rand(0.4, 1.8); w.parts.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(14, 30), col: i % 3 ? col : '#ffffff', glow: 1, sz: 1 + (i % 2) }); } }
-  function toast(s) { w.toastText = s; w.toastT = 240; }
+  function toast(s, long) { w.toastText = s; w.toastT = long ? 420 : 240; w.toastMax = w.toastT; }
   function gainShard(x, y, quiet, n) {
-    Game.melee++;
-    if (n !== undefined) Game.meleeGot[n] = 1;
+    if (n !== undefined) { Game.meleeGot[n] = 1; Game.melee++; }
     if (!quiet) { Sound.sfx('shard'); sparkle(x, y, '#9ff4ff', 5); }
   }
   function gainGem(e) {
@@ -108,7 +112,8 @@ const World = (() => {
     w.bumps.push({ cx, cy, t: 10 });
     if (ch === 'U') { Sound.sfx('bump'); return; }
     w.grid[cy][cx] = 'U';
-    if (ch === '?') { w.ents.push(makeEnt({ t: 'pop', x, y: y - 12 })); gainShard(x, y - 8); Sound.sfx('bump'); }
+    if (ch === 'G') { const id = w.gemBlocks[cx + ',' + cy]; if (id && !Game.gems[id]) { w.ents.push(makeEnt({ t: 'gem', x, y: y - 6, gem: id })); sparkle(x, y - 8, '#fff6c8', 24); Sound.sfx('power'); toast('Something bright was buried here…'); } }
+    else if (ch === '?') { w.ents.push(makeEnt({ t: 'pop', x, y: y - 12 })); gainShard(x, y - 8); Sound.sfx('bump'); }
     else { w.ents.push(makeEnt({ t: ch === 'H' ? 'cake' : 'bloom', x, y })); Sound.sfx('item'); }
   }
   function checkpoint(x, y) { Game.cp = { x, y }; Game.save(); for (const p of w.players) if (!p.dead) p.hp = 3; }
@@ -139,12 +144,15 @@ const World = (() => {
   /* ---------- simulation ---------- */
   const ALWAYS = { boss: 1, wave: 1, fall: 1 };
   function update() {
-    w.t++;
     if (w.card) {
       w.card.t++;
-      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2'))) { w.card = null; Sound.duck(false); Sound.sfx('confirm'); }
+      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.duck(false); Sound.sfx('confirm'); }
       return;
     }
+    w.t++;
+    const calm = World.calm;
+    if (w.flash > (calm ? 0.2 : 0.6)) w.flash = calm ? 0.2 : 0.6;
+    if (w.shake > (calm ? 3 : 18)) w.shake = calm ? 3 : 18;
     if (w.introT > 0) w.introT--;
     if (w.toastT > 0) w.toastT--;
     if (w.shake > 0) w.shake *= 0.86;
@@ -156,9 +164,16 @@ const World = (() => {
     const alive = w.players.filter(p => !p.dead);
     w.player = alive[0] || w.players[0];
     for (const p of w.players) if (p.dead > 170 && alive.length && w.state === 'play') { // a fallen companion returns
-      const q = alive[0]; Object.assign(p, makePlayer(q.x + 5, q.y + q.h - 30, p.id)); p.hp = 2; p.inv = 150; p.vy = -2; sparkle(p.x + 5, p.y + 10, '#bff4ff', 16); Sound.sfx('heal');
+      const q = alive[0]; Object.assign(p, makePlayer(q.x + 5, q.y + q.h, p.id)); p.hp = 2; p.inv = 150; sparkle(p.x + 5, p.y + 10, '#bff4ff', 16); Sound.sfx('heal');
     }
-    if (w.players.length > 1) for (const p of alive) p.x = clamp(p.x, w.cam.x + 3, w.cam.x + W - 13);
+    if (alive.length > 1) { // keep companions together: a rider is never dragged off; a straggler is brought to the leader
+      const rider = alive.find(p => p.ride), [a, b] = alive;
+      if (rider || Math.abs(a.y - b.y) > H * 0.8) {
+        const lead = rider || (a.y < b.y ? a : b), lag = lead === a ? b : a;
+        if (lag.x < w.cam.x - 2 || lag.x > w.cam.x + W - 8 || Math.abs(a.y - b.y) > H * 0.8 || Math.abs(a.x - b.x) > W * 0.8) { lag.x = lead.x; lag.y = lead.y; lag.vx = lag.vy = 0; lag.inv = Math.max(lag.inv, 60); lag.ride = lead.ride; sparkle(lag.x + 5, lag.y + 10, '#bff4ff', 10); }
+      } else for (const p of alive) p.x = clamp(p.x, w.cam.x + 3, w.cam.x + W - 13);
+    }
+    if (alive.length) w.deadT = 0;
     const cx = w.cam.x + W / 2;
     for (let i = 0; i < w.ents.length; i++) {
       const e = w.ents[i], d = ENT[e.type];
@@ -201,7 +216,7 @@ const World = (() => {
     // camera
     const fx = alive.length ? alive.reduce((a, p) => a + p.x, 0) / alive.length : lead.x;
     let tx = fx + 5 - W / 2 + (alive.length === 1 ? lead.face * 24 : 0), ty = lead.y + 11 - H * 0.56;
-    if (alive.length > 1) ty = Math.min(...alive.map(p => p.y)) + 11 - H * 0.5;
+    if (alive.length > 1) ty = (alive[0].y + alive[1].y) / 2 + 11 - H * 0.5;
     if (w.fight) tx = w.arena.x0;
     if (w.state === 'clear') tx = lead.x + 5 - W / 2 + 30;
     w.cam.x += (clamp(tx, 0, w.cols * T - W) - w.cam.x) * (w.fight ? 0.06 : 0.1);
@@ -224,9 +239,9 @@ const World = (() => {
         if (ch === '.' || ch === '~') continue;
         let x = cx * T - ox, y = cy * T - oy;
         if (w.bumps.length) for (const b of w.bumps) if (b.cx === cx && b.cy === cy) y -= Math.round(Math.sin(b.t / 10 * Math.PI) * 5);
-        const v = (hash2(cx, cy) * 4) | 0;
+        const v6 = (hash2(cx, cy) * 6) | 0, v = v6 & 3;
         if (ch === '#') {
-          c.drawImage(ts.fill[v], x, y);
+          c.drawImage(ts.fill[v6], x, y);
           const up = cy > 0 ? w.grid[cy - 1][cx] : '#', dn = cy < w.rows - 1 ? w.grid[cy + 1][cx] : '#';
           let depth = 0; while (depth < 5 && cy - depth - 1 >= 0 && w.grid[cy - depth - 1][cx] === '#') depth++;
           if (depth) { c.fillStyle = `rgba(10,8,30,${Math.min(0.42, depth * 0.1)})`; c.fillRect(x, y, T, T); }
@@ -259,7 +274,7 @@ const World = (() => {
             R(c, x + i * 4, y + h, 4, T - h, Lq.body); R(c, x + i * 4, y + h, 4, 1, Lq.top);
           }
           const b = (w.t + cx * 37) % 90; if (b < 12) R(c, x + (cx * 5 % 12), y + 7 - (b >> 2), 2, 2, Lq.top);
-          if (!Lq.glow) R(c, x + ((w.t >> 3) + cx * 7) % 13, y + 9, 3, 1, Lq.top);
+          if (!Lq.glow) { R(c, x, y + 7, T, 2, Lq.deep); R(c, x + ((w.t >> 3) + cx * 7) % 13, y + 10, 3, 1, Lq.top); }
         } else {
           R(c, x, y, T, T, Lq.deep); R(c, x, y, T, 3, Lq.body);
           const k = (w.t * 0.3 + cx * 9) % 32;
@@ -286,17 +301,16 @@ const World = (() => {
     lg.globalCompositeOperation = 'destination-out';
     const hole = (x, y, r, k) => {
       if (x < -r || x > W + r || y < -r || y > H + r) return;
-      const g = lg.createRadialGradient(x, y, r * 0.15, x, y, r);
-      g.addColorStop(0, `rgba(0,0,0,${k || 1})`); g.addColorStop(1, 'rgba(0,0,0,0)');
-      lg.fillStyle = g; lg.fillRect(x - r, y - r, r * 2, r * 2);
+      lg.globalAlpha = k || 1; lg.drawImage(holeImg, x - r, y - r, r * 2, r * 2); lg.globalAlpha = 1;
     };
     for (const p of w.players) if (!p.dead) hole(p.x - ox + 5, p.y - oy + 10, p.radiant > 0 ? 120 : 84 + Math.sin(w.t * 0.05) * 3, 1);
-    for (const tq of w.torches) hole(tq.x - ox, tq.y - oy, 60 + Math.sin(w.t * 0.3 + tq.x) * 3, 0.95);
+    for (const tq of w.torches) { hole(tq.x - ox, tq.y - oy, 60 + Math.sin(w.t * 0.3 + tq.x) * 3, 0.95); hole(tq.x - ox, tq.y - oy + 22, 34, 0.5); }
     for (const e of w.ents) {
       const d = ENT[e.type];
       if (d.light) { const r = d.light(e); if (r) hole(e.x - ox + e.w / 2, e.y - oy + e.h / 3, r, 0.95); }
       else if (d.glowR && !(d.harmless && d.harmless(e))) hole(e.x - ox + e.w / 2, e.y - oy + e.h / 2, d.glowR, 0.8);
       else if (e.type === 'shard') hole(e.x - ox + 4, e.y - oy + 5, 9, 0.6);
+      else if (d.foe && d.arrow) hole(e.x - ox + e.w / 2, e.y - oy + e.h / 2, 22 + e.w * 0.5, 0.5);
     }
     const x0 = Math.max(0, Math.floor(ox / T)), x1 = Math.min(w.cols - 1, Math.floor((ox + W) / T));
     for (let cx = x0; cx <= x1; cx++) {
@@ -304,9 +318,7 @@ const World = (() => {
       for (let cy = Math.max(1, Math.floor(oy / T)); cy < w.rows; cy++) {
         if (w.grid[cy][cx] === '~' && w.grid[cy - 1][cx] !== '~') {
           const x = cx * T - ox, y = cy * T - oy;
-          const g = lg.createLinearGradient(0, y - 56, 0, y + 6);
-          g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,0.85)');
-          lg.fillStyle = g; lg.fillRect(x, y - 56, T, 62 + T * 3);
+          lg.drawImage(lavaImg, x, y - 56, T, 62); lg.fillStyle = 'rgba(0,0,0,0.85)'; lg.fillRect(x, y + 6, T, T * 3);
           break;
         }
       }
@@ -365,6 +377,8 @@ const World = (() => {
     Backdrop.drawAmbient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
     if (!w.card) hud(c);
+    // embers about to leap from lava below the screen are announced at its edge
+    for (const e of w.ents) if (e.type === 'ember' && e.warn > 0 && e.x - ox > -10 && e.x - ox < W + 10) { const yy = Math.min(e.by - oy, H - 4); Art.glow(c, e.x - ox + 4, yy, 8 + (40 - e.warn) * 0.3, '#ff7a20', 0.5 + 0.3 * Math.sin(w.t * 0.6)); R(c, e.x - ox + 3, yy - 6 - (w.t >> 2) % 3, 2, 3, '#ffd070'); }
   }
   function hud(c) {
     const S = Art.S, two = w.players.length > 1;

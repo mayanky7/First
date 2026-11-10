@@ -27,7 +27,7 @@ const Art = (() => {
     });
   }
   function blit(c, img, x, y, flip, flipV) {
-    x = Math.round(x); y = Math.round(y);
+    x = Math.round(x) - (img.pad || 0); y = Math.round(y) - (img.pad || 0);
     if (flip || flipV) {
       c.save();
       c.translate(x + (flip ? img.width : 0), y + (flipV ? img.height : 0));
@@ -43,7 +43,7 @@ const Art = (() => {
     if (glowCache[col]) return glowCache[col];
     const [cv, g] = mk(64, 64);
     g.fillStyle = col;
-    for (let i = 0; i < 12; i++) { g.globalAlpha = 0.045 + i * 0.012; g.beginPath(); g.arc(32, 32, 32 - i * 2.6, 0, TAU); g.fill(); }
+    for (let i = 0; i < 24; i++) { g.globalAlpha = 0.022 + i * 0.006; g.beginPath(); g.arc(32, 32, 32 - i * 1.3, 0, TAU); g.fill(); }
     return glowCache[col] = cv;
   }
   function glow(c, x, y, r, col, a) {
@@ -257,7 +257,7 @@ const Art = (() => {
       R(g, 6, 9, 2, 1, '#ff5050'); R(g, 10, 9, 2, 1, '#ff5050'); R(g, 7, 11, 1, 1, '#ddd'); R(g, 10, 11, 1, 1, '#ddd');
     });
     S.bat = frames(3, 18, 12, (g, f) => {
-      const b = '#3d2e55', b2 = '#5a4580';
+      const b = '#6a4fa0', b2 = '#8e72c8';
       R(g, 7, 4, 4, 6, b); R(g, 7, 2, 1, 2, b); R(g, 10, 2, 1, 2, b);
       R(g, 7, 6, 1, 1, '#ff4040'); R(g, 10, 6, 1, 1, '#ff4040');
       if (f === 2) { R(g, 6, 4, 1, 7, b2); R(g, 11, 4, 1, 7, b2); R(g, 5, 6, 1, 4, b); R(g, 12, 6, 1, 4, b); }
@@ -335,7 +335,7 @@ const Art = (() => {
       R(g, 5, 3, 3, 1, d); R(g, 5, 4, 3, 1, d); R(g, 4, 5, 3, 1, d); R(g, 4, 6, 2, 1, d); R(g, 2, 1, 1, 1, '#fff');
     });
     S.heartEmpty = spr(9, 8, g => {
-      const c = '#22303a';
+      const c = '#46587c';
       R(g, 1, 0, 3, 1, c); R(g, 5, 0, 3, 1, c); R(g, 0, 1, 9, 3, c); R(g, 1, 4, 7, 1, c); R(g, 2, 5, 5, 1, c); R(g, 3, 6, 3, 1, c); R(g, 4, 7, 1, 1, c);
     });
     S.quiver = spr(3, 8, g => { R(g, 1, 0, 1, 8, '#e8fbff'); R(g, 0, 1, 3, 1, '#9fe8ff'); R(g, 0, 6, 1, 2, '#9fe8ff'); R(g, 2, 6, 1, 2, '#9fe8ff'); });
@@ -382,13 +382,13 @@ const Art = (() => {
     if (tileSets[th.id]) return tileSets[th.id];
     const P = th.tiles, r = rng(th.seed || 7);
     const set = { fill: [], cap: [], left: null, right: null };
-    for (let v = 0; v < 4; v++) set.fill.push(spr(T, T, g => {
+    for (let v = 0; v < 6; v++) set.fill.push(spr(T, T, g => {
       R(g, 0, 0, T, T, P.body);
       if (P.style === 'brick') {
         R(g, 0, 7, T, 1, P.dark); R(g, 0, 15, T, 1, P.dark);
         R(g, 4 + v * 2, 0, 1, 7, P.dark); R(g, (11 + v * 3) % 16, 8, 1, 7, P.dark);
         R(g, 0, 0, T, 1, P.light); R(g, 0, 8, T, 1, P.light);
-        for (let i = 0; i < 4; i++) R(g, r() * 16, r() * 16, 1, 1, P.speck);
+        if (v === 2) { R(g, 9, 10, 3, 2, P.speck); R(g, 11, 12, 2, 1, P.speck); R(g, 8, 11, 1, 1, '#e08a50'); } if (v === 5) { R(g, 3, 3, 2, 2, P.speck); R(g, 4, 2, 2, 1, '#e08a50'); }
       } else if (P.style === 'rock') {
         for (let i = 0; i < 3; i++) R(g, r() * 12, r() * 14, 3 + r() * 3, 1 + r() * 2, r() < 0.5 ? P.dark : P.light);
         if (v === 1) { const vein = [[4, 2], [4, 3], [5, 4], [5, 5], [6, 6], [7, 7], [7, 8], [8, 9], [6, 7], [5, 8], [4, 9], [9, 10], [9, 11]]; for (const [x, y] of vein) R(g, x - 1, y, 3, 1, '#6a2010'); for (const [x, y] of vein) R(g, x, y, 1, 1, P.speck); }
@@ -455,7 +455,10 @@ const Art = (() => {
     return x;
   }
 
-  function init() { buildQueen(); buildFoes(); buildItems(); S.shard = S.shard.map(im => { const o = spr(11, 13, g => g.drawImage(im, 1, 1)); return outlined(o, '#1c3a6a'); }); }
+  function padded(img, col) { const o = outlined(spr(img.width + 2, img.height + 2, g => g.drawImage(img, 1, 1)), col); o.pad = 1; return o; }
+  function init() { buildQueen(); buildFoes(); buildItems();
+    for (const k of ['goblin', 'wolf', 'spider', 'bat', 'troll', 'tonttu', 'bloom']) S[k] = S[k].map(im => padded(im, '#0e0c1c'));
+    S.cake = padded(S.cake, '#3a2410'); S.shard = S.shard.map(im => { const o = spr(11, 13, g => g.drawImage(im, 1, 1)); return outlined(o, '#1c3a6a'); }); }
 
   return { S, init, spr, blit, glow, flashOf, tileSet, digits, drawQueen, Q, gemSprite, outlined };
 })();

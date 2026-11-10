@@ -74,14 +74,20 @@
     ctx.drawImage(buf, 0, 0, cv.width, cv.height);
     if (sc.drawHi) sc.drawHi(UI);
     // soft vignette
-    const v = ctx.createRadialGradient(cv.width / 2, cv.height / 2, cv.height * 0.45, cv.width / 2, cv.height / 2, cv.width * 0.72);
-    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.38)');
-    ctx.fillStyle = v; ctx.fillRect(0, 0, cv.width, cv.height);
+    if (!vig || vig.width !== cv.width) {
+      const v = ctx.createRadialGradient(cv.width / 2, cv.height / 2, cv.height * 0.45, cv.width / 2, cv.height / 2, cv.width * 0.72);
+      v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,0.38)');
+      vig = v; vig.width = cv.width;
+    }
+    ctx.fillStyle = vig; ctx.fillRect(0, 0, cv.width, cv.height);
+    const mode = sc === Scenes.list.play && !World.card && !sc.paused ? 'play' : 'menu';
+    if (mode !== lastMode) { document.body.classList.toggle('menu', mode === 'menu'); lastMode = mode; }
     if (Scenes.fade > 0) { ctx.fillStyle = `rgba(4,5,13,${Scenes.fade})`; ctx.fillRect(0, 0, cv.width, cv.height); }
     if (muteT > 0) { muteT--; UI.text(Sound.muted ? 'Sound off' : 'Sound on', W - 8, H - 8, 7, { color: '#dfe8ff', align: 'right', alpha: Math.min(1, muteT / 20) }); }
   }
 
-  let muteT = 0;
+  let muteT = 0, vig = null, lastMode = '';
+  World.calm = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   function step() {
     Input.poll();
     if (Input.hit('mute')) { Sound.toggleMute(); muteT = 90; }
@@ -110,7 +116,7 @@
   document.addEventListener('visibilitychange', () => {
     last = 0;
     const sc = Scenes.cur;
-    if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead && !World.card) { sc.paused = true; }
+    if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead && !World.card) { sc.paused = true; Sound.duck(true); }
   });
 
   Art.init();

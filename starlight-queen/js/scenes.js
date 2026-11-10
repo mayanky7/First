@@ -4,13 +4,13 @@ const Game = {
   cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, coop: false, metBoy: false, bossDown: false, region: 0,
   stats: { foes: 0, deaths: 0, hits: 0, frames: 0 }, saved: null, vault: {}, best: null,
   newGame() {
-    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, coop: false, metBoy: false, bossDown: false, region: 0, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
+    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, coop: false, metBoy: !!this.read('sq-met'), bossDown: false, region: 0, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
   },
   read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
   write(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
   loadSave() { this.saved = this.read('sq-run'); this.vault = this.read('sq-vault') || {}; this.best = this.read('sq-best'); },
   save() {
-    Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault);
+    Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault); if (this.metBoy) this.write('sq-met', 1);
     this.saved = { cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, coop: this.coop, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
     this.write('sq-run', this.saved);
   },
@@ -26,7 +26,7 @@ const Game = {
     const min = st.frames / 3600;
     const clarity = flaws === 0 ? ['FL', 'Flawless'] : flaws <= 3 ? ['IF', 'Internally flawless'] : flaws <= 8 ? ['VVS', 'Very, very slightly included'] : flaws <= 16 ? ['VS', 'Very slightly included'] : flaws <= 30 ? ['SI', 'Slightly included'] : ['I', 'Included'];
     const ci = frac >= 0.95 ? 0 : frac >= 0.9 ? 1 : frac >= 0.84 ? 2 : frac >= 0.75 ? 3 : frac >= 0.65 ? 4 : frac >= 0.5 ? 5 : frac >= 0.35 ? 6 : 7;
-    const cut = min < 14 ? 'Excellent' : min < 19 ? 'Very good' : min < 26 ? 'Good' : min < 36 ? 'Fair' : 'Poor';
+    const cut = min < 9 ? 'Excellent' : min < 12 ? 'Very good' : min < 16 ? 'Good' : min < 24 ? 'Fair' : 'Poor';
     const sec = Math.floor(st.frames / 60);
     return {
       carat: this.carats(), n: Object.keys(this.gems).length, clarity, colour: 'DEFGHIJK'[ci], cut, got, total: World.meleeTotal || got,
@@ -82,7 +82,9 @@ function drawGemCard(u, gem, t, a, footer) {
   });
   g.save(); g.globalAlpha = a * 0.6; g.fillStyle = '#d6ba78'; g.fillRect(x * s, 127 * s, wd * s, Math.max(1, s * 0.4)); g.restore();
   u.text(gem.lesson, x, 137, 9.5, { color: '#f0d896', alpha: a, align: 'left', italic: true });
-  u.wrap(gem.text, wd, 7.7, {}).forEach((ln, i) => u.text(ln, x, 148.5 + i * 9.6, 7.7, { color: '#d8e0f2', alpha: a, align: 'left' }));
+  let fs = 7.7, lines = u.wrap(gem.text, wd, fs, {});
+  while (lines.length * fs * 1.34 > 51 && fs > 6.4) { fs -= 0.3; lines = u.wrap(gem.text, wd, fs, {}); }
+  lines.forEach((ln, i) => u.text(ln, x, 149 + i * fs * 1.34, fs, { color: '#d8e0f2', alpha: a, align: 'left' }));
   if (footer) u.text(footer, 92, 189, 5.4, { color: '#f0d896', alpha: a * (0.7 + 0.3 * Math.sin(t * 0.1)), ls: 1.3, title: true });
 }
 
@@ -162,7 +164,8 @@ Scenes.list.title = {
     if (Input.hit('vault')) { Scenes.go('vault'); return; }
     if (Input.hit('enter') && this.t > 20) {
       Sound.sfx('confirm');
-      const it = Input.hit('tap') && Input.touch ? this.items[0] : this.items[this.sel];
+      if (Input.hit('tap')) { const k = Math.round((Input.tapY - 136) / 15); if (k < 0 || k >= this.items.length || Math.abs(Input.tapX - 254) > 110) return; this.sel = k; }
+      const it = this.items[this.sel];
       if (it === 'continue') { Game.resume(); Scenes.go('map'); }
       else if (it === 'vault') Scenes.go('vault');
       else { Game.write('sq-run', null); Game.newGame(); Scenes.go('intro'); }
@@ -183,17 +186,17 @@ Scenes.list.title = {
       if (on) { const hw = u.width(label, 10.5) / 2 + 9; u.text('✦', 254 - hw, y, 7, { color: '#bff4ff', alpha: b }); u.text('✦', 254 + hw, y, 7, { color: '#bff4ff', alpha: b }); }
     });
     if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 254, 188, 6.4, { color: '#d6ba78', alpha: b, italic: true });
-    u.text(Input.touch ? 'TAP TO BEGIN' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 205, 5, { color: '#98a6cc', alpha: b, ls: 1.4, title: true });
+    u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 205, 5.6, { color: '#98a6cc', alpha: b, ls: 1.2, title: true });
   }
 };
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  'In Kaamos, a small town at the top of Finland, the winter night lasts fifty-one days.',
+  'In Kaamos, a small town at the top of Finland, the winter night lasts more than fifty days.',
   'Ana lives at the end of the last lane. The town calls her the quiet girl. The forest calls her what she is — the last queen of the elves of the north.',
   'Far to the west a Hoarder King sits upon a mesa, gathering the great diamonds of the world one by one, so that their light is his alone.',
   'The greatest of them is the Koh-i-Noor — the Mountain of Light.',
-  'So Ana laces her boots and leaves the small town behind. Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a far-away world called America.',
+  'So Ana laces her boots and leaves the small town behind. Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a faraway world called America.',
   'The road goes west. Gather every light you can.'
 ];
 Scenes.list.intro = {
@@ -235,7 +238,7 @@ Scenes.list.intro = {
     const a = clamp(this.pt / 40, 0, 1);
     const lines = u.wrap(PROLOGUE[this.i], 268, 11.5, { italic: true });
     lines.forEach((ln, k) => u.text(ln, 192, 136 + k * 16 - (lines.length - 1) * 8 + 8, 11.5, { color: '#e6ecff', alpha: a, italic: true }));
-    u.text(Input.touch ? 'TAP TO CONTINUE' : 'ENTER  CONTINUE   ·   ESC  SKIP', 192, 205, 5, { color: '#98a6cc', ls: 1.4, title: true });
+    u.text(Input.touch ? 'TAP TO CONTINUE' : 'ENTER  CONTINUE   ·   ESC  SKIP', 192, 205, 5.6, { color: '#98a6cc', ls: 1.2, title: true });
   }
 };
 
@@ -324,7 +327,7 @@ Scenes.list.map = {
     u.panel(72, 166, 240, 34, 0.9 * a, '#2a1a0a');
     u.text(MAP_NAMES[this.to], 192, 177, 10, { color: '#f6e2a0', alpha: a, title: true, ls: 1 });
     u.text(`${Object.keys(Game.gems).length} of ${GEMS.length} diamonds   ·   ${Game.carats().toFixed(2)} carats carried`, 192, 187, 6.6, { color: '#e6dcc0', italic: true, alpha: a });
-    u.text(Input.touch ? 'TAP TO SET FORTH' : 'ENTER TO SET FORTH', 192, 195, 4.8, { color: '#c8a860', alpha: a * (0.6 + 0.4 * Math.sin(t * 0.1)), ls: 1.4, title: true });
+    u.text(Input.touch ? 'TAP TO SET FORTH' : 'ENTER TO SET FORTH', 192, 195.5, 5.6, { color: '#f0d896', alpha: a * (0.85 + 0.15 * Math.sin(t * 0.1)), ls: 1.2, title: true });
   }
 };
 
@@ -334,18 +337,22 @@ Scenes.list.play = {
   update(busy) {
     const w = World;
     if (busy) { if (w.player.dead || w.state === 'clear') w.update(); return; }
-    if (Input.hit('pause') && w.state === 'play' && !w.player.dead && !w.card) { this.paused = !this.paused; Sound.duck(this.paused); Sound.sfx('select'); }
+    if (Input.hit('pause') && w.state === 'play' && !w.player.dead && !w.card) { this.paused = !this.paused; this.armR = false; Sound.duck(this.paused); Sound.sfx('select'); return; }
     if (this.paused) {
-      if (Input.hit('enter')) { this.paused = false; Sound.duck(false); }
-      else if (Input.hit('restart')) { Scenes.go('play', { respawn: true }); }
-      else if (Input.hit('quit')) { Game.save(); Scenes.go('title'); }
+      let pick = Input.hit('restart') ? 1 : Input.hit('quit') ? 3 : Input.hit('enter') && !Input.hit('tap') ? 0 : -1;
+      if (Input.hit('tap')) { const k = Math.round((Input.tapY - 96) / 14); if (k >= 0 && k < 4 && Math.abs(Input.tapX - 192) < 110) pick = k; }
+      if (pick === 0) { this.paused = false; Sound.duck(false); }
+      else if (pick === 1) { if (this.armR) Scenes.go('play', { respawn: true }); else { this.armR = true; Sound.sfx('select'); } }
+      else if (pick === 2) { Sound.toggleMute(); }
+      else if (pick === 3) { Game.save(); Scenes.go('title'); }
       return;
     }
-    if (Input.hit('join') && Game.metBoy && w.state === 'play' && !w.card) {
+    if (Input.hit('join') && Game.metBoy && w.state === 'play' && !w.card && w.players.every(p => !p.dead)) {
       Game.coop = !Game.coop;
-      if (Game.coop) { w.addPlayer2(); w.toast('Sam joins the road!   ← → walk  ·  ↑ leap  ·  K sling'); } else { w.dropPlayer2(); w.toast('Sam waves, and falls behind. Press [2] to call him back.'); }
+      if (Game.coop) { w.addPlayer2(); w.toast('ANA   A D walk  ·  W leap  ·  X arrow|SAM   ← → walk  ·  ↑ leap  ·  K sling', true); } else { w.dropPlayer2(); w.toast('Sam waves, and falls behind. Press [2] to call him back.'); }
       Game.save();
     }
+    if (!Game.seen.hello && w.state === 'play') { Game.seen.hello = 1; w.toast(Input.touch ? '◀ ▶ walk   ·   ▲ leap   ·   ✦ arrow' : '← → walk   ·   SPACE leap   ·   X arrow', true); }
     w.update();
   },
   draw(c) { World.draw(c); },
@@ -353,6 +360,7 @@ Scenes.list.play = {
     const w = World, z = w.introZone;
     if (w.introT > 0 && z && w.state === 'play' && !w.card) {
       const a = clamp(w.introT / 40, 0, 1) * clamp((250 - w.introT) / 30, 0, 1);
+      u.panel(0, 46, W, 60, 0.3 * a, '#060814');
       u.text(z.title.toUpperCase(), 192, 66, 24, { color: '#f6e2a0', glow: '#ffb040', alpha: a, title: true, ls: 6 });
       u.rule(192, 84, 96, '#c8a860', a);
       u.text(z.sub, 192, 96, 9.5, { color: '#f0e8d0', alpha: a, italic: true });
@@ -362,12 +370,15 @@ Scenes.list.play = {
       if (Input.touch) txt = txt.replace('[←] [→] to walk  ·  [SPACE] to leap — hold it to leap higher', '◀ ▶ to walk  ·  ▲ to leap — hold it to leap higher').replace('[X] looses', '✦ looses').replace('Press [SPACE] again', 'Press ▲ again');
       const lines = txt.split('|'), hgt = 12 + lines.length * 11;
       const wd = Math.min(340, Math.max(...lines.map(l => u.width(l, 8))) + 24);
-      u.panel(192 - wd / 2, 166 - (lines.length - 1) * 5.5, wd, hgt, 0.8, '#0a1020');
-      lines.forEach((ln, i) => u.text(ln, 192, 178 + i * 11 - (lines.length - 1) * 5.5, 8, { color: '#e8f4ff' }));
+      const cy = w.player.y - w.cam.y > 96 ? 62 : 178;
+      u.panel(192 - wd / 2, cy - 12 - (lines.length - 1) * 5.5, wd, hgt, 0.82, '#0a1020');
+      lines.forEach((ln, i) => u.text(ln, 192, cy + i * 11 - (lines.length - 1) * 5.5, 8, { color: '#e8f4ff' }));
     }
     if (w.toastT > 0 && w.state === 'play' && !w.card) {
-      const a = clamp(w.toastT / 30, 0, 1) * clamp((240 - w.toastT) / 15, 0, 1);
-      u.text(w.toastText, 192, 44, 9, { color: '#fff6c8', alpha: a, glow: '#ffb040', italic: true });
+      const a = clamp(w.toastT / 30, 0, 1) * clamp(((w.toastMax || 240) - w.toastT) / 15, 0, 1), tl = w.toastText.split('|');
+      const ty = w.signText && w.player.y - w.cam.y > 96 ? 112 : 40;
+      if (tl.length > 1) u.panel(192 - 120, ty - 9, 240, tl.length * 12 + 6, 0.55 * a, '#080a14');
+      tl.forEach((ln, i) => u.text(ln, 192, ty + i * 12, 9, { color: '#fff6c8', alpha: a, glow: tl.length > 1 ? null : '#ffb040', italic: tl.length === 1 }));
     }
     if (w.fight && w.boss && w.boss.st === 'intro') {
       const a = clamp(w.boss.t0 / 30, 0, 1) * clamp((110 - w.boss.t0) / 20, 0, 1);
@@ -375,21 +386,21 @@ Scenes.list.play = {
       u.text('Keeper of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     } else if (w.fight && w.boss && !w.boss.dead) u.text('THE HOARDER KING', 192, H - 21, 5, { color: '#ffc8a0', alpha: 0.9, ls: 1.5, title: true });
     if (Game.metBoy && !Game.coop && w.state === 'play' && !w.card && !this.paused && !Input.touch) { u.panel(W - 109, 30, 106, 10, 0.5, '#080a14'); u.text('PLAYER 2  ·  PRESS 2 TO JOIN', W - 7, 35.2, 4.8, { color: '#ffd070', align: 'right', ls: 0.9, title: true }); }
-    if (w.players.length > 1 && !w.card) { u.text('ANA', 57, 9.5, 4.2, { color: '#bff4ff', align: 'right', ls: 0.6, title: true }); u.text('SAM', 57, 33.5, 4.2, { color: '#ffd070', align: 'right', ls: 0.6, title: true }); }
+    if (w.players.length > 1 && !w.card) { u.text('ANA', 57.5, 9.5, 4.8, { color: '#bff4ff', align: 'right', ls: 0.4, title: true }); u.text('SAM', 57.5, 33.5, 4.8, { color: '#ffd070', align: 'right', ls: 0.6, title: true }); }
     if (w.state === 'clear') {
       const a = clamp((w.clearT - 50) / 40, 0, 1);
       u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
       u.text(`${Game.carats().toFixed(2)} carats carried home`, 192, 78, 8.5, { color: '#dffbff', alpha: clamp((w.clearT - 120) / 40, 0, 1), italic: true });
     }
-    if (w.card) drawGemCard(u, w.card.gem, w.card.t, clamp(w.card.t / 25, 0, 1), w.card.t > 70 ? (Input.touch ? 'TAP ▲ TO CONTINUE' : 'ENTER TO CONTINUE') : '');
+    if (w.card) drawGemCard(u, w.card.gem, w.card.t, clamp(w.card.t / 25, 0, 1), w.card.t > 70 ? (Input.touch ? 'TAP TO CONTINUE' : 'ENTER TO CONTINUE') : '');
     if (this.paused) {
       u.panel(0, 0, W, H, 0.66, '#04050d');
       u.text('THE ROAD WAITS', 192, 60, 18, { color: '#f6e2a0', glow: '#ffb040', title: true, ls: 4 });
       u.rule(192, 76, 80, '#c8a860', 1);
-      const rows = Input.touch ? [['II', 'resume']] : [['ENTER', 'resume'], ['R', 'return to the last lantern'], ['Q', 'save and quit to title'], ['M', 'sound ' + (Sound.muted ? 'off' : 'on')]];
-      rows.forEach(([k, v], i) => { u.text(k, 172, 96 + i * 13, 5.6, { color: '#d6ba78', align: 'right', ls: 1.4, title: true }); u.text(v, 182, 96 + i * 13, 8.6, { color: '#dfe8ff', align: 'left' }); });
+      const tt = Input.touch, rows = [[tt ? '›' : 'ENTER', 'resume'], [tt ? '›' : 'R', this.armR ? (tt ? 'tap again to confirm' : 'press R again to confirm') : 'return to the last lantern'], [tt ? '›' : 'M', 'sound ' + (Sound.muted ? 'off' : 'on')], [tt ? '›' : 'Q', 'save and quit to title']];
+      rows.forEach(([k, v], i) => { u.text(k, 172, 96 + i * 14, 5.6, { color: '#d6ba78', align: 'right', ls: 1.4, title: true }); u.text(v, 182, 96 + i * 14, 9, { color: '#dfe8ff', align: 'left' }); });
       const ctl = Game.coop ? [['ANA', 'A D walk   ·   W or SPACE leap   ·   X or F arrow'], ['SAM', '← → walk   ·   ↑ leap   ·   K or / sling']] : [['WALK', '← →  or  A D'], ['LEAP', 'SPACE or ↑   ·   again in the air, held: glide'], ['ARROW', 'X or K']];
-      ctl.forEach(([k, v], i) => { u.text(k, 132, 160 + i * 11, 5, { color: '#8f9cc0', align: 'right', ls: 1.4, title: true }); u.text(v, 140, 160 + i * 11, 7.4, { color: '#aeb9d6', align: 'left' }); });
+      if (!tt) ctl.forEach(([k, v], i) => { u.text(k, 132, 160 + i * 11, 5, { color: '#8f9cc0', align: 'right', ls: 1.4, title: true }); u.text(v, 140, 160 + i * 11, 7.4, { color: '#aeb9d6', align: 'left' }); });
     }
   }
 };
@@ -407,7 +418,8 @@ Scenes.list.vault = {
     if (Input.hit('dn')) mv(6);
     if (Input.hit('up')) mv(-6);
     if (Input.hit('pause') || Input.hit('vault') || Input.hit('quit')) { Scenes.go('title'); return; }
-    if (Input.hit('enter') && this.t > 15) { if (Input.touch && Input.hit('tap')) { Scenes.go('title'); return; } if (Game.vault[GEMS[this.sel].id]) { this.open = true; this.ot = this.t; Sound.sfx('gem'); } else Sound.sfx('empty'); }
+    if (Input.hit('tap')) { const col = Math.round((Input.tapX - 42) / 60), rw = Math.round((Input.tapY - 80) / 68); if (col < 0 || col > 5 || rw < 0 || rw > 1 || Input.tapY < 46) { Scenes.go('title'); return; } this.sel = rw * 6 + col; }
+    if (Input.hit('enter') && this.t > 15) { if (Game.vault[GEMS[this.sel].id]) { this.open = true; this.ot = this.t; Sound.sfx('gem'); } else Sound.sfx('empty'); }
   },
   draw(c) { c.fillStyle = '#05060f'; c.fillRect(0, 0, W, H); const r = rng(3); for (let i = 0; i < 40; i++) R(c, r() * W, r() * H, 1, 1, '#1c2440'); },
   drawHi(u) {
@@ -427,14 +439,14 @@ Scenes.list.vault = {
       u.text(has ? `${gem.carat} ct` : '—', x, y + 20, 6.6, { color: has ? '#fff6dc' : '#6a76a0', title: true });
       u.text(has ? nm : 'Found in ' + where, x, y + 28.5, u.width(has ? nm : '', 5.6, { italic: true }) > 56 ? 4.6 : 5.6, { color: has ? '#b4c0e0' : '#7884ac', italic: true });
     });
-    u.text(Input.touch ? 'TAP TO RETURN' : '← →  CHOOSE   ·   ENTER  STUDY   ·   ESC  RETURN', 192, 205, 5, { color: '#98a6cc', ls: 1.4, title: true });
-    if (this.open) drawGemCard(u, GEMS[this.sel], t, clamp((t - this.ot) / 20, 0, 1), 'ENTER TO CLOSE');
+    u.text(Input.touch ? 'TAP A STONE TO STUDY IT   ·   TAP THE TITLE TO RETURN' : '← →  CHOOSE   ·   ENTER  STUDY   ·   ESC  RETURN', 192, 205, 5.6, { color: '#98a6cc', ls: 1.4, title: true });
+    if (this.open) drawGemCard(u, GEMS[this.sel], t, clamp((t - this.ot) / 20, 0, 1), Input.touch ? 'TAP TO CLOSE' : 'ENTER TO CLOSE');
   }
 };
 
 /* ---------- Ending ---------- */
 const EPILOGUE = [
-  'The Hoarder King is fallen, and the Mountain of Light is free.',
+  'The Hoarder King is fallen, and the Mountain of Light shines for everyone again.',
   'Ana does not keep it. Great diamonds, she has learned, are only ever borrowed — from the deep earth, and from everyone who comes after.',
   'In Kaamos the long night ends. The tonttu at the end of the lane sets a lantern in the window, in case she should come home.',
   'But the road is long, and the world is wide, and Ana has only just begun.'

@@ -1,7 +1,7 @@
 'use strict';
 /* Starlight Queen — Ana and Sam, their foes, items, diamonds, and the Hoarder King */
 
-const SOLID = { '#': 1, 'B': 1, '?': 1, 'H': 1, 'S': 1, 'L': 1, 'U': 1, 'X': 1 };
+const SOLID = { '#': 1, 'B': 1, '?': 1, 'H': 1, 'S': 1, 'G': 1, 'U': 1, 'X': 1 };
 function tileAt(w, cx, cy) { if (cy < 0 || cy >= w.rows || cx < 0 || cx >= w.cols) return '.'; return w.grid[cy][cx]; }
 function solidAt(w, cx, cy) { if (cx < 0 || cx >= w.cols) return true; return !!SOLID[tileAt(w, cx, cy)]; }
 function standable(w, cx, cy) { const ch = tileAt(w, cx, cy); return !!SOLID[ch] || ch === '='; }
@@ -51,7 +51,7 @@ function makePlayer(x, y, id) {
     anim: 0, dead: 0, ride: null, control: true, stepT: 0
   };
 }
-const GLIDE_MAX = 64;
+const GLIDE_MAX = 44;
 function updatePlayer(w, p) {
   if (p.dead) { p.dead++; return; }
   if (p.ride) { p.x += p.ride.ddx; p.y += p.ride.ddy; }
@@ -145,7 +145,7 @@ function killPlayer(w, p, pit) {
 }
 function drawPlayer(c, w, p, ox, oy) {
   if (p.dead) return;
-  if (p.inv > 0 && p.hurtT <= 0 && (p.inv >> 2) % 2) return;
+  if (p.inv > 0 && p.hurtT <= 0 && (p.inv >> 3) % 2) return;
   const set = p.id ? (p.shootT > 0 ? Art.S.boyShoot : Art.S.boy) : (p.shootT > 0 ? Art.S.queenShoot : Art.S.queen);
   let img;
   if (p.hurtT > 0) img = set.hurt[0];
@@ -305,6 +305,7 @@ ENT.ember = {
   init(e) { e.jump = e.h; e.w = 8; e.h = 10; e.x -= 4; e.by = e.y - 2; e.y = e.by; e.per = 170; e.t0 = Math.floor((e.ph || 0) * 170); e.up = 0; },
   update(w, e) {
     e.t0++;
+    e.warn = e.up === 0 ? Math.max(0, 40 - (e.per - e.t0 % e.per)) : 0;
     if (e.up === 0 && e.t0 % e.per === 0) {
       e.up = 1; e.vy = -Math.sqrt(2 * 0.13 * (e.jump || 7) * T);
       if (Math.abs(e.x - w.player.x) < 220) Sound.sfx('ember');
@@ -406,11 +407,11 @@ ENT.lantern = {
   init(e) { e.w = 12; e.h = 26; e.x -= 6; e.y -= 26; e.on = false; },
   update(w, e) {
     if (!e.on && touch(w, e)) {
-      e.on = true; World.checkpoint(e.x + 6, e.y + 26); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — your road is remembered');
+      e.on = true; World.checkpoint(e.x + 6, e.y + 26); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — you will return here if you fall');
     }
   },
   draw(c, w, e, ox, oy) {
-    if (e.on) Art.glow(c, e.x - ox + 6, e.y - oy + 5, 22 + Math.sin(w.t * 0.1) * 2, '#bff4ff', 0.6);
+    if (e.on) Art.glow(c, e.x - ox + 6, e.y - oy + 5, 13 + Math.sin(w.t * 0.1) * 1.5, '#bff4ff', 0.5);
     Art.blit(c, Art.S.lantern[e.on ? 1 : 0], e.x - ox, e.y - oy);
   },
   light(e) { return e.on ? 62 : 0; }
@@ -431,7 +432,7 @@ ENT.beacon = {
     if (!e.on && (!e.final || (!w.bossAlive && Game.gems.kohinoor)) && !p.dead && p.x + p.w > e.x + 2 && p.x < e.x + e.w - 2 && Math.abs(p.y + p.h - (e.y + 56)) < 40) { e.on = true; World.lightBeacon(e); }
     if (e.on) {
       e.fire = Math.min(1, e.fire + 0.012);
-      for (let i = 0; i < 2; i++) w.parts.push({ x: e.x + 20 + rand(-7, 7) * e.fire, y: e.y + 2, vx: rand(-0.3, 0.3), vy: rand(-2.6, -0.8) * (0.4 + e.fire), life: rand(18, 44), col: ['#fff6b0', '#ffc040', '#ff7a1a', '#ff4a10'][i + (w.t % 2) * 2 & 3], g: -0.02, glow: 1, sz: 2 + (rand() < 0.4) });
+      if (Math.abs(e.x - w.cam.x - W / 2) < W) for (let i = 0; i < 2; i++) w.parts.push({ x: e.x + 20 + rand(-7, 7) * e.fire, y: e.y + 2, vx: rand(-0.3, 0.3), vy: rand(-2.6, -0.8) * (0.4 + e.fire), life: rand(18, 44), col: ['#fff6b0', '#ffc040', '#ff7a1a', '#ff4a10'][i + (w.t % 2) * 2 & 3], g: -0.02, glow: 1, sz: 2 + (rand() < 0.4) });
     }
   },
   draw(c, w, e, ox, oy) {
@@ -464,7 +465,7 @@ ENT.boss = {
       case 'idle': {
         face();
         e.vx = e.dir * (p2 ? 0.6 : 0.4);
-        if (Math.abs(p.x - e.x) < 30) e.vx = 0;
+        if (Math.abs(p.x - e.x) < 64) e.vx = 0;
         e.x = clamp(e.x + e.vx, A.x0 + 4, A.x1 - e.w - 4);
         if (e.t0 > (p2 ? 46 : 74)) {
           const opts = ['slam', 'embers', 'charge'].filter(o => o !== e.last);
@@ -664,7 +665,7 @@ ENT.boy = {
     e.dir = p.x < e.x ? -1 : 1;
     if (near) {
       if (!Game.metBoy) { Game.metBoy = true; Sound.sfx('oneup'); World.sparkle(e.x + 5, e.y + 6, '#ffd070', 14); Game.save(); }
-      w.signText = 'Sam: “You came all the way from Finland? I dig for diamonds here.|Let’s go together!”   ·   Player 2 — press [2] to join'; w.signNear = e;
+      w.signText = 'Sam: “You came all the way from Finland? I dig for diamonds here.|Let’s go together!”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
     }
   },
   draw(c, w, e, ox, oy) {

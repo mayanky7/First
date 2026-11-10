@@ -33,10 +33,11 @@ Gamepads work (first pad is Ana, second is Sam), and touch buttons appear on pho
 
 ## The diamonds
 
-Twelve diamonds lie along the road, each larger than the last and each in a spot that takes
+Twelve diamonds lie along the road, growing grander as it goes, each in a spot that takes
 some finding. Collecting one opens a card with its carat, cut, colour, clarity and origin, and
 a short lesson. The first six are teaching stones invented for the game (carat, cut, clarity,
-colour, fancy colour, where diamonds come from). The last six are real: Uncle Sam, the Dresden
+colour, fancy colour, where diamonds come from). The last six are real: Uncle Sam (buried — bump
+the right block), the Dresden
 Green, the Hope, the Tiffany Yellow, Cullinan I and the Koh-i-Noor, described with their real
 figures. The small sparkles are *melee* — the trade's word for diamonds under a fifth of a carat.
 

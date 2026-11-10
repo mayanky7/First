@@ -18,19 +18,19 @@ const GEMS = [
     id: 'clarity', name: 'The Ice Window', real: false, carat: 2.00, cut: 'Emerald (step cut)', shape: 'emerald',
     color: 'E · colourless', tint: '#e6fbff', clarity: 'VVS1', origin: 'Diavik, Northwest Territories, Canada',
     lesson: 'Clarity',
-    text: 'Clarity counts the tiny crystals and feathers trapped inside. The scale runs FL, IF, VVS, VS, SI, I — judged under ten-power magnification. A step cut like this one is an open window: it hides nothing, so it demands a clean stone. Diavik is mined beneath a frozen lake.'
+    text: 'Clarity counts the tiny crystals and feathers trapped inside. The scale runs FL, IF, VVS, VS, SI, I — judged under ten-power magnification. A step cut like this one is an open window: it hides nothing, so it demands a clean stone. Diavik was mined from beneath a frozen lake.'
   },
   {
     id: 'colour', name: 'Midsummer White', real: false, carat: 5.00, cut: 'Oval brilliant', shape: 'oval',
     color: 'D · colourless', tint: '#ffffff', clarity: 'IF', origin: 'Mir pipe, Yakutia, Russia',
     lesson: 'Colour',
-    text: 'For white diamonds, less colour is worth more. The scale starts at D — perfectly colourless — and runs to Z, a light yellow. Graders compare a stone, table down, against master stones under daylight-white lamps. The Mir mine is an open pit more than half a kilometre deep.'
+    text: 'For white diamonds, less colour is worth more. The scale starts at D — colourless — and runs to Z, a light yellow. Graders compare a stone, table down, against master stones under lamps that copy daylight. The Mir mine is an open pit more than half a kilometre deep.'
   },
   {
-    id: 'pink', name: 'The Rose of the Kimberley', real: false, carat: 6.00, cut: 'Cushion', shape: 'cushion',
-    color: 'Fancy vivid pink', tint: '#ff9ac8', clarity: 'VS1', origin: 'Argyle, Western Australia',
+    id: 'pink', name: 'The Savannah Rose', real: false, carat: 6.00, cut: 'Cushion', shape: 'cushion',
+    color: 'Fancy vivid pink', tint: '#ff9ac8', clarity: 'VS1', origin: 'Williamson mine, Tanzania',
     lesson: 'Fancy colour',
-    text: 'Past Z the rules turn over: strong colour becomes rare and precious. Yellow comes from nitrogen, blue from boron. Pink comes from no impurity at all — the crystal itself was bent under pressure. Argyle produced most of the world’s pink diamonds until it closed in 2020.'
+    text: 'Past Z the rules turn over: strong colour becomes rare and precious. Yellow comes from nitrogen, blue from boron. Pink comes from no impurity at all — the crystal itself was bent under pressure. Most pinks came from Argyle in Australia, which closed in 2020; the rare large ones, like this, from Tanzania.'
   },
   {
     id: 'deep', name: 'The Deep One', real: false, carat: 10.00, cut: 'Pear brilliant', shape: 'pear',
@@ -40,7 +40,7 @@ const GEMS = [
   },
   {
     id: 'unclesam', name: 'Uncle Sam', real: true, carat: 12.42, cut: 'Emerald (step cut)', shape: 'emerald',
-    color: 'M · faint brown', tint: '#f6e6cc', clarity: 'VVS1', origin: 'Crater of Diamonds, Arkansas, USA',
+    color: 'M · faint brown', tint: '#f6e6cc', clarity: 'VVS', origin: 'Crater of Diamonds, Arkansas, USA',
     lesson: 'A real American find',
     text: 'The largest diamond ever found in the United States: 40.23 carats in the rough, picked up in 1924 near Murfreesboro, Arkansas. It was cut down to this 12.42-carat stone. The field is now a state park where anyone may dig — and keep what they find.'
   },
@@ -48,7 +48,7 @@ const GEMS = [
     id: 'dresden', name: 'The Dresden Green', real: true, carat: 41, cut: 'Pear brilliant', shape: 'pear',
     color: 'Natural fancy green', tint: '#8fe6a8', clarity: 'VS1', origin: 'Golconda region, India',
     lesson: 'Colour by radiation',
-    text: 'About 41 carats, and the largest naturally green diamond known. Its colour was made by natural radiation in the earth, over millions of years. It has been in Dresden, Germany, since 1742 and is kept in the Green Vault there.'
+    text: 'About 41 carats, and the largest naturally green diamond known. Its colour was made by natural radiation in the earth, over millions of years. It has been in Dresden, Germany, since the 1740s and is kept in the Green Vault there.'
   },
   {
     id: 'hope', name: 'The Hope Diamond', real: true, carat: 45.52, cut: 'Antique cushion', shape: 'cushion',
@@ -58,21 +58,21 @@ const GEMS = [
   },
   {
     id: 'tiffany', name: 'The Tiffany Yellow', real: true, carat: 128.54, cut: 'Cushion brilliant, 82 facets', shape: 'cushion',
-    color: 'Fancy yellow', tint: '#ffe26a', clarity: 'VS1', origin: 'Kimberley, South Africa',
+    color: 'Fancy yellow', tint: '#ffe26a', clarity: 'VS1, by Tiffany', origin: 'Kimberley, South Africa',
     lesson: 'Cut for colour',
     text: '128.54 carats, cut from a 287.42-carat crystal found in 1877. Its cutters gave it 82 facets — two dozen more than a standard brilliant — to make the yellow blaze rather than to save weight. Nitrogen in the crystal gives it its colour.'
   },
   {
     id: 'cullinan', name: 'Cullinan I · The Great Star of Africa', real: true, carat: 530.2, cut: 'Pear brilliant, 74 facets', shape: 'pear',
-    color: 'D · colourless', tint: '#ffffff', clarity: 'Exceptional', origin: 'Premier Mine, Cullinan, South Africa',
+    color: 'Colourless', tint: '#ffffff', clarity: 'Not formally graded', origin: 'Premier Mine, Cullinan, South Africa',
     lesson: 'The largest crystal',
     text: '530.2 carats, cut from the Cullinan — at 3,106 carats the largest gem diamond crystal ever found, in 1905. The rough was cleaved into nine great stones and many small ones. This, the largest, is set in the Sovereign’s Sceptre of the British Crown Jewels.'
   },
   {
     id: 'kohinoor', name: 'The Koh-i-Noor', real: true, carat: 105.6, cut: 'Oval brilliant', shape: 'oval',
-    color: 'Colourless', tint: '#fffdf4', clarity: 'Exceptional', origin: 'Golconda region, India',
+    color: 'Colourless', tint: '#fffdf4', clarity: 'Not formally graded', origin: 'Golconda region, India',
     lesson: 'The Mountain of Light',
-    text: 'Its name is Persian for “Mountain of Light”. Mined in India centuries ago, it passed between Mughal, Persian, Afghan and Sikh rulers before coming to Britain in 1849. It weighed about 186 carats until it was recut in 1852 to 105.6 for more brilliance. It is kept in the Tower of London.'
+    text: 'Its name is Persian for “Mountain of Light”. Mined in India long ago, it was won and lost by Mughal, Persian, Afghan and Sikh rulers. Britain took it with the Punjab in 1849 and recut it in 1852, from about 191 carats to 105.6. It lies in the Tower of London; India and others have asked for its return.'
   }
 ];
 const GEM_BY_ID = {}; GEMS.forEach((g, i) => { g.n = i; GEM_BY_ID[g.id] = g; });
