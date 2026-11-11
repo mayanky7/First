@@ -19,6 +19,8 @@
   html,body{margin:0;height:100%;background:#05060c;overflow:hidden;touch-action:none;
     -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
   #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #wrap,#game,#touch,.tb{touch-action:none}
+  html.zoomed,html.zoomed body,html.zoomed #wrap,html.zoomed #game,html.zoomed #touch,html.zoomed .tb{touch-action:pinch-zoom}
   #game{display:block;background:#000;outline:none}
   #vig{position:absolute;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,0) 52%,rgba(0,0,0,.38) 100%)}
   #touch{position:fixed;inset:0;pointer-events:none;display:none}

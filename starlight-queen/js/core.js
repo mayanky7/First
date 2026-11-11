@@ -98,6 +98,28 @@ const Input = (() => {
       setTimeout(() => { set('enter', 'tap', false); set('tap', 'tap', false); }, 60);
     });
     if (window.matchMedia && matchMedia('(pointer: coarse)').matches) { usedTouch = true; document.body.classList.add('touch'); }
+    // The browser's own zoom has no place in a game: two thumbs on two buttons read as a pinch, quick taps on one as a
+    // double-tap, and some browsers (iOS Safari) ignore a page that asks not to be zoomed. So stop those gestures here.
+    // And if the page is ever zoomed all the same, step aside, so that a pinch can always bring it back.
+    const vv = window.visualViewport, zoomed = () => !!vv && vv.scale > 1.02;
+    const stop = e => { if (e.cancelable && !zoomed()) e.preventDefault(); };
+    document.addEventListener('touchmove', stop, { passive: false });
+    document.addEventListener('touchstart', e => { if (e.touches.length > 1) stop(e); }, { passive: false });
+    let lastEnd = 0;
+    document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastEnd < 350) stop(e); lastEnd = now; }, { passive: false });
+    ['gesturestart', 'gesturechange', 'gestureend', 'dblclick'].forEach(n => document.addEventListener(n, stop, { passive: false }));
+    window.addEventListener('wheel', e => { if (e.ctrlKey) stop(e); }, { passive: false });
+    if (vv) {
+      const meta = document.querySelector('meta[name="viewport"]'), base = meta && meta.getAttribute('content');
+      let tries = 0;
+      const check = () => {
+        const z = zoomed();
+        document.documentElement.classList.toggle('zoomed', z); // the stylesheet lets a pinch through while this is set
+        if (!z) { tries = 0; return; }
+        if (meta && base && tries < 3) { tries++; meta.setAttribute('content', base + ',minimum-scale=1'); setTimeout(() => meta.setAttribute('content', base), 120); } // asking again for scale 1 snaps some browsers back
+      };
+      vv.addEventListener('resize', check); window.addEventListener('pageshow', check); window.addEventListener('orientationchange', () => setTimeout(check, 300)); check();
+    }
   }
 
   /* gamepad */
