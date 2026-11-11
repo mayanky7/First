@@ -3937,6 +3937,10 @@ Scenes.list.title = {
   enter() {
     Game.loadSave(); this.t = 0; this.sel = 0;
     this.items = (Game.saved ? ['continue'] : []).concat(['new', 'vault']);
+    // On a web page that is the whole game in one file, offer that file to keep: it plays on a laptop with no internet.
+    this.canSave = /^https?:$/.test(location.protocol) && !document.querySelector('script[src]') && !Input.touch;
+    if (this.canSave) this.items.push('download');
+    this.saveNote = ''; this.saveT = 0;
     Sound.music('title'); Sound.duck(false); Sound.setRate(1);
   },
   update(busy) {
@@ -3955,6 +3959,16 @@ Scenes.list.title = {
       const it = this.items[this.sel];
       if (it === 'continue') { Game.resume(); Scenes.go('map'); }
       else if (it === 'vault') Scenes.go('vault');
+      else if (it === 'download') {
+        this.saveNote = 'Fetching the game…'; this.saveT = this.t;
+        fetch('./index.html', { credentials: 'same-origin' }).then(r => r.text().then(html => {
+          if (!r.ok || html.indexOf('window.__sq') < 0) throw new Error('not the game');
+          const page = html.replace(/<link rel="(manifest|apple-touch-icon)"[^>]*>\n?/g, ''); // the file needs neither on a laptop
+          const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([page], { type: 'text/html' })); a.download = 'Starlight Queen.html';
+          document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 8000);
+          this.saveNote = 'Saved as “Starlight Queen.html”. Double-click it to play, no internet needed.'; this.saveT = this.t;
+        })).catch(() => { this.saveNote = 'That did not work just now. Try again with a connection.'; this.saveT = this.t; });
+      }
       else { Game.write('sq-run', null); Game.newGame(); Scenes.go('intro'); }
     }
   },
@@ -3974,11 +3988,12 @@ Scenes.list.title = {
       const bg = g.createLinearGradient(0, (H - 30) * s, 0, H * s); bg.addColorStop(0, 'rgba(4,6,26,0)'); bg.addColorStop(0.6, 'rgba(4,6,26,0.8)'); bg.addColorStop(1, 'rgba(4,6,26,0.92)'); g.save(); g.globalAlpha = b; g.fillStyle = bg; g.fillRect(0, (H - 30) * s, W * s, 30 * s); g.restore(); }
     this.items.forEach((it, i) => {
       const on = i === this.sel, y = 122 + i * 13;
-      const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${Game.saved.oz ? 'Australia' : MAP_NAMES[Game.saved.region || 0]}` : `The windowsill  ·  ${vn} of ${GEMS.length} diamonds`;
+      const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${Game.saved.oz ? 'Australia' : MAP_NAMES[Game.saved.region || 0]}` : it === 'download' ? 'Download for a laptop  ·  plays offline' : `The windowsill  ·  ${vn} of ${GEMS.length} diamonds`;
       u.text(label, 192, y, on ? 10 : 8.4, { color: on ? '#ffe9a8' : '#aab3d4', alpha: b * (on ? 1 : 0.8) });
       if (on) { const hw = u.width(label, 10) / 2 + 8, d = 1.7 + 0.3 * Math.sin(t * 0.12); g.save(); g.globalAlpha = b; g.fillStyle = '#f3d384'; for (const sx of [-1, 1]) { g.save(); g.translate((192 + sx * hw) * s, y * s); g.rotate(Math.PI / 4); g.fillRect(-d * s / 2, -d * s / 2, d * s, d * s); g.restore(); } g.restore(); }
     });
-    if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.items.length * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
+    if (this.saveNote && t - this.saveT < 600) u.text(this.saveNote, 192, 122 + this.items.length * 13 + 4, 7, { color: '#fff3c4', halo: 'rgba(6,9,25,0.85)', alpha: b * clamp((600 - (t - this.saveT)) / 60, 0, 1), italic: true });
+    else if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.items.length * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
     u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, Input.touch ? 6.2 : 5, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.4, title: true });
   }
 };
