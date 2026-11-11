@@ -50,7 +50,7 @@ const World = (() => {
     }
     w.zone = null; enterZone(zoneAt(w.player.x + 5));
     w.cam.x = clamp(w.player.x - W / 2, w.bx0, w.bx1 - W);
-    w.cam.y = clamp(w.player.y - H * 0.66, 0, w.rows * T - H + 18);
+    w.cam.y = clamp(w.player.y - H * 0.72, 0, w.rows * T - H + 18);
     lastCamX = w.cam.x;
     scatter();
     Sound.duck(false);
@@ -75,9 +75,9 @@ const World = (() => {
       for (let cy = 3; cy < w.rows; cy++) {
         if (w.grid[cy][x] !== '#' || w.grid[cy - 1][x] !== '.') continue;
         const h = hash2(x * 7 + 3, cy * 13 + th.seed);
-        if (th.trees && x - lastTree > 7 && h < 0.5 && !keep.has(x) && x > 1 && x < w.cols - 2 && w.grid[cy][x - 1] === '#' && w.grid[cy][x + 1] === '#'
+        if (th.trees && x - lastTree > 7 && h < 0.5 && !keep.has(x) && w.colTheme[Math.max(0, x - 6)] === th && w.colTheme[Math.min(w.cols - 1, x + 6)] === th && x > 1 && x < w.cols - 2 && w.grid[cy][x - 1] === '#' && w.grid[cy][x + 1] === '#'
           && (x * T < w.arena.x0 - 60 || x * T > w.arena.x1 + 30)) {
-          w.back.push({ type: th.trees, v: x % 3, x: x * T + 8, y: cy * T + 1 }); lastTree = x;
+          w.back.push({ type: th.id === 'meads' && x % 5 === 0 ? 'stuga' : th.id === 'meads' && x % 2 ? 'birch' : th.trees, v: x % 3, x: x * T + 8, y: cy * T + 1 }); lastTree = x;
         }
         if (keep.has(x)) continue;
         let acc = 0; const h2 = hash2(x * 31 + 1, cy * 17 + th.seed * 3);
@@ -244,7 +244,7 @@ const World = (() => {
         w.parts = []; w.rings = []; w.signHold = null; w.signText = null; w.gaze = null;
         Game.cp = { x: m.x, y: m.y }; w.spawn = Game.cp;
         enterZone(zoneAt(p.x + 5));
-        w.cam.x = clamp(p.x - W / 2 + 24, w.bx0, w.bx1 - W); w.cam.y = clamp(p.y + 11 - H * 0.66, 0, w.rows * T - H + 18); lastCamX = w.cam.x;
+        w.cam.x = clamp(p.x - W / 2 + 24, w.bx0, w.bx1 - W); w.cam.y = clamp(p.y + 11 - H * 0.72, 0, w.rows * T - H + 18); lastCamX = w.cam.x;
         Game.save();
       }
       if (fx.t >= 96) { w.warpFx = null; for (const p of w.players) p.control = true; sparkle(w.player.x + 5, w.player.y + 10, '#dff2ff', 20); }
@@ -339,7 +339,7 @@ const World = (() => {
 
     // camera
     const fx = alive.length ? alive.reduce((a, p) => a + p.x, 0) / alive.length : lead.x;
-    let tx = fx + 5 - W / 2 + (alive.length === 1 ? lead.face * 24 : 0), ty = lead.y + 11 - H * 0.66;
+    let tx = fx + 5 - W / 2 + (alive.length === 1 ? lead.face * 24 : 0), ty = lead.y + 11 - H * 0.72;
     if (alive.length > 1) ty = (alive[0].y + alive[1].y) / 2 + 11 - H * 0.6;
     if (w.fight) tx = w.arena.x0;
     if (w.state === 'clear') tx = lead.x + 5 - W / 2 + 30;
@@ -374,7 +374,7 @@ const World = (() => {
       lg.globalAlpha = k || 1; lg.drawImage(holeImg, x - r, y - r, r * 2, r * 2); lg.globalAlpha = 1;
     };
     for (const p of w.players) if (!p.dead) hole(p.x - ox + 5, p.y - oy + 10, p.lit ? 132 : p.radiant > 0 ? 120 : p.cloak ? 30 : 84 + Math.sin(w.t * 0.05) * 3, 1);
-    for (const tq of w.torches) { hole(tq.x - ox, tq.y - oy, 60 + Math.sin(w.t * 0.3 + tq.x) * 3, 0.95); hole(tq.x - ox, tq.y - oy + 22, 34, 0.5); }
+    for (const tq of w.torches) { hole(tq.x - ox, tq.y - oy, 78 + Math.sin(w.t * 0.3 + tq.x) * 3, 0.95); hole(tq.x - ox, tq.y - oy + 22, 44, 0.5); }
     for (const e of w.ents) {
       const d = ENT[e.type];
       if (d.light) { const r = d.light(e); if (r) hole(e.x - ox + e.w / 2, e.y - oy + e.h / 3, r, 0.95); }
@@ -444,7 +444,7 @@ const World = (() => {
     for (const tq of w.torches) Paint.torch(c, tq.x - ox, tq.y - oy + 14, w.t, true);
     for (const e of w.ents) { const d = ENT[e.type]; if (d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     drawParts(c, ox, oy, true);
-    for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.8 * (1 - k); c.strokeStyle = q.col; c.lineWidth = r > 60 ? 1.4 : 0.8; c.beginPath(); c.arc(q.x - ox, q.y - oy, Math.max(0.1, r), 0, TAU); c.stroke(); }
+    for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.22 * (1 - k); c.strokeStyle = q.col; c.lineWidth = 3 + r * 0.06; c.beginPath(); c.arc(q.x - ox, q.y - oy, Math.max(0.1, r), 0, TAU); c.stroke(); } // a soft swell of light, not a drawn circle
     c.globalAlpha = 1;
     Paint.ambient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
     if (w.gemFx) {
@@ -455,14 +455,13 @@ const World = (() => {
       Paint.soft(c, x, y, 34 + 20 * k, '#ffffff', 0.6);
       drawGemHi(c, x, y, 6 + 6 * k, fx.gem, w.fxT);
     }
-    if (w.gaze) { // the sky reddens; then the look itself crosses the road
-      const g = w.gaze, warn = clamp(g.t / 60, 0, 1) * (0.14 + 0.06 * Math.sin(w.t * 0.25));
-      c.fillStyle = `rgba(255,30,10,${warn})`; c.fillRect(0, 0, W, H);
+    if (w.gaze) { // the sky warms; then the look itself crosses the road, slow and soft
+      const g = w.gaze, warn = clamp(g.t / 60, 0, 1) * (0.1 + 0.03 * Math.sin(w.t * 0.12));
+      c.fillStyle = `rgba(255,120,40,${warn})`; c.fillRect(0, 0, W, H);
       if (g.t > 100) {
-        const bx = W + 40 - (g.t - 100) * 3.4;
-        c.save(); c.globalCompositeOperation = 'lighter';
-        for (const [wd, a] of [[60, 0.1], [40, 0.14], [20, 0.22], [6, 0.4]]) { c.fillStyle = `rgba(255,70,30,${a})`; c.beginPath(); c.moveTo(bx - wd * 0.25, 0); c.lineTo(bx + wd * 0.25, 0); c.lineTo(bx + wd, H); c.lineTo(bx - wd, H); c.fill(); }
-        c.restore();
+        const bx = W + 40 - (g.t - 100) * 3.4, gr = c.createLinearGradient(bx - 70, 0, bx + 70, 0);
+        gr.addColorStop(0, 'rgba(255,150,60,0)'); gr.addColorStop(0.5, 'rgba(255,170,80,0.26)'); gr.addColorStop(1, 'rgba(255,150,60,0)');
+        c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = gr; c.beginPath(); c.moveTo(bx - 24, 0); c.lineTo(bx + 24, 0); c.lineTo(bx + 70, H); c.lineTo(bx - 70, H); c.fill(); c.restore();
       }
     }
     if (w.warpFx) { // the afternoon, folding

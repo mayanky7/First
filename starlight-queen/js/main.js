@@ -12,12 +12,13 @@
   if (document.fonts) { document.fonts.addEventListener && document.fonts.addEventListener('loadingdone', dropCache); document.fonts.ready && document.fonts.ready.then(dropCache); }
   const UI = {
     ctx, get s() { return s; },
-    font(size, o) { ctx.font = `${o && o.italic ? 'italic ' : ''}${o && o.title ? '600 ' : ''}${size * s}px ${o && o.title ? TITLE : SERIF}`; },
+    font(size, o) { ctx.font = `${o && o.italic ? 'italic ' : ''}${o && o.title ? (o.metal ? '400 ' : '600 ') : ''}${size * s}px ${o && o.title ? TITLE : SERIF}`; },
     width(str, size, o) { this.font(size, o); return ctx.measureText(str).width / s; },
     text(str, x, y, size, o) {
       o = o || {};
       const a = o.alpha === undefined ? 1 : o.alpha;
       if (a <= 0.01 || !str) return;
+      if (Input.touch && size < 6.8 && !o.metal) { const k = 6.8 / size; size = 6.8; if (o.ls) o = Object.assign({}, o, { ls: o.ls / (k * 1.4) }); } // nothing smaller than this on a phone
       // text is rendered once (with its glow and shadow) and re-used; blurred shadows are costly per frame
       const key = str + '|' + size + '|' + (o.metal ? 'M' : '') + (o.color || '') + (o.glow || '') + (o.halo || '') + (o.italic ? 'i' : '') + (o.title ? 't' : '') + (o.ls || 0) + (o.shadow === false ? 'n' : '');
       let e = cache.get(key);
@@ -31,14 +32,12 @@
         const g = tc.getContext('2d');
         g.font = ctx.font; g.textAlign = 'left'; g.textBaseline = 'middle'; if (ls) g.letterSpacing = ls + 'px';
         const px = pad, py = ch / 2;
-        if (o.metal) { // engraved gold: hard shadow, dark keyline, vertical metal gradient, a lit upper edge
-          const hgt = size * s, gr = g.createLinearGradient(0, py - hgt * 0.42, 0, py + hgt * 0.4);
-          gr.addColorStop(0, '#fff4cf'); gr.addColorStop(0.46, '#f3c768'); gr.addColorStop(0.54, '#a8681f'); gr.addColorStop(1, '#e2aa4e');
-          g.lineJoin = 'round';
-          g.fillStyle = 'rgba(7,10,30,0.85)'; g.fillText(str, px, py + 1.2 * s); // hard shadow
-          g.strokeStyle = '#2e1a06'; g.lineWidth = Math.max(1.5, s * 1); g.strokeText(str, px, py);
-          g.fillStyle = '#fffbe6'; g.fillText(str, px, py - 0.4 * s); // lit upper edge
+        if (o.metal) { // pale gold, lightly: a soft shadow, a breath of cold light, no outline
+          const hgt = size * s, gr = g.createLinearGradient(0, py - hgt * 0.42, 0, py + hgt * 0.42);
+          gr.addColorStop(0, '#fff8e4'); gr.addColorStop(0.55, '#f2d898'); gr.addColorStop(1, '#e0b868');
+          g.shadowColor = 'rgba(6,10,30,0.55)'; g.shadowBlur = Math.max(2, size * s * 0.16); g.shadowOffsetY = Math.max(1, s * 0.5);
           g.fillStyle = gr; g.fillText(str, px, py);
+          g.shadowColor = 'rgba(159,188,255,0.35)'; g.shadowBlur = size * s * 0.35; g.shadowOffsetY = 0; g.fillText(str, px, py);
           e = { tc, pad, tw: tw - ls, ch }; cache.set(key, e);
         } else {
         if (o.halo) { g.strokeStyle = o.halo; g.lineWidth = size * s * 0.32; g.lineJoin = 'round'; g.strokeText(str, px, py); }

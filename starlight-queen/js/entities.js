@@ -193,9 +193,9 @@ function drawPlayer(c, w, p, ox, oy) {
   }
   if (p.lit) { // starlight, come down into her raised hand
     const sx = x + p.face * 4.6, sy = y - 24.5 + Math.sin(w.t * 0.12) * 0.8, k = 0.75 + 0.25 * Math.sin(w.t * 0.2);
-    c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = '#bfe4ff';
-    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + w.t * 0.012, len = 46 + (i % 3) * 22, wd = 0.03 + (i % 2) * 0.025; c.globalAlpha = 0.08 * k; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.cos(a - wd) * len, sy + Math.sin(a - wd) * len); c.lineTo(sx + Math.cos(a + wd) * len, sy + Math.sin(a + wd) * len); c.fill(); }
-    c.restore();
+    { const gr = c.createRadialGradient(sx, sy, 2, sx, sy, 44); gr.addColorStop(0, 'rgba(210,235,255,0.5)'); gr.addColorStop(1, 'rgba(210,235,255,0)'); c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = gr;
+      for (let i = 0; i < 6; i++) { const a = i / 6 * TAU + w.t * 0.01, wd = 0.07; c.globalAlpha = 0.5 * k; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.cos(a - wd) * 44, sy + Math.sin(a - wd) * 44); c.lineTo(sx + Math.cos(a + wd) * 44, sy + Math.sin(a + wd) * 44); c.fill(); }
+      c.restore(); }
     Paint.soft(c, sx, sy, 22 + k * 6, '#dff2ff', 0.7);
     Paint.star4(c, sx, sy, 4.2 + k, '#ffffff', w.t * 0.02);
   }

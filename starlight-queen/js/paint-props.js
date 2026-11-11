@@ -78,6 +78,12 @@
     throne: [48, 66, (g) => { g.fillStyle = vgrad(g, 0, 66, ['#3a2a34', '#140c12']); g.beginPath(); g.moveTo(8, 66); g.lineTo(8, 14); g.lineTo(13, 2); g.lineTo(18, 14); g.lineTo(24, 0); g.lineTo(30, 14); g.lineTo(35, 2); g.lineTo(40, 14); g.lineTo(40, 66); g.closePath(); g.fill(); g.fillStyle = '#4a3642'; g.fillRect(4, 42, 40, 6); g.fillRect(2, 42, 5, 24); g.fillRect(41, 42, 5, 24); soft(g, 24, 10, 10, '#ff6a20', 0.4); disc(g, 24, 9, 1.2, '#ffa040'); }],
     banner: [18, 44, (g) => { g.fillStyle = vgrad(g, 0, 44, ['#6a1820', '#3a0c14']); g.beginPath(); g.moveTo(1, 0); g.lineTo(17, 0); g.lineTo(17, 38); g.lineTo(9, 44); g.lineTo(1, 38); g.closePath(); g.fill(); g.fillStyle = '#2a1c24'; g.fillRect(0, 0, 18, 1.6); g.fillStyle = '#ff8a30'; for (const [x, h] of [[5, 5], [9, 8], [13, 5]]) { g.beginPath(); tri(g, x - 1.4, 22, x, 22 - h, x + 1.4, 22); g.fill(); } g.fillRect(4, 22, 10, 1.2); }]
   };
+  PROPS.birch = [34, 62, (g, v) => { // a birch: a white stem with dark marks, small bright leaf
+    g.fillStyle = '#f4f1e8'; g.beginPath(); limb(g, 17, 62, 17.6 + v * 0.6, 14, 1.5, 0.7); limb(g, 17.4, 36, 9, 24, 0.7, 0.3); limb(g, 17.6, 30, 26, 20, 0.7, 0.3); g.fill();
+    g.fillStyle = '#3a3038'; for (let i = 0; i < 6; i++) g.fillRect(16.2 + (i % 2) * 0.8, 54 - i * 7, 1.6, 0.8);
+    const r = rng(77 + v); for (const [col, n] of [['#6cab5c', 34], ['#9ad070', 26], ['#d4ec9a', 10]]) { g.fillStyle = col; g.beginPath(); for (let i = 0; i < n; i++) { const a = r() * TAU, d = Math.sqrt(r()), cx = 17 + Math.cos(a) * d * 13, cy = 18 + Math.sin(a) * d * 14; g.moveTo(cx + 2, cy); g.ellipse(cx, cy, 2, 1.3, r() * 3, 0, TAU); } g.fill(); }
+  }];
+  PROPS.stuga = [46, 40, (g, v, L) => PROPS.cottage[2](g, 0, Object.assign({}, L, { capCol: '#f2f5ff' }))]; // a red summer cottage: falu red, white corners
   PROPS.elder = PROPS.oak; PROPS.dead = PROPS.charred; PROPS.maypole = PROPS.flower; PROPS.fern = PROPS.grass; PROPS.mushroom = PROPS.flower; PROPS.reeds = PROPS.frostgrass; PROPS.deadbush = PROPS.drygrass;
 
   Paint.prop = function (g, type, v, x, y, w, d) {

@@ -9,14 +9,13 @@ const REGIONS = [
     build(L) {
       L.g(0, 40, 3); L.start(3, 3);
       L.sign(12, 3, 'Tonttu: “I’ll keep the porridge warm. Go.”');
-      L.sign(26, 3, '[E]  raise your hand to the stars');
       L.door(39, 3, 8, 'The last gate of Kaamos stands open.');
       
       L.s(13, 4, 4);
       L.b(20, 6, '?');
       
       L.b(31, 5, '???'); L.b(32, 8, '?'); L.gem('first', 32, 11);
-      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.sign(55, 5, 'Under this drift something small and round sleeps till spring.'); L.e('goblin', 53, 5);
+      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.e('goblin', 53, 5);
       L.g(58, 66, 3); L.sign(60, 3, '[X]  loose a starlight arrow');
       
       L.g(70, 84, 3); L.b(74, 6, '?S?'); L.e('goblin', 79, 3);
@@ -33,7 +32,7 @@ const REGIONS = [
       
       L.p(172, 4, 3); L.p(177, 6, 3); L.p(181, 4, 3); L.s(172, 6, 3); L.s(181, 6, 3);
       L.m(180, 9, 2); L.gem('cut', 181, 12); 
-      L.g(184, 231, 3); L.b(192, 6, '??'); L.e('wolf', 198, 3);
+      L.g(184, 231, 3); L.b(192, 6, '??'); L.sign(188, 3, 'Under this drift something small and round sleeps till spring.'); L.e('wolf', 198, 3);
       L.g(204, 206, 4); L.g(207, 209, 5); L.g(210, 231, 6); L.s(204, 6, 6);
       L.sign(214, 6, 'The last fence. Light the beacon, Ana.');
       L.beacon(221, 6, 'The beacon of Kaamos burns behind you');
@@ -70,7 +69,7 @@ const REGIONS = [
       L.e('spider', 113, 9, { len: 5 }); L.e('spider', 121, 9, { len: 5 });
       L.s(111, 4, 10); L.s(111, 11, 3); L.b(118, 13, 'S');
       L.g(126, 128, 5); L.g(129, 131, 7); L.s(129, 8, 2); L.keep('dala', 131, 9); L.wonder('frogs', 144, 3);
-      L.g(132, 150, 3); L.b(137, 6, '?????');
+      L.g(132, 150, 3); L.b(133, 6, '???');
       L.g(154, 156, 3); L.s(154, 5, 3);
       L.g(160, 180, 3); L.cp(161, 3); L.e('wolf', 166, 3);
       L.p(163, 6, 2); L.p(167, 9, 4); L.e('spider', 169, 9, { len: 5 }); L.s(167, 11, 4);
@@ -105,8 +104,8 @@ const REGIONS = [
       L.g(125, 140, 4); L.b(129, 7, '?S?'); L.e('bat', 132, 14); L.torch(127, 4); L.torch(138, 4);
       L.g(141, 143, 6); L.g(144, 146, 8); L.g(147, 149, 10); L.g(150, 170, 12);
       L.s(141, 7, 3); L.s(144, 9, 3); L.s(147, 11, 3);
-      L.torch(151, 12); L.torch(168, 12); L.b(158, 15, '?');
-      L.gem('deep', 158, 17);
+      L.torch(151, 12); L.torch(168, 12); L.b(152, 15, '?');
+      L.gem('deep', 152, 17);
       L.g(171, 200, 5); L.e('troll', 181, 5); L.e('bat', 176, 14); L.spk(191, 193, 5); L.b(185, 8, '?H?');
       L.torch(177, 5); L.torch(197, 5); L.cp(173, 5);
       L.liq(201, 216, 2); L.mp(201, 4, 3, 4, 0, 200); L.mp(209, 4, 3, 5, 0, 200, 0.5); L.e('ember', 208, 2, { h: 8 });
@@ -116,7 +115,7 @@ const REGIONS = [
     }
   },
   {
-    theme: 'canyon', cols: 62, join: true,
+    theme: 'sea', cols: 62, title: 'The Western Sea', sub: 'Every map she owned ended here', map: 3,
     build(L) { // the sea crossing
       L.liq(0, 61, 2);
       L.g(0, 4, 8); L.g(5, 7, 5); L.g(8, 11, 3);
@@ -154,18 +153,18 @@ const REGIONS = [
       L.mp(141, 2, 3, 3, 0, 200); L.mp(147, 2, 3, 3, 0, 200, 0.5);
       L.g(153, 170, 3); L.cp(155, 3); L.b(158, 6, '?S?'); L.e('troll', 165, 3);
       L.g(171, 173, 5); L.g(174, 176, 7); L.arc(177, 9, 5); L.m(177, 6, 12); L.gem('hope', 183, 10);
-      L.g(189, 215, 3); L.spk(210, 211, 3);
-      L.b(198, 6, '?H?');
+      L.g(189, 215, 3);
+      L.b(192, 6, '?H?');
       L.g(219, 251, 3); L.e('goblin', 224, 3); L.g(232, 234, 4); L.g(235, 251, 5); L.beacon(242, 5, 'The canyon beacon burns');
     }
   },
   {
-    theme: 'gloam', cols: 232, title: 'United States', sub: 'The Hoarder King’s mesa', map: 4,
+    theme: 'gloam', cols: 232, title: 'The Hoarder’s Mesa', sub: 'Where the light was taken', map: 4,
     build(L) {
       L.liq(0, 231, 2);
       L.g(0, 20, 3);
       
-      L.sign(11, 3, 'When the sky reddens, he is looking. Hold [↓]. Be a stone.');
+      L.sign(24, 3, 'When the sky reddens, he is looking. Hold [↓]. Be a stone.');
       L.g(23, 24, 3); L.e('ember', 21, 2, { h: 6 }); L.e('ember', 26, 2, { h: 6, ph: 0.5 });
       L.g(27, 45, 3); L.e('troll', 38, 3); L.b(31, 6, '?H?');
       L.g(46, 48, 5); L.g(49, 51, 7); L.g(52, 70, 9); L.s(46, 6, 3); L.s(49, 8, 3);

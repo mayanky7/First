@@ -11,7 +11,7 @@ const WONDERS = [
 ];
 const WONDER_BY_ID = {}; WONDERS.forEach((q, i) => { q.n = i; WONDER_BY_ID[q.id] = q; });
 
-const WONDER_RANGE = { fox: 64, frogs: 76, undersky: 150, whale: 96, arch: 76, kings: 110, cross: 120 };
+const WONDER_RANGE = { fox: 64, frogs: 76, undersky: 150, whale: 96, arch: 76, kings: 230, cross: 120 };
 const DANCERS = ['#3a6ab0', '#f0d040', '#f4f4f4', '#d84a3a', '#58b848', '#e88ab0', '#f4f4f4', '#3a6ab0'].map((col, i) => ({ tunic: col, tunicD: mix(col, '#101028', 0.28), belt: '#ffffff', cloak: null, hair: ['#e8c868', '#8a5a30', '#c88a48', '#f0dc98'][i % 4], hairD: ['#c8a040', '#6a4020', '#a06a30', '#d0b870'][i % 4], skin: '#f6d4b4', leg: '#3a3048', boot: '#5a3b28', band: '#4ea848', hem: i % 2 ? -5 : -7, long: i % 2 }));
 ENT.wonder = {
   lit: true,
@@ -20,7 +20,7 @@ ENT.wonder = {
     const p = nearP(w, e), id = e.def.id, dx = p.x + 5 - e.cx;
     const near = !p.dead && Math.abs(dx) < WONDER_RANGE[id] && Math.abs(p.y + p.h - e.gy) < 120;
     e.t0++;
-    if (!e.seen && near && w.state === 'play' && !w.fight && !w.wonderCard && (id !== 'undersky' || p.lit)) { e.seen = true; e.t0 = 0; w.introT = 0; World.wonder(e.def, e.cx, e.gy - 44); }
+    if (!e.seen && near && w.state === 'play' && !w.fight && !w.wonderCard && w.introT <= 0 && (id !== 'undersky' || p.lit)) { e.seen = true; e.t0 = 0; World.wonder(e.def, e.cx, e.gy - 44); }
     if (e.seen && e.k < 1) e.k = Math.min(1, e.k + 0.012);
     if (Math.abs(dx) > 420 && id !== 'whale') return;
     if (id === 'fox' && e.seen) {
@@ -34,7 +34,7 @@ ENT.wonder = {
       e.glow = lerp(e.glow, p.lit && Math.abs(dx) < 190 ? 1 : e.seen ? 0.42 : 0.1, 0.05);
     } else if (id === 'whale') {
       if (e.cool > 0) e.cool--;
-      const tx = clamp(p.x + 84, e.cx - 200, e.cx + 230);
+      const tx = clamp(p.x + 112, e.cx - 200, e.cx + 250);
       if (e.ph < 0 && near && e.cool <= 0 && e.seen) { e.ph = 0; e.wx = tx; }
       if (e.ph >= 0) {
         e.ph += 1 / 520; e.wx = lerp(e.wx, tx, 0.03);
@@ -89,7 +89,7 @@ ENT.wonder = {
       ring(false);
       stamp(c, 'w:pole', 60, 110, X - 30, Y - 109.4, g => { // a midsummer pole: birch-leaf and flowers, a cross-beam, two wreaths
         const lf = '#4ea848', lf2 = '#2f8a3a', fl = ['#ffe36a', '#ff8aa8', '#ffffff'];
-        g.fillStyle = '#efe6cc'; g.fillRect(28.6, 8, 2.8, 102); g.fillRect(8, 28, 44, 2.4);
+        g.fillStyle = '#efe6cc'; g.fillRect(28, 8, 4, 102); g.fillRect(8, 27.6, 44, 3.2);
         g.strokeStyle = lf; g.lineWidth = 2; g.beginPath(); for (let y = 8; y < 108; y += 6) { g.moveTo(28, y); g.quadraticCurveTo(32.6, y + 2, 28, y + 6); } g.stroke();
         g.strokeStyle = lf2; g.lineWidth = 1.6; g.beginPath(); g.moveTo(8, 28.4); g.lineTo(52, 28.4); g.stroke();
         for (const cx of [13, 47]) { g.strokeStyle = lf; g.lineWidth = 2.2; g.beginPath(); g.ellipse(cx, 39, 6.4, 7.6, 0, 0, TAU); g.stroke(); g.strokeStyle = '#b8a888'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(cx, 30); g.lineTo(cx, 31.6); g.stroke(); for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; disc(g, cx + Math.cos(a) * 6.4, 39 + Math.sin(a) * 7.6, 0.9, fl[i % 3]); } }
@@ -107,8 +107,8 @@ ENT.wonder = {
       }
       if (f) {
         const fx = f.x - ox, fy = f.y - oy, g = c, run = t * 0.45, st = Math.sin(run);
-        soft(c, fx, fy, 22, '#7affc8', 0.45 * e.k);
-        g.save(); g.translate(fx, fy); g.globalAlpha = e.k; g.rotate(Math.cos(f.k * Math.PI) * -0.25); g.lineCap = 'round';
+        soft(c, fx, fy, 34, '#7affc8', 0.45 * e.k);
+        g.save(); g.translate(fx, fy); g.scale(1.5, 1.5); g.globalAlpha = e.k; g.rotate(Math.cos(f.k * Math.PI) * -0.25); g.lineCap = 'round';
         g.strokeStyle = '#bfeedd'; g.lineWidth = 1.3; g.beginPath(); g.moveTo(-5, 1.6); g.lineTo(-7.6 - st * 3.4, 6); g.moveTo(-3.4, 1.8); g.lineTo(-4 + st * 3, 6.4); g.moveTo(5, 1.6); g.lineTo(6.4 + st * 3.6, 6); g.moveTo(6.4, 1.4); g.lineTo(9.4 - st * 2.6, 5.8); g.stroke();
         g.fillStyle = '#f2fff8'; g.beginPath(); g.ellipse(0, 0, 8.4, 3, 0, 0, TAU); g.moveTo(6, -2.2); g.lineTo(13.6, -1.4 ); g.lineTo(16.4, 0.6); g.lineTo(11, 2); g.lineTo(6.4, 1.4); g.closePath(); g.moveTo(8.6, -2.4); g.lineTo(9.4, -6.4); g.lineTo(11.2, -2.6); g.closePath(); g.moveTo(10.6, -2.4); g.lineTo(12, -5.8); g.lineTo(13, -2); g.closePath();
         g.moveTo(-7, -1.6); g.quadraticCurveTo(-13, -4 + st, -18, -9 + st * 1.4); g.quadraticCurveTo(-21, -5 + st, -15.6, -1 + st * 0.6); g.quadraticCurveTo(-11, 1.6, -7, 1.6); g.closePath(); g.fill();
@@ -117,29 +117,29 @@ ENT.wonder = {
       } else if (!e.seen) { const b = 0.4 + 0.3 * Math.sin(t * 0.08); c.globalAlpha = b; star4(c, X - 2, Y - 84, 1.6, '#bfffe8', t * 0.03); c.globalAlpha = b * 0.7; star4(c, X + 10, Y - 92, 1.1, '#bfffe8'); c.globalAlpha = 1; } // a glint, high over the hill
     } else if (id === 'cross') {
       if (!w.zone || !w.zone.warp) return;
-      const sx = (e.cx - ox - W / 2) * 0.22 + W / 2, sy = 46 + (e.gy - oy - 150) * 0.1, k = e.k, Z = 2;
+      const sx = (e.cx - ox - W / 2) * 0.22 + W / 2, sy = 46 + (e.gy - oy - 150) * 0.1, k = e.k, Z = 2.6;
       if (sx < -90 || sx > W + 90) return;
-      if (k > 0) { c.fillStyle = vgrad(c, 0, 100, [`rgba(8,14,48,${0.55 * k})`, 'rgba(8,14,48,0)']); c.fillRect(0, 0, W, 100); }
+      if (k > 0) { c.fillStyle = vgrad(c, 0, 120, [`rgba(8,14,48,${0.66 * k})`, 'rgba(8,14,48,0)']); c.fillRect(0, 0, W, 120); const r = rng(9); c.fillStyle = '#dfe8ff'; for (let i = 0; i < 90; i++) { const u = r(), x = sx - 150 + u * 300 + (r() - 0.5) * 30, y = sy + 46 - u * 92 + (r() - 0.5) * 26; c.globalAlpha = 0.5 * k * r(); c.beginPath(); c.arc(x, y, 0.3 + r() * 0.3, 0, TAU); c.fill(); } c.globalAlpha = 1; } // the Milky Way, which runs through it
       const stars = [[0, -13, 2, '#ffc8a8'], [1, 13, 3, '#eaf2ff'], [-9, 1, 3, '#dfe8ff'], [8, -3, 2, '#eaf2ff'], [4, 5, 1, '#c8d4ff'], [-36, 7, 3, '#fff4d8'], [-25, 3, 2, '#dfe8ff']];
       if (k > 0) { c.strokeStyle = `rgba(223,242,255,${0.3 * k})`; c.lineWidth = 0.35; c.beginPath(); c.moveTo(sx, sy - 13 * Z); c.lineTo(sx + Z, sy + 13 * Z); c.moveTo(sx - 9 * Z, sy + Z); c.lineTo(sx + 8 * Z, sy - 3 * Z); c.stroke(); }
-      stars.forEach(([x, y, r, col], i) => { const tw = 0.75 + 0.25 * Math.sin(t * 0.07 + i * 1.7), a = (0.4 + 0.6 * k) * tw; soft(c, sx + x * Z, sy + y * Z, r * 2.4 + 3 * k, col, 0.45 * a); c.globalAlpha = a; star4(c, sx + x * Z, sy + y * Z, 0.7 + r * (0.7 + 0.5 * k), col, 0); disc(c, sx + x * Z, sy + y * Z, 0.5, '#ffffff'); c.globalAlpha = 1; });
+      stars.forEach(([x, y, r, col], i) => { const tw = 0.75 + 0.25 * Math.sin(t * 0.07 + i * 1.7), a = (0.4 + 0.6 * k) * tw; soft(c, sx + x * Z, sy + y * Z, r * 3 + 4 * k, col, 0.45 * a); c.globalAlpha = a; star4(c, sx + x * Z, sy + y * Z, 1 + r * (0.9 + 0.6 * k), col, 0); disc(c, sx + x * Z, sy + y * Z, 0.5, '#ffffff'); c.globalAlpha = 1; });
     } else if (id === 'whale' && e.ph >= 0) {
-      const ph = e.ph, rise = Math.pow(Math.sin(Math.min(1, ph / 0.82) * Math.PI), 0.55), wx = e.wx - ox, S = Y + 21, L = 84, Hh = 30 * rise, g = c;
+      const ph = e.ph, rise = Math.pow(Math.sin(Math.min(1, ph / 0.82) * Math.PI), 0.55), wx = e.wx - ox, S = Y + 21, L = 84, Hh = 40 * rise, g = c;
       if (Hh > 1) {
-        g.fillStyle = vgrad(g, S - Hh, S + 10, ['#5a82a8', '#2c4a6e', '#1c3454']);
+        g.fillStyle = vgrad(g, S - Hh, S + 10, ['#8a9cc4', '#5a6c9a', '#3a4a78']);
         g.beginPath(); g.moveTo(wx - L, S + 12); g.quadraticCurveTo(wx - L * 0.7, S - Hh * 0.8, wx - L * 0.1, S - Hh); g.quadraticCurveTo(wx + L * 0.62, S - Hh * 1.04, wx + L * 0.92, S - Hh * 0.34); g.quadraticCurveTo(wx + L * 1.04, S, wx + L, S + 12); g.closePath(); g.fill();
         g.save(); g.clip(); // the pale pleated throat, barnacles, an eye
         g.fillStyle = '#c9dcea'; g.beginPath(); g.moveTo(wx + L * 0.2, S + 12); g.quadraticCurveTo(wx + L * 0.5, S - Hh * 0.34, wx + L * 1.02, S - Hh * 0.2); g.lineTo(wx + L * 1.04, S + 12); g.closePath(); g.fill();
         g.strokeStyle = 'rgba(40,70,100,0.5)'; g.lineWidth = 0.5; g.beginPath(); for (let i = 0; i < 7; i++) { g.moveTo(wx + L * (0.34 + i * 0.09), S + 12); g.quadraticCurveTo(wx + L * (0.5 + i * 0.08), S - Hh * 0.1, wx + L * (0.72 + i * 0.05), S - Hh * (0.24 - i * 0.02)); } g.stroke();
-        g.strokeStyle = 'rgba(255,255,255,0.3)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(wx - L * 0.66, S - Hh * 0.66); g.quadraticCurveTo(wx, S - Hh * 1.02, wx + L * 0.6, S - Hh * 0.92); g.stroke();
+        g.strokeStyle = 'rgba(255,200,150,0.75)'; g.lineWidth = 1; g.beginPath(); g.moveTo(wx - L * 0.66, S - Hh * 0.66); g.quadraticCurveTo(wx, S - Hh * 1.02, wx + L * 0.6, S - Hh * 0.92); g.stroke();
         for (let i = 0; i < 9; i++) disc(g, wx - L * 0.5 + i * 13 + (i % 2) * 3, S - Hh * (0.5 + 0.3 * Math.sin(i * 2.1)), 0.6, 'rgba(230,240,246,0.7)');
         if (rise > 0.5) { const ex = wx + L * 0.62, ey = S - Hh * 0.5; disc(g, ex, ey, 2.6, '#16304a'); disc(g, ex, ey, 1.6, '#0a1420'); disc(g, ex - 0.5, ey - 0.6, 0.5, '#ffffff'); }
         g.restore();
-        if (rise > 0.3) { g.fillStyle = '#2c4a6e'; g.beginPath(); g.moveTo(wx - L * 0.36, S - Hh * 0.9); g.quadraticCurveTo(wx - L * 0.3, S - Hh * 0.9 - 6, wx - L * 0.22, S - Hh * 0.97 - 2); g.lineTo(wx - L * 0.2, S - Hh * 0.96); g.closePath(); g.fill(); }
+        if (rise > 0.3) { g.fillStyle = '#5a6c9a'; g.beginPath(); g.moveTo(wx - L * 0.36, S - Hh * 0.9); g.quadraticCurveTo(wx - L * 0.3, S - Hh * 0.9 - 6, wx - L * 0.22, S - Hh * 0.97 - 2); g.lineTo(wx - L * 0.2, S - Hh * 0.96); g.closePath(); g.fill(); }
       }
       if (ph > 0.74) { // the flukes, last
         const fk = (ph - 0.74) / 0.26, th = Math.sin(fk * Math.PI) * 36, tx = wx - 62;
-        if (th > 2) { g.fillStyle = vgrad(g, S - th - 8, S + 8, ['#5a82a8', '#2c4a6e']); g.beginPath(); g.moveTo(tx - 3.4, S + 10); g.quadraticCurveTo(tx - 2, S - th * 0.6, tx - 1, S - th); g.quadraticCurveTo(tx - 9, S - th - 2, tx - 17, S - th - 9); g.quadraticCurveTo(tx - 8, S - th - 9.6, tx, S - th - 4.6); g.quadraticCurveTo(tx + 8, S - th - 9.6, tx + 17, S - th - 9); g.quadraticCurveTo(tx + 9, S - th - 2, tx + 1, S - th); g.quadraticCurveTo(tx + 2, S - th * 0.6, tx + 3.4, S + 10); g.closePath(); g.fill(); }
+        if (th > 2) { g.fillStyle = vgrad(g, S - th - 8, S + 8, ['#8a9cc4', '#4a5a8a']); g.beginPath(); g.moveTo(tx - 3.4, S + 10); g.quadraticCurveTo(tx - 2, S - th * 0.6, tx - 1, S - th); g.quadraticCurveTo(tx - 9, S - th - 2, tx - 17, S - th - 9); g.quadraticCurveTo(tx - 8, S - th - 9.6, tx, S - th - 4.6); g.quadraticCurveTo(tx + 8, S - th - 9.6, tx + 17, S - th - 9); g.quadraticCurveTo(tx + 9, S - th - 2, tx + 1, S - th); g.quadraticCurveTo(tx + 2, S - th * 0.6, tx + 3.4, S + 10); g.closePath(); g.fill(); }
       }
     }
   },

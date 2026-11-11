@@ -36,20 +36,21 @@ const Paint = (() => {
       ground: ['#24386e', '#0d1634'], cap: 'snow', capCol: '#edf3ff', capShade: '#a9bde6', plat: ['#6a5a56', '#3e3238'], pit: '#060a1c' },
     meads: { sky: ['#3f72be', '#7aacdc', '#c6dcd6', '#f4dca6', '#ffe9b8'], clouds: '#fff6e0', orb: { x: 290, y: 132, r: 12, col: '#fffbe6', glow: '#ffe6a0', gr: 96 },
       ridge: ['#8db4a4', '#6ea686', '#4f9468', '#3b7c54'], kind: ['hills', 'hills', 'round', 'round'], haze: '#ffe6b0',
-      ground: ['#2a6448', '#102e24'], cap: 'grass', capCol: '#7fd46a', capShade: '#4fa64e', plat: ['#b8895a', '#6e4a2c'], pit: '#0e2a26' },
-    halls: { sky: ['#06070f', '#0c1022', '#141a38', '#1c2448'], cave: 1,
-      ridge: ['#1c2446', '#161c38', '#10152c', '#0b0f20'], kind: ['pillars', 'pillars', 'pillars', 'rubble'], haze: '#2a3466',
-      ground: ['#2b3256', '#0b0e1e'], cap: 'stone', capCol: '#5c6896', capShade: '#3a4470', plat: ['#56608a', '#2a3050'], pit: '#05060e' },
+      ground: ['#2a6448', '#102e24'], cap: 'grass', capCol: '#74c26c', capShade: '#4b9a52', plat: ['#b8895a', '#6e4a2c'], pit: '#0e2a26' },
+    halls: { sky: ['#0b1024', '#152046', '#22346a', '#2f4a86'], cave: 1,
+      ridge: ['#3a4f8c', '#2a3a70', '#1d2852', '#141b3a'], kind: ['pillars', 'pillars', 'pillars', 'rubble'], haze: '#4a64b0',
+      ground: ['#3a4470', '#141a34'], cap: 'stone', capCol: '#8090c4', capShade: '#4a5688', plat: ['#7a6a5a', '#3e3438'], pit: '#080c1c' },
     canyon: { sky: ['#231a52', '#5a2c70', '#b8487a', '#ee7a58', '#ffb866', '#ffe6a0'], clouds: '#ffb0a0', orb: { x: 250, y: 132, r: 17, col: '#fff4d0', glow: '#ffd890', gr: 100 },
       ridge: ['#b8668a', '#96487a', '#6e3266', '#4a2050'], kind: ['mesa', 'mesa', 'mesa', 'cactus'], haze: '#ffc090',
       ground: ['#70304a', '#280e22'], cap: 'sand', capCol: '#f6b07a', capShade: '#c0705a', plat: ['#a06a52', '#5a3038'], pit: '#1e0a1c' },
-    gloam: { sky: ['#070306', '#1a070c', '#3c0e10', '#742014', '#b8481c', '#e88a30'], embers: 1, stars: 0.3,
-      ridge: ['#5a1e20', '#3e131c', '#280c16', '#18070f'], kind: ['mesa', 'mesa', 'mesa', 'dead'], haze: '#a03a1c',
-      ground: ['#2c1a22', '#090407'], cap: 'ash', capCol: '#6e5a62', capShade: '#40303a', plat: ['#5a4850', '#2a1c24'], pit: '#080305' },
+    gloam: { sky: ['#1a0f2a', '#3a1630', '#6e2430', '#a8402a', '#e07a34', '#ffc070'], embers: 1, stars: 0.35,
+      ridge: ['#7a2c30', '#5a1e2a', '#3e1422', '#280c18'], kind: ['mesa', 'mesa', 'mesa', 'dead'], haze: '#d06a34',
+      ground: ['#3c2430', '#160a10'], cap: 'ash', capCol: '#a08088', capShade: '#5a3c48', plat: ['#5a4850', '#2a1c24'], pit: '#080305' },
     oz: { sky: ['#17245c', '#34509a', '#8d93c4', '#eeb2a4', '#ffd49a', '#fff0c6'], stars: 0.5, clouds: '#ffd8c0', orb: { x: 96, y: 150, r: 11, col: '#fffbe6', glow: '#ffe9b0', gr: 70 },
       ridge: ['#de8a6e', '#bc6258', '#923f48', '#6a2a34'], kind: ['rock', 'domes', 'plain', 'gum'], haze: '#ffd8b0',
       ground: ['#a23e22', '#48160e'], cap: 'spinifex', capCol: '#ecc866', capShade: '#b8862e', plat: ['#a8744c', '#5e3624'], pit: '#2a0c08' }
   };
+  LOOK.sea = Object.assign({}, LOOK.canyon, { kind: ['plain', 'plain', 'plain', 'plain'], ridge: ['#a8668e', '#8a4c7c', '#6a386a', '#4e2858'] });
   LOOK.wood = LOOK.meads; LOOK.fens = LOOK.halls;
   LOOK.vista = Object.assign({}, LOOK.north, { seed: 'north', orb: { x: 346, y: 26, r: 6, col: '#f4f7ff', glow: '#9fbcff', gr: 40 } }); // the title painting: the moon keeps clear of the lettering
   // Kaamos again, on the morning the sun comes back
@@ -105,14 +106,23 @@ const Paint = (() => {
     g.fillStyle = vgrad(g, 0, H, L.sky); g.fillRect(-1, -1, W + 2, H + 2);
     if (L.stars) { const off = cx * 0.015; for (const s of starField) { const x = ((s.x - off) % LW + LW) % LW; if (x > W + 2) continue; g.globalAlpha = L.stars * (s.y > 110 ? 0.4 : 1) * (0.55 + 0.45 * Math.sin(t * 0.03 + s.p)); disc(g, x, s.y, s.r, s.w ? '#ffe9c8' : '#eaf2ff'); } g.globalAlpha = 1; }
     if (L.aurora) { g.save(); g.imageSmoothingEnabled = true; Backdrop.aurora(g, t, cx * 0.03, -6, 0.62 + 0.38 * (lit || 0)); g.restore(); }
-    if (L.orb) { const o = L.orb; soft(g, o.x, o.y, o.gr, o.glow, 0.55); disc(g, o.x, o.y, o.r, o.col); }
+    if (L.orb) {
+      const o = L.orb; soft(g, o.x, o.y, o.gr * 1.25, o.glow, 0.55);
+      const gr = g.createRadialGradient(o.x - o.r * 0.3, o.y - o.r * 0.3, 0, o.x, o.y, o.r); gr.addColorStop(0, '#ffffff'); gr.addColorStop(1, o.col); g.fillStyle = gr; g.beginPath(); g.arc(o.x, o.y, o.r, 0, TAU); g.fill();
+      if (L.aurora || id === 'vista') { g.fillStyle = 'rgba(170,186,228,0.4)'; g.beginPath(); g.ellipse(o.x - o.r * 0.3, o.y - o.r * 0.2, o.r * 0.32, o.r * 0.24, 0.4, 0, TAU); g.ellipse(o.x + o.r * 0.34, o.y + o.r * 0.1, o.r * 0.22, o.r * 0.3, -0.3, 0, TAU); g.ellipse(o.x - o.r * 0.05, o.y + o.r * 0.5, o.r * 0.26, o.r * 0.14, 0, 0, TAU); g.fill(); } // the seas of the moon
+    }
     if (L.volcano) { const vx = 250 - cx * 0.03; soft(g, vx, 96, 90, '#ff5a1a', 0.5 + 0.08 * Math.sin(t * 0.04)); }
-    if (L.clouds) { g.fillStyle = L.clouds; for (const c of cloudField) { const x = ((c.x - cx * 0.03 - t * 0.02) % LW + LW) % LW - 120; if (x > W + 10) continue; g.globalAlpha = 0.5; g.beginPath(); rr(g, x, c.y, c.w, c.h, c.h / 2); g.fill(); g.globalAlpha = 0.32; g.beginPath(); rr(g, x + c.w * 0.18, c.y - c.h * 0.7, c.w * 0.5, c.h, c.h / 2); g.fill(); } g.globalAlpha = 1; }
+    if (L.clouds) { // clouds: a few soft heaps on a flat base, drifting, kept clear of the top of the frame
+      g.fillStyle = L.clouds; g.globalAlpha = 0.34;
+      for (const c of cloudField) { const x = ((c.x - cx * 0.03 - t * 0.02) % LW + LW) % LW - 120, y = c.y + 14; if (x > W + 10) continue; g.beginPath(); rr(g, x, y, c.w, c.h * 0.8, c.h * 0.4); for (let k = 0; k < 5; k++) { const ex = x + c.w * (0.14 + k * 0.18), er = c.h * (0.9 + ((k * 7 + (c.w | 0)) % 4) * 0.35); g.moveTo(ex + er * 1.5, y + c.h * 0.3); g.ellipse(ex, y + c.h * 0.3, er * 1.5, er, 0, Math.PI, 0); } g.fill(); }
+      g.globalAlpha = 1;
+    }
     for (let i = 0; i < 4; i++) {
       const off = ((cx * PARA[i]) % LW + LW) % LW, dy = L.cave ? 0 : yo * YO[i], cv = layer(id, i);
       if (id === 'oz' && i === 3) roos(g, cx, yo, t);
       g.imageSmoothingQuality = 'low'; g.drawImage(cv, -off, dy, LW, H); if (LW - off < W + 1) g.drawImage(cv, LW - off - 0.4, dy, LW, H); g.imageSmoothingQuality = 'high';
     }
+    if (L.cave) { g.save(); g.globalCompositeOperation = 'lighter'; for (let k = 0; k < 3; k++) { const x = ((k * 190 + 60 - cx * 0.16) % 560 + 560) % 560 - 90; g.fillStyle = vgrad(g, 0, 170, ['rgba(150,180,255,0.16)', 'rgba(150,180,255,0)']); g.beginPath(); g.moveTo(x, 0); g.lineTo(x + 16, 0); g.lineTo(x + 58, 170); g.lineTo(x - 26, 170); g.closePath(); g.fill(); } g.restore(); } // daylight, a long way up
     if (L.cave) for (let k = 0; k < 14; k++) { const x = ((k * 97 + 30 - cx * 0.2) % 520 + 520) % 520 - 60, y = 60 + (k * 53) % 90; soft(g, x, y, 5 + (k % 3) * 2, k % 3 ? '#7fd8ff' : '#b890ff', 0.35 + 0.2 * Math.sin(t * 0.04 + k)); disc(g, x, y, 0.7, '#eaf8ff'); }
     if (L.embers) for (let k = 0; k < 26; k++) { const life = ((t * (0.3 + (k % 5) * 0.08) + k * 41) % 260) / 260, x = ((k * 71 - cx * 0.3) % 440 + 440) % 440 - 20 + Math.sin(t * 0.02 + k) * 8; g.globalAlpha = (1 - life) * 0.8; disc(g, x, H - 20 - life * 170, 0.6 + (k % 3) * 0.3, k % 2 ? '#ffb040' : '#ff6a20'); } g.globalAlpha = 1;
   }
@@ -126,6 +136,7 @@ const Paint = (() => {
     const q = cv.getContext('2d'); q.scale(k, k);
     q.fillStyle = L.cave ? L.ridge[i] : vgrad(q, H - [160, 130, 102, 74][i], H - [40, 30, 20, 10][i], [L.ridge[i], mix(L.ridge[i], L.haze, 0.5 - i * 0.09)]);
     q.fill(ridgePath(id, i));
+    if (L.cave && i < 3) { q.save(); q.clip(ridgePath(id, i)); const r = rng(600 + i); q.lineCap = 'round'; for (let n = 0; n < 16; n++) { const x = r() * LW, y = 24 + r() * 150; q.strokeStyle = n % 3 ? 'rgba(184,98,58,0.42)' : 'rgba(224,154,90,0.5)'; q.lineWidth = 0.6 + r() * 1.2; q.beginPath(); q.moveTo(x, y); q.bezierCurveTo(x + 12, y + 10 * (r() - 0.5), x + 26, y + 16 * (r() - 0.5), x + 34 + r() * 20, y + 20 * (r() - 0.5)); q.stroke(); } q.restore(); } // iron in the rock
     if (!L.cave && i < 3) { q.fillStyle = vgrad(q, H - [112, 90, 70][i], H - [66, 48, 32][i], [L.haze + '00', L.haze + '30', L.haze + '00']); q.fillRect(0, H - 114, LW, 90); } // mist lying in the valleys
     layers.set(key, cv);
     return cv;
@@ -153,6 +164,14 @@ const Paint = (() => {
       if (y1 === w.rows - 1) { let run = -1; for (let cx = a; cx <= b + 1; cx++) { const s = cx <= b && w.grid[y1][cx] === '#'; if (s && run < 0) run = cx; else if (!s && run >= 0) { g.rect(run * T - ox, wy(y1 + 1) - 0.2, (cx - run) * T + 0.3, H); run = -1; } } }
       g.fillStyle = vgrad(g, wy(w.rows - 16), wy(w.rows) + 30, [mix(L.ground[0], L.ridge[3], 0.25), L.ground[0], L.ground[1]]);
       g.fill();
+      g.save(); g.clip(); g.fillStyle = mix(L.ground[0], L.capShade, 0.5); // old layers in the earth
+      for (const [dy, th, al] of [[18, 3.4, 0.16], [34, 5, 0.13], [56, 4, 0.1], [84, 6, 0.08], [120, 5, 0.07], [160, 7, 0.06]]) {
+        g.globalAlpha = al; g.beginPath(); const yb = wy(w.rows) - 190 + dy + 60;
+        for (let x = a * T - ox - 8; x <= (b + 1) * T - ox + 8; x += 8) { const yy = yb + Math.sin((x + ox) * 0.021 + dy) * 3 + Math.sin((x + ox) * 0.057 + dy * 2) * 1.4; x === a * T - ox - 8 ? g.moveTo(x, yy) : g.lineTo(x, yy); }
+        for (let x = (b + 1) * T - ox + 8; x >= a * T - ox - 8; x -= 8) g.lineTo(x, yb + th + Math.sin((x + ox) * 0.021 + dy) * 3 + Math.sin((x + ox) * 0.043 + dy) * 1.6);
+        g.closePath(); g.fill();
+      }
+      g.restore(); g.globalAlpha = 1;
       caps(g, w, L, a, b, y0, y1, ox, oy);
       a = b + 1;
     }
@@ -214,7 +233,7 @@ const Paint = (() => {
   }
 
   /* ---------- small figures ---------- */
-  const ANA = { tunic: '#2f9c96', tunicD: '#1f7478', belt: '#f0cf78', cloak: '#d8463c', cloakD: '#a52e32', hair: '#f6d572', hairD: '#d9a94a', skin: '#f8dfc4', leg: '#3a2e44', boot: '#5a3b28', band: '#d8463c', hem: -7, long: 1, ears: 1 };
+  const ANA = { tunic: '#2f9c96', tunicD: '#1f7478', belt: '#f0cf78', cloak: '#d8463c', cloakD: '#a52e32', hair: '#f6d572', hairD: '#d9a94a', skin: '#f8dfc4', leg: '#5a4a6e', boot: '#5a3b28', band: '#d8463c', hem: -7, long: 1, ears: 1 };
   const MAYANK = { tunic: '#f2a43c', tunicD: '#c97a22', belt: '#fff0c8', cloak: null, scarf: '#3b44a8', hair: '#221a1c', hairD: '#221a1c', skin: '#b98052', leg: '#f1e8d8', boot: '#6a4630', hem: -5, long: 0 };
   // o: face, speed (0..1), ph (stride phase), air (vertical speed, or 0 on the ground), glide, hurt, shoot, raise, t, sq, crown, lantern
   function figure(g, x, y, o, K) {
@@ -228,8 +247,11 @@ const Paint = (() => {
     // legs
     const st = inAir ? 0 : Math.sin(ph) * 3.6 * Math.min(1, sp * 1.4), lf = inAir ? 0 : Math.max(0, Math.cos(ph)) * 1.8 * sp, lf2 = inAir ? 0 : Math.max(0, -Math.cos(ph)) * 1.8 * sp;
     const f1 = inAir ? [air < 0 ? 1.6 : 2.4, air < 0 ? -1.6 : -0.6] : [st, -lf], f2 = inAir ? [air < 0 ? -1.8 : -1.2, air < 0 ? -0.4 : -1.4] : [-st, -lf2];
+    if (!inAir && sp < 0.1) { f1[0] = 1.3; f2[0] = -1.3; } // standing: feet a little apart
     g.strokeStyle = K.leg; g.lineWidth = 2;
-    g.beginPath(); g.moveTo(-0.9, -8 + bob); g.lineTo(f2[0] - 0.4, f2[1] - 1.2); g.moveTo(0.9, -8 + bob); g.lineTo(f1[0] + 0.4, f1[1] - 1.2); g.stroke();
+    g.beginPath(); // each leg bends at the knee, a little forward of the straight line
+    g.moveTo(-0.9, -8 + bob); g.quadraticCurveTo((f2[0] - 1.3) * 0.5 + 1.2 + Math.abs(f2[1]) * 0.6, -4.6 + bob * 0.5 + f2[1] * 0.4, f2[0] - 0.4, f2[1] - 1.2);
+    g.moveTo(0.9, -8 + bob); g.quadraticCurveTo((f1[0] + 1.3) * 0.5 + 1.2 + Math.abs(f1[1]) * 0.6, -4.6 + bob * 0.5 + f1[1] * 0.4, f1[0] + 0.4, f1[1] - 1.2); g.stroke();
     g.fillStyle = K.boot; g.beginPath(); rr(g, f2[0] - 1.7, f2[1] - 2.6, 3.6, 2.6, 1); rr(g, f1[0] - 1.3, f1[1] - 2.6, 3.6, 2.6, 1); g.fill();
     g.translate(0, bob); g.rotate(lean);
     // cloak, or a scarf
@@ -250,18 +272,19 @@ const Paint = (() => {
     // head
     const hx = 0.5, hy = -20.2;
     if (K.long) { // long hair, lifted by the going
-      const hxT = -4 - 5.5 * flow, hyT = -10.5 - lift * 6 + wv2;
-      g.fillStyle = K.hairD; g.beginPath(); g.moveTo(-1.6, -22.6); g.quadraticCurveTo(-4.8 - flow * 2, -19 - lift, hxT, hyT); g.quadraticCurveTo(hxT + 1.4, hyT + 1.6, hxT + 2.8, hyT + 1.2 + wv * 0.4); g.quadraticCurveTo(-2.4, -14, 0.2, -17.6); g.closePath(); g.fill();
+      const hxT = -3 - 5 * flow, hyT = -11.4 - lift * 6 + wv2;
+      g.fillStyle = K.hair; g.beginPath(); g.moveTo(-1.4, -22.6); g.quadraticCurveTo(-4.2 - flow * 2, -19 - lift, hxT, hyT); g.quadraticCurveTo(hxT + 0.6, hyT + 0.9, hxT + 1.2, hyT + 0.6 + wv * 0.3); g.quadraticCurveTo(-1.8, -15, -0.4, -18); g.closePath(); g.fill();
+      g.strokeStyle = K.hairD; g.lineWidth = 0.45; g.beginPath(); g.moveTo(-1.8, -21); g.quadraticCurveTo(-3.6 - flow * 2, -17.6 - lift, hxT + 0.5, hyT + 0.3); g.stroke();
     }
     g.fillStyle = K.skin; g.beginPath(); g.arc(hx, hy, 2.9, 0, TAU); g.fill();
-    if (K.ears) { g.beginPath(); g.moveTo(hx - 2, hy - 0.2); g.lineTo(hx - 4.6, hy - 2.6); g.lineTo(hx - 1.2, hy + 1.2); g.closePath(); g.fill(); }
+    if (K.ears) { g.beginPath(); g.moveTo(hx - 2.2, hy + 0.4); g.lineTo(hx - 4, hy - 0.9); g.lineTo(hx - 1.6, hy + 1.6); g.closePath(); g.fill(); }
     g.fillStyle = K.hair; g.beginPath(); g.moveTo(hx + 2.7, hy - 1.2); g.quadraticCurveTo(hx + 1.6, hy - 3.9, hx - 0.8, hy - 3.3); g.quadraticCurveTo(hx - 3.6, hy - 2.6, hx - 3.1, hy + 1); g.quadraticCurveTo(hx - 2.2, hy + 2.6, hx - 1.4, hy + 3); g.quadraticCurveTo(hx - 1.2, hy, hx + 0.2, hy - 1.3); g.quadraticCurveTo(hx + 1.6, hy - 1.6, hx + 2.7, hy - 1.2); g.closePath(); g.fill();
     if (K.band) { g.strokeStyle = K.band; g.lineWidth = 1.3; g.beginPath(); g.moveTo(hx + 2.7, hy - 1.5); g.quadraticCurveTo(hx, hy - 2.6, hx - 2.9, hy - 0.5); g.stroke(); star4(g, hx + 1.5, hy - 2, 0.9, '#ffffff'); }
     g.fillStyle = '#2a2233'; g.beginPath(); g.arc(hx + 1.7, hy + 0.1, 0.42, 0, TAU); g.fill();
     if (o.crown) { g.fillStyle = '#ffe9a0'; for (let i = -2; i <= 2; i++) star4(g, hx + i * 1.5, hy - 4.1 - (2 - Math.abs(i)) * 0.6, 0.9 + (i === 0 ? 0.5 : 0), '#fff3c4', t * 0.01); }
     // near arm: swinging, drawing a bow, holding up the light, or carrying a lantern
-    g.strokeStyle = K.tunic; g.lineWidth = 1.8; g.beginPath(); g.moveTo(1.4, -15.6);
-    if (o.shoot) { g.lineTo(6.2, -15.2); g.stroke(); g.strokeStyle = '#f4ecd6'; g.lineWidth = 0.8; g.beginPath(); g.arc(4.4, -15.2, 5.2, -1.15, 1.15); g.stroke(); g.lineWidth = 0.35; g.beginPath(); g.moveTo(6.5, -19.9); g.lineTo(6.5, -10.5); g.stroke(); }
+    g.strokeStyle = mix(K.tunic, '#ffffff', 0.22); g.lineWidth = 1.8; g.beginPath(); g.moveTo(1.4, -15.6);
+    if (o.shoot) { g.lineTo(6.2, -15.2); g.stroke(); g.strokeStyle = '#fff6dc'; g.lineWidth = 1.2; g.beginPath(); g.arc(4.4, -15.2, 5.2, -1.15, 1.15); g.stroke(); g.lineWidth = 0.35; g.beginPath(); g.moveTo(6.5, -19.9); g.lineTo(6.5, -10.5); g.stroke(); }
     else if (o.raise) { g.lineTo(4.4, -21.6); g.stroke(); }
     else if (o.lantern) { g.lineTo(5.2, -13); g.stroke(); g.strokeStyle = '#6a4a30'; g.lineWidth = 0.5; g.beginPath(); g.moveTo(5.4, -13); g.lineTo(5.6, -11); g.stroke(); g.fillStyle = '#ffe9a8'; g.beginPath(); rr(g, 4.2, -11.2, 2.8, 3.6, 0.9); g.fill(); g.fillStyle = '#6a4a30'; g.fillRect(4, -11.5, 3.2, 0.6); g.fillRect(4, -7.8, 3.2, 0.6); }
     else { g.lineTo(1.4 - Math.sin(sw) * 4.2, -15.6 + Math.cos(sw) * 4.8); g.stroke(); }
@@ -316,20 +339,19 @@ Paint.tiles = function (g, w, ox, oy) {
         const m = w.moon[cx + cy * w.cols] || 0;
         if (m > 0) { const a = Math.min(1, m / 40); g.globalAlpha = a; g.fillStyle = Paint.vgrad(g, y, y + 6, ['rgba(255,255,255,0.95)', 'rgba(170,215,255,0.55)', 'rgba(170,215,255,0)']); g.fillRect(x - 0.2, y, T + 0.4, 6); g.globalAlpha = 1; Paint.soft(g, x + 8, y + 2, 12, '#bfe4ff', 0.28 * a); if ((t + cx * 9) % 40 < 6) Paint.star4(g, x + ((cx * 7) % 12) + 2, y - 1.5, 1.6, '#ffffff', t * 0.05); }
         else if (((t + cx * 23) >> 3) % 9 === 0) Paint.disc(g, x + (cx * 7 + (t >> 5)) % 14 + 1, y + 2 + (cx % 3), 0.5, 'rgba(223,242,255,0.7)');
-      } else if (ch === 'D') { // a door that shows itself only to starlight
-        const d = w.doors.find(q => q.cx === cx), k = d ? clamp((w.doorP[d.id] || 0) / 70, 0, 1) : 0, row = d ? d.cy - cy : 0;
-        g.fillStyle = Paint.vgrad(g, y, y + T, ['#343b5c', '#2a304c']); g.fillRect(x, y - 0.2, T, T + 0.4); g.fillStyle = 'rgba(255,255,255,0.07)'; g.fillRect(x, y - 0.2, 1.4, T + 0.4); g.fillStyle = 'rgba(0,0,0,0.25)'; g.fillRect(x + T - 1.6, y - 0.2, 1.6, T + 0.4);
-        const a = clamp(0.1 + 0.9 * k + (k > 0 ? 0.1 * Math.sin(t * 0.3) : 0), 0, 1); g.strokeStyle = `rgba(223,242,255,${a})`; g.lineWidth = 0.7;
-        g.beginPath(); g.moveTo(x + 3.5, y - 0.2); g.lineTo(x + 3.5, y + T + 0.2); g.moveTo(x + 12.5, y - 0.2); g.lineTo(x + 12.5, y + T + 0.2); g.stroke();
-        if (d && row === d.h - 1) { g.beginPath(); g.arc(x + 8, y + 6, 4.5, Math.PI, 0); g.stroke(); }
-        if (d && row === (d.h >> 1)) { g.globalAlpha = a; Paint.star4(g, x + 8, y + 8, 4.2, '#eaf6ff'); g.globalAlpha = 1; }
-        if (k > 0) Paint.soft(g, x + 8, y + 8, 14, '#bfe4ff', 0.35 * k);
-      } else { // a runestone, asleep until something wakes it; or one already woken
-        const used = ch === 'U', pulse = 0.6 + 0.4 * Math.sin(t * 0.06 + cx * 1.3);
-        g.fillStyle = Paint.vgrad(g, y, y + T, used ? ['#4a5068', '#32364a'] : ['#6f7a9c', '#49526f']); g.beginPath(); rr(g, x + 0.5, y + 0.5, T - 1, T - 1, 3.2); g.fill();
-        g.fillStyle = 'rgba(255,255,255,0.16)'; g.beginPath(); rr(g, x + 2, y + 1.6, T - 4, 1.2, 0.6); g.fill();
-        if (used) Paint.star4(g, x + 8, y + 8.4, 3.4, 'rgba(20,24,40,0.45)');
-        else { Paint.soft(g, x + 8, y + 8.4, 9, '#bfe4ff', 0.3 * pulse); g.globalAlpha = 0.65 + 0.35 * pulse; Paint.star4(g, x + 8, y + 8.4, 3.8, '#eaf6ff'); g.globalAlpha = 1; }
+      } else if (ch === 'D') { // a door that shows itself only to starlight: a veil across the way, thin as breath until she lights it
+        const d = w.doors.find(q => q.cx === cx), k = d ? clamp((w.doorP[d.id] || 0) / 70, 0, 1) : 0, a = 0.2 + 0.55 * k + 0.05 * Math.sin(t * 0.07 + cy);
+        const gr = g.createLinearGradient(x, 0, x + T, 0); gr.addColorStop(0, 'rgba(190,220,255,0)'); gr.addColorStop(0.5, `rgba(214,236,255,${a})`); gr.addColorStop(1, 'rgba(190,220,255,0)');
+        g.fillStyle = gr; g.fillRect(x, y - 0.2, T, T + 0.4);
+        g.fillStyle = `rgba(255,255,255,${0.35 + 0.6 * k})`; for (let i = 0; i < 2; i++) { const yy = ((t * 0.3 + cy * 37 + i * 9) % 16); Paint.disc(g, x + 8 + Math.sin(t * 0.05 + cy + i * 2) * 3, y + yy, 0.45, g.fillStyle); }
+        if (k > 0) Paint.soft(g, x + 8, y + 8, 16, '#bfe4ff', 0.3 * k);
+      } else { // a runestone: a piece of the land itself, hung in the air, asleep until light or an arrow wakes it
+        const used = ch === 'U', pulse = 0.6 + 0.4 * Math.sin(t * 0.06 + cx * 1.3), h1 = hash2(cx, cy), bob = used ? 0 : Math.sin(t * 0.04 + cx) * 0.5;
+        g.fillStyle = Paint.vgrad(g, y, y + T, [mix(L.ground[0], L.ridge[1], used ? 0.3 : 0.55), mix(L.ground[1], L.ground[0], 0.5)]);
+        g.beginPath(); g.moveTo(x + 1.2, y + 5 + bob); g.quadraticCurveTo(x + 1 + h1, y + 0.8 + bob, x + 6, y + 0.6 + bob); g.lineTo(x + 10.6, y + 0.5 + bob); g.quadraticCurveTo(x + 15.2, y + 1 + bob, x + 15, y + 6 + bob); g.quadraticCurveTo(x + 15.6 - h1, y + 12 + bob, x + 11.6, y + 15.4 + bob); g.quadraticCurveTo(x + 7, y + 16.4 + bob, x + 3.4, y + 14.8 + bob); g.quadraticCurveTo(x + 0.2, y + 11 + bob, x + 1.2, y + 5 + bob); g.closePath(); g.fill();
+        g.fillStyle = L.capCol; g.globalAlpha = L.cap === 'snow' ? 0.95 : 0.55; g.beginPath(); g.moveTo(x + 1.6, y + 3.4 + bob); g.quadraticCurveTo(x + 3, y + 0.2 + bob, x + 8, y + 0.2 + bob); g.quadraticCurveTo(x + 13.6, y + 0.2 + bob, x + 14.6, y + 3.6 + bob); g.quadraticCurveTo(x + 8, y + 1.6 + bob, x + 1.6, y + 3.4 + bob); g.fill(); g.globalAlpha = 1;
+        if (used) Paint.star4(g, x + 8, y + 8.6, 2.6, 'rgba(255,255,255,0.14)');
+        else { Paint.soft(g, x + 8, y + 8.6 + bob, 8, '#bfe4ff', 0.3 * pulse); g.globalAlpha = 0.6 + 0.4 * pulse; Paint.star4(g, x + 8, y + 8.6 + bob, 3, '#eaf6ff'); g.globalAlpha = 1; }
       }
     }
   }

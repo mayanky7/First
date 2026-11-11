@@ -15,6 +15,10 @@ const THEMES = {
     liquid: { top: '#c8f4ee', body: '#2f97a2', deep: '#1c5c74', glow: null },
     scatter: [['drygrass', 0.3], ['cactus', 0.06], ['skull', 0.03], ['rock', 0.1]], trees: 'saguaro'
   },
+  sea: {
+    id: 'sea', food: 'Apple pie, still warm.', seed: 63, music: 'canyon', dark: 0, amb: 'pollen', pit: '#1c5c74',
+    tiles: {}, liquid: { top: '#c8f4ee', body: '#2f97a2', deep: '#1c5c74', glow: null }, scatter: [['rock', 0.06]], trees: null
+  },
   meads: {
     id: 'meads', food: 'Midsummer strawberries and cream.', seed: 11, music: 'meads', dark: 0, amb: 'pollen', pit: '#14264a',
     tiles: { style: 'dirt', body: '#8a5a34', dark: '#6e4426', light: '#a06c40', speck: '#b8946a', cap: '#58b848', capHi: '#9ee86a', capDark: '#3a8a38', capDots: '#ffe870',

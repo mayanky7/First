@@ -9,31 +9,31 @@
   /* Each land has its own creatures: the same habits, a different animal. [kind][land] -> colours and a shape. */
   const SKIN = {
     goblin: {
-      north: { shape: 'imp', body: '#3d4a70', dark: '#232c4a', eye: '#ffe36a', ears: 1 },            // hiisi
+      north: { shape: 'imp', body: '#6276ae', dark: '#3a4878', eye: '#ffe36a', ears: 1 },            // hiisi
       meads: { shape: 'imp', body: '#5f9150', dark: '#3a6238', eye: '#20301c', crown: 1, nose: 1 },  // småtroll, in a midsummer crown
       halls: { shape: 'imp', body: '#646a8c', dark: '#3a3f5c', eye: '#ffe9a0', lamp: 1 },            // gruvrå, the mine-folk
       canyon: { shape: 'hare', body: '#cfa878', dark: '#96724a', eye: '#2a1a14' },                   // jackalope
-      gloam: { shape: 'imp', body: '#2c1c22', dark: '#160c10', eye: '#ff7a20', ears: 1, cinder: 1 },
+      gloam: { shape: 'imp', body: '#6a4450', dark: '#40262e', eye: '#ffb060', ears: 1, cinder: 1 },
       oz: { shape: 'toad', body: '#8f8c4c', dark: '#5e5c2c', eye: '#20180a', belly: '#dcd090' }      // cane toad
     },
     wolf: {
-      north: { body: '#59658a', dark: '#39425f', eye: '#ffe36a' }, meads: { body: '#6a6f86', dark: '#444860', eye: '#ffe36a' }, halls: { body: '#4a5070', dark: '#2c3048', eye: '#ffe9a0' },
-      canyon: { body: '#c79c68', dark: '#8e6a40', eye: '#2a1a14', slim: 1 }, gloam: { body: '#2a1c22', dark: '#140a0e', eye: '#ff7a20' }, oz: { body: '#e2ac5e', dark: '#aa7a34', eye: '#2a1808', slim: 1, curl: 1 }
+      north: { body: '#7484b4', dark: '#4a5680', eye: '#ffe36a' }, meads: { body: '#6a6f86', dark: '#444860', eye: '#ffe36a' }, halls: { body: '#4a5070', dark: '#2c3048', eye: '#ffe9a0' },
+      canyon: { body: '#c79c68', dark: '#8e6a40', eye: '#2a1a14', slim: 1 }, gloam: { body: '#6a4450', dark: '#40262e', eye: '#ffb060' }, oz: { body: '#e2ac5e', dark: '#aa7a34', eye: '#2a1808', slim: 1, curl: 1 }
     },
     bat: {
       north: { shape: 'owl', body: '#f1f4ff', dark: '#b7c3e4', eye: '#ffcf40' }, meads: { shape: 'bat', body: '#5a4a86', dark: '#392f5c', eye: '#ffd0d0' }, halls: { shape: 'bat', body: '#4a4470', dark: '#2a2648', eye: '#ffd0d0' },
-      canyon: { shape: 'gull', body: '#f7f7f4', dark: '#a9b0bf', eye: '#20202a' }, gloam: { shape: 'bat', body: '#2a1a22', dark: '#14080e', eye: '#ff7a20' }, oz: { shape: 'gull', body: '#17171d', dark: '#f1f1f1', eye: '#c84a30', pied: 1 }
+      canyon: { shape: 'gull', body: '#f7f7f4', dark: '#a9b0bf', eye: '#20202a' }, gloam: { shape: 'bat', body: '#6a4450', dark: '#40262e', eye: '#ffb060' }, oz: { shape: 'gull', body: '#17171d', dark: '#f1f1f1', eye: '#c84a30', pied: 1 }
     },
     spider: {
       north: { body: '#3a3560', dark: '#231f40', eye: '#ff7a8a' }, meads: { body: '#3f3a66', dark: '#262246', eye: '#ff7a8a' }, halls: { body: '#34304f', dark: '#1c1a30', eye: '#ff7a8a' },
-      canyon: { body: '#6a3a40', dark: '#3c1c24', eye: '#ffd070' }, gloam: { body: '#241418', dark: '#10060a', eye: '#ff7a20' }, oz: { shape: 'bear', body: '#8f94a0', dark: '#666b7a', eye: '#201410' }
+      canyon: { body: '#6a3a40', dark: '#3c1c24', eye: '#ffd070' }, gloam: { body: '#6a4450', dark: '#40262e', eye: '#ffb060' }, oz: { shape: 'bear', body: '#8f94a0', dark: '#666b7a', eye: '#201410' }
     },
     troll: {
       north: { body: '#6c7594', dark: '#434a66', eye: '#ffe36a', snow: 1 }, meads: { body: '#6f7f6a', dark: '#46543f', eye: '#ffe36a', moss: 1 }, halls: { body: '#646a88', dark: '#3a3f5a', eye: '#ffe9a0' },
-      canyon: { body: '#8a5a3c', dark: '#573620', eye: '#ffe9a0', shag: 1 }, gloam: { body: '#3a3448', dark: '#1e1a2a', eye: '#ff5a1a', helm: 1 }, oz: { body: '#8a5a3c', dark: '#573620', eye: '#ffe9a0', shag: 1 }
+      canyon: { body: '#8a5a3c', dark: '#573620', eye: '#ffe9a0', shag: 1 }, gloam: { body: '#6a5a70', dark: '#3a3046', eye: '#ffb060', helm: 1 }, oz: { body: '#a8683c', dark: '#6a3c20', eye: '#ffe9a0', shag: 1, moss: 0 }
     }
   };
-  const skin = (kind, land) => (SKIN[kind] && (SKIN[kind][land] || SKIN[kind].north)) || {};
+  const skin = (kind, land) => (SKIN[kind] && (SKIN[kind][land === 'sea' ? 'canyon' : land] || SKIN[kind].north)) || {};
   const WHITE = { body: W1, dark: W1, eye: W1, belly: W1 };
 
   // (x, y) is the middle of the creature's feet; o: dir, flash, fast, st, squash
@@ -87,7 +87,7 @@
         g.fillStyle = K.body; g.beginPath(); ell(g, 0, 0.4, 3.6, 4.6); ell(g, 0, -3, 3.4, 2.9); g.fill();
         disc(g, -1.3, -3.2, 1, K.eye); disc(g, 1.3, -3.2, 1, K.eye); disc(g, -1.3, -3.2, 0.45, '#20202a'); disc(g, 1.3, -3.2, 0.45, '#20202a'); g.fillStyle = '#e8b040'; g.beginPath(); tri(g, -0.5, -2.4, 0.5, -2.4, 0, -1.4); g.fill();
       } else if (K.shape === 'gull') {
-        g.strokeStyle = K.pied ? K.body : K.dark; g.lineWidth = 1.5; g.beginPath(); g.moveTo(-1, 0); g.quadraticCurveTo(-5, -3 - wy, -10, -0.4 - wy * 1.3); g.moveTo(1, 0); g.quadraticCurveTo(5, -3 - wy, 10, -0.4 - wy * 1.3); g.stroke();
+        g.fillStyle = K.pied ? K.body : K.dark; g.beginPath(); for (const sd of [-1, 1]) { g.moveTo(sd * 1, -0.8); g.quadraticCurveTo(sd * 5, -4 - wy, sd * 10.4, -0.6 - wy * 1.3); g.quadraticCurveTo(sd * 5.6, -1 - wy * 0.5, sd * 1, 1.4); g.closePath(); } g.fill();
         g.fillStyle = K.body; g.beginPath(); ell(g, 0, 0.4, 4.2, 2.2); ell(g, 3.6, -1, 1.8, 1.6); g.fill();
         if (K.pied) { g.fillStyle = K.dark; g.beginPath(); ell(g, -1.6, 0.2, 2, 1.2); ell(g, 2.6, -1.9, 1.1, 0.6); g.fill(); }
         g.fillStyle = K.pied ? '#d8dbe4' : '#f0a030'; g.beginPath(); tri(g, 5, -1.4, 7.4, -0.6, 5, -0.2); g.fill(); disc(g, 4.1, -1.3, 0.45, K.eye);
@@ -107,7 +107,7 @@
         g.fillStyle = K.eye; g.beginPath(); ell(g, 0, 0.6, 1.5, 2); ell(g, -2.8, -0.8, 0.6, 0.6); ell(g, 2.8, -0.8, 0.6, 0.6); g.fill();
         g.strokeStyle = K.dark; g.lineWidth = 1.6; g.beginPath(); g.moveTo(-5.4, 3); g.lineTo(-8.4, 6.4); g.moveTo(5.4, 3); g.lineTo(8.4, 6.4); g.stroke();
       } else {
-        g.strokeStyle = K.dark; g.lineWidth = 0.8; g.beginPath(); for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { const wig = Math.sin(t * 0.3 + i * 1.3) * 0.8, a0 = -0.9 + i * 0.5; g.moveTo(s * 2, 0.6); g.quadraticCurveTo(s * (5 + i * 0.4), -3.4 + i * 1.5 + wig, s * (7.4 - Math.abs(a0) * 0.6), 2.4 + i * 1.5 + wig); } g.stroke();
+        g.strokeStyle = K.dark; g.lineWidth = 1; g.beginPath(); for (let i = 0; i < 4; i++) for (const s of [-1, 1]) { const wig = Math.sin(t * 0.3 + i * 1.3) * 0.8, a0 = -0.9 + i * 0.5; g.moveTo(s * 2, 0.6); g.quadraticCurveTo(s * (5 + i * 0.4), -3.4 + i * 1.5 + wig, s * (7.4 - Math.abs(a0) * 0.6), 2.4 + i * 1.5 + wig); } g.stroke();
         g.fillStyle = K.body; g.beginPath(); ell(g, 0, 0.4, 4.4, 3.8); ell(g, 0, 4, 2.6, 2.2); g.fill();
         g.fillStyle = K.dark; g.globalAlpha = 0.5; g.beginPath(); ell(g, -1, -0.6, 2.2, 1.8); g.fill(); g.globalAlpha = 1;
         disc(g, -1.1, 4.2, 0.6, K.eye); disc(g, 1.1, 4.2, 0.6, K.eye);
@@ -207,9 +207,11 @@
     g.fillStyle = on ? col : '#3a4058'; g.beginPath(); rr(g, lx - 2.2, ly - 3, 4.4, 6, 1.2); g.fill(); if (on) { g.fillStyle = '#ffffff'; g.beginPath(); rr(g, lx - 0.9, ly - 1.6, 1.8, 3.2, 0.8); g.fill(); }
     g.fillStyle = '#2c2a3c'; g.fillRect(lx - 2.6, ly - 3.6, 5.2, 0.9); g.fillRect(lx - 2.6, ly + 2.7, 5.2, 0.9);
   };
-  Paint.waystone = function (g, x, y, t, near) { // a road marker, older than the road
-    g.fillStyle = vgrad(g, y - 15, y, ['#8a93b4', '#525a78']); g.beginPath(); g.moveTo(x - 4.6, y + 0.4); g.quadraticCurveTo(x - 5.4, y - 11, x - 1.6, y - 14.4); g.quadraticCurveTo(x + 2.6, y - 16, x + 4.4, y - 10); g.quadraticCurveTo(x + 5.2, y - 4, x + 4.8, y + 0.4); g.closePath(); g.fill();
-    const k = near ? 1 : 0.55 + 0.25 * Math.sin(t * 0.05 + x); soft(g, x, y - 8, near ? 13 : 7, '#bfe4ff', 0.4 * k); g.globalAlpha = k; star4(g, x, y - 8.2, 2.9, '#eaf6ff'); g.globalAlpha = 1;
+  Paint.waystone = function (g, x, y, t, near) { // a small cairn by the road: it has something to say only when she is close
+    g.fillStyle = vgrad(g, y - 11, y, ['#98a0be', '#5a6280']);
+    g.beginPath(); g.ellipse(x - 0.4, y - 1.8, 5.2, 2.4, 0, 0, TAU); g.ellipse(x + 0.6, y - 5, 3.8, 2, 0.12, 0, TAU); g.ellipse(x - 0.2, y - 7.8, 2.5, 1.5, -0.1, 0, TAU); g.ellipse(x + 0.2, y - 9.9, 1.4, 1, 0, 0, TAU); g.fill();
+    g.fillStyle = 'rgba(255,255,255,0.22)'; g.beginPath(); g.ellipse(x - 1.6, y - 2.6, 2.6, 0.8, 0, 0, TAU); g.ellipse(x - 0.4, y - 5.6, 1.8, 0.6, 0.12, 0, TAU); g.fill();
+    if (near) { soft(g, x, y - 13, 9, '#bfe4ff', 0.5); star4(g, x, y - 13.4 + Math.sin(t * 0.08) * 0.6, 1.9, '#eaf6ff', t * 0.02); }
   };
   Paint.beacon = function (g, x, y, t, fire) { // a signal tower: (x, y) is the middle of its foot
     g.fillStyle = vgrad(g, y - 54, y, ['#8a90a8', '#4a4e66']); g.beginPath(); g.moveTo(x - 12, y + 0.4); g.lineTo(x - 9, y - 46); g.lineTo(x - 12.6, y - 46); g.lineTo(x - 12.6, y - 52); g.lineTo(x - 8.6, y - 52); g.lineTo(x - 8.6, y - 49.4); g.lineTo(x - 4.2, y - 49.4); g.lineTo(x - 4.2, y - 52); g.lineTo(x + 4.2, y - 52); g.lineTo(x + 4.2, y - 49.4); g.lineTo(x + 8.6, y - 49.4); g.lineTo(x + 8.6, y - 52); g.lineTo(x + 12.6, y - 52); g.lineTo(x + 12.6, y - 46); g.lineTo(x + 9, y - 46); g.lineTo(x + 12, y + 0.4); g.closePath(); g.fill();
