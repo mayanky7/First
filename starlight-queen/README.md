@@ -28,6 +28,11 @@ cd starlight-queen
 python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
+**As an app that caches itself:** when the folder is served from a web address (any static host),
+the game keeps a copy of itself on the device after the first visit (`sw.js`,
+`manifest.webmanifest`) and plays offline from then on. On an iPhone or iPad: open the address
+in Safari, Share, Add to Home Screen.
+
 **Playing with no internet:** `offline/Starlight Queen.html` is the whole game in one file,
 typefaces included. Copy it to any laptop and double-click it. Rebuild it with
 `python3 build-offline.py` after changing the game.

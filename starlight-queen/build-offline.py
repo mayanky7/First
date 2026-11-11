@@ -35,6 +35,7 @@ def font_css():
 def main():
     html = open(os.path.join(HERE, 'index.html'), encoding='utf-8').read()
     html = re.sub(r'<link rel="preconnect"[^>]*>\n?', '', html)
+    html = re.sub(r'<link rel="(manifest|apple-touch-icon)"[^>]*>\n?', '', html)  # those belong to the hosted edition
     fonts = font_css()
     html, n = re.subn(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>\n?', lambda m: '<style>\n' + fonts + '\n</style>\n' if fonts else '', html)
     assert n == 1, 'font link not found'

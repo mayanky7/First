@@ -187,5 +187,8 @@
   if (q.has('at')) { Game.newGame(); Game.cp = { x: (+q.get('at') || 3) * T + 8, y: (ROWS - (+q.get('alt') || 3)) * T }; if (q.has('down')) { Game.bossDown = true; Game.gems.kohinoor = 1; } Scenes.go('play', { resume: true, god: q.has('god') }); }
   else Scenes.go(q.get('scene') || 'title');
   window.__sq = { Game, World, Scenes, Input, Sound, step, frame };
+  // Hosted on its own page (not opened as a file, not embedded in another site), the game keeps a copy of itself on the
+  // device after the first visit, so it plays with no connection from then on.
+  try { if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && window.top === window) navigator.serviceWorker.register('sw.js').catch(() => { }); } catch (e) { }
   requestAnimationFrame(loop);
 })();
