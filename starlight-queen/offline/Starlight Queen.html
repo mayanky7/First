@@ -3938,7 +3938,8 @@ Scenes.list.title = {
     Game.loadSave(); this.t = 0; this.sel = 0;
     this.items = (Game.saved ? ['continue'] : []).concat(['new', 'vault']);
     // On a web page that is the whole game in one file, offer that file to keep: it plays on a laptop with no internet.
-    this.canSave = /^https?:$/.test(location.protocol) && !document.querySelector('script[src]') && !Input.touch;
+    // (Tested by whether the game's own code is inline, not by whether the page has any outside script: hosts add their own.)
+    this.canSave = /^https?:$/.test(location.protocol) && !document.querySelector('script[src$="js/main.js"]') && !Input.touch;
     if (this.canSave) this.items.push('download');
     this.saveNote = ''; this.saveT = 0;
     Sound.music('title'); Sound.duck(false); Sound.setRate(1);
