@@ -20,7 +20,7 @@
       const a = o.alpha === undefined ? 1 : o.alpha;
       if (a <= 0.01 || !str) return;
       // text is rendered once (with its glow and shadow) and re-used; blurred shadows are costly per frame
-      const key = str + '|' + size + '|' + (o.color || '') + (o.glow || '') + (o.halo || '') + (o.italic ? 'i' : '') + (o.title ? 't' : '') + (o.ls || 0) + (o.shadow === false ? 'n' : '');
+      const key = str + '|' + size + '|' + (o.metal ? 'M' : '') + (o.color || '') + (o.glow || '') + (o.halo || '') + (o.italic ? 'i' : '') + (o.title ? 't' : '') + (o.ls || 0) + (o.shadow === false ? 'n' : '');
       let e = cache.get(key);
       if (!e) {
         if (cache.size > 120) dropCache();
@@ -32,16 +32,59 @@
         const g = tc.getContext('2d');
         g.font = ctx.font; g.textAlign = 'left'; g.textBaseline = 'middle'; if (ls) g.letterSpacing = ls + 'px';
         const px = pad, py = ch / 2;
+        if (o.metal) { // engraved gold: hard shadow, dark keyline, vertical metal gradient, a lit upper edge
+          const hgt = size * s, gr = g.createLinearGradient(0, py - hgt * 0.42, 0, py + hgt * 0.4);
+          gr.addColorStop(0, '#fff6cf'); gr.addColorStop(0.38, '#f3d384'); gr.addColorStop(0.55, '#d9a94e'); gr.addColorStop(0.78, '#b07a2c'); gr.addColorStop(1, '#e9c377');
+          g.lineJoin = 'round';
+          g.shadowColor = 'rgba(2,3,12,0.9)'; g.shadowBlur = hgt * 0.22; g.shadowOffsetY = hgt * 0.05; g.fillStyle = '#05060f'; g.fillText(str, px, py);
+          g.shadowColor = 'transparent'; g.shadowBlur = 0; g.shadowOffsetY = 0;
+          g.strokeStyle = '#2a1806'; g.lineWidth = Math.max(1.5, hgt * 0.085); g.strokeText(str, px, py);
+          g.fillStyle = '#3a2208'; g.fillText(str, px, py + Math.max(1, hgt * 0.035));
+          g.fillStyle = gr; g.fillText(str, px, py);
+          e = { tc, pad, tw: tw - ls, ch }; cache.set(key, e);
+        } else {
         if (o.halo) { g.strokeStyle = o.halo; g.lineWidth = size * s * 0.32; g.lineJoin = 'round'; g.strokeText(str, px, py); }
-        if (o.glow) { g.shadowColor = o.glow; g.shadowBlur = size * s * 0.55; g.fillStyle = o.color || '#fff'; g.fillText(str, px, py); }
+        if (o.glow) { g.shadowColor = o.glow; g.shadowBlur = size * s * 0.3; g.fillStyle = o.color || '#fff'; g.fillText(str, px, py); }
         if (o.shadow !== false) { g.shadowColor = 'rgba(0,0,0,0.85)'; g.shadowBlur = Math.max(2, size * s * 0.18); g.shadowOffsetY = Math.max(1, s * 0.5); }
         else { g.shadowColor = 'transparent'; g.shadowBlur = 0; }
         g.fillStyle = o.color || '#fff'; g.fillText(str, px, py);
         e = { tc, pad, tw: tw - ls, ch }; cache.set(key, e);
+        }
       }
       const al = o.align || 'center';
       const x0 = x * s - e.pad - (al === 'center' ? e.tw / 2 : al === 'right' ? e.tw : 0);
       ctx.globalAlpha = a; ctx.drawImage(e.tc, Math.round(x0), Math.round(y * s - e.ch / 2)); ctx.globalAlpha = 1;
+    },
+    // a line of text in which [KEY] tokens are drawn as keycaps
+    rich(line, cx, y, size, o) {
+      o = o || {};
+      const parts = line.split(/(\[[^\]]+\])/).filter(Boolean), a = o.alpha === undefined ? 1 : o.alpha;
+      const seg = parts.map(p => { const key = p[0] === '[' && p[p.length - 1] === ']'; const label = key ? p.slice(1, -1) : p; const tw = key ? Math.max(size * 1.35, this.width(label, size * 0.62, { title: true }) + size * 0.9) : this.width(label, size, o); return { key, label, tw }; });
+      let x = cx - seg.reduce((t, q) => t + q.tw, 0) / 2;
+      for (const q of seg) {
+        if (q.key) {
+          const h = size * 1.3, r = Math.min(2.2, h / 3) * s;
+          ctx.save(); ctx.globalAlpha = a;
+          ctx.beginPath(); if (ctx.roundRect) ctx.roundRect((x + 0.6) * s, (y - h / 2 + 0.9) * s, (q.tw - 1.2) * s, h * s, r); else ctx.rect((x + 0.6) * s, (y - h / 2 + 0.9) * s, (q.tw - 1.2) * s, h * s);
+          ctx.fillStyle = 'rgba(4,6,18,0.9)'; ctx.fill();
+          ctx.beginPath(); if (ctx.roundRect) ctx.roundRect((x + 0.6) * s, (y - h / 2) * s, (q.tw - 1.2) * s, h * s, r); else ctx.rect((x + 0.6) * s, (y - h / 2) * s, (q.tw - 1.2) * s, h * s);
+          ctx.fillStyle = 'rgba(38,46,82,0.95)'; ctx.fill(); ctx.strokeStyle = 'rgba(217,181,102,0.85)'; ctx.lineWidth = Math.max(1, s * 0.3); ctx.stroke();
+          ctx.restore();
+          this.text(q.label, x + q.tw / 2, y + 0.2, size * 0.62, { color: '#fff3c4', title: true, alpha: a, shadow: false });
+        } else this.text(q.label, x, y, size, Object.assign({}, o, { align: 'left' }));
+        x += q.tw;
+      }
+    },
+    // a soft dark plate with a gold hairline: the one container used for dialogue and notices
+    plate(x, y, w, h, a) {
+      if (a <= 0.01) return;
+      ctx.save(); ctx.globalAlpha = a;
+      const r = Math.min(5 * s, h * s / 2);
+      ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x * s, y * s, w * s, h * s, r); else ctx.rect(x * s, y * s, w * s, h * s);
+      ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 6 * s; ctx.shadowOffsetY = 1.5 * s;
+      ctx.fillStyle = 'rgba(9,13,34,0.9)'; ctx.fill();
+      ctx.shadowColor = 'transparent'; ctx.strokeStyle = 'rgba(217,181,102,0.55)'; ctx.lineWidth = Math.max(1, s * 0.3); ctx.stroke();
+      ctx.restore();
     },
     wrap(str, maxW, size, o) {
       this.font(size, o || { italic: true });
@@ -93,7 +136,7 @@
     // soft bloom: a small, contrast-boosted copy of the frame laid back over it
     bx.globalCompositeOperation = 'source-over'; bx.drawImage(buf, 0, 0, 96, 54);
     bx.globalCompositeOperation = 'multiply'; bx.drawImage(bcv, 0, 0); bx.drawImage(bcv, 0, 0); // keep only the brightest lights
-    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = 0.24;
+    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = sc.noBloom ? 0 : 0.13;
     ctx.drawImage(bcv, 0, 0, cv.width, cv.height); ctx.restore();
     if (sc.drawHi) sc.drawHi(UI);
     // soft vignette

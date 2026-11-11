@@ -65,14 +65,42 @@ const Backdrop = (() => {
     }
     return out;
   }
+  // a vertical gradient, quantised and ordered-dithered so it reads as painted pixels, not stripes
   function sky(bands, h) {
-    const [cv, g] = mk(1, h || H); const n = 28;
-    for (let i = 0; i < n; i++) {
-      const t = i / (n - 1) * (bands.length - 1), k = Math.min(bands.length - 2, t | 0);
-      g.fillStyle = mix(bands[k], bands[k + 1], t - k);
-      g.fillRect(0, Math.floor(i * (h || H) / n), 1, Math.ceil((h || H) / n) + 1);
+    h = h || H;
+    const [cv, g] = mk(W, h), img = g.createImageData(W, h), d = img.data, steps = 22;
+    const BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    const rgb = bands.map(c => { const v = parseInt(c.slice(1), 16); return [v >> 16, v >> 8 & 255, v & 255]; });
+    const at = k => { const t = clamp(k, 0, 1) * (rgb.length - 1), i = Math.min(rgb.length - 2, t | 0), f = t - i; return [0, 1, 2].map(j => rgb[i][j] + (rgb[i + 1][j] - rgb[i][j]) * f); };
+    for (let y = 0; y < h; y++) {
+      const t = y / (h - 1) * (steps - 1), lo = Math.floor(t), fr = t - lo;
+      for (let x = 0; x < W; x++) {
+        const c = at((lo + (fr > (BAYER[(y & 3) * 4 + (x & 3)] + 0.5) / 16 ? 1 : 0)) / (steps - 1)), o = (y * W + x) * 4;
+        d[o] = c[0]; d[o + 1] = c[1]; d[o + 2] = c[2]; d[o + 3] = 255;
+      }
     }
+    g.putImageData(img, 0, 0);
     return cv;
+  }
+  // aurora: soft curtains with a sharp lower hem, fading upward; drawn at half width and reused for a frame
+  const [auc, aug] = mk(192, 96), [aus, asg] = mk(1, 48);
+  { const gr = asg.createLinearGradient(0, 0, 0, 48); gr.addColorStop(0, 'rgba(150,110,255,0)'); gr.addColorStop(0.45, 'rgba(90,190,255,0.35)'); gr.addColorStop(0.86, 'rgba(110,255,190,0.95)'); gr.addColorStop(0.97, 'rgba(200,255,220,1)'); gr.addColorStop(1, 'rgba(110,255,190,0)'); asg.fillStyle = gr; asg.fillRect(0, 0, 1, 48); }
+  let auT = -1;
+  function aurora(c, t, off, y, alpha) {
+    if ((t >> 1) !== auT) {
+      auT = t >> 1; aug.clearRect(0, 0, 192, 96); aug.globalCompositeOperation = 'lighter';
+      for (let r = 0; r < 3; r++) for (let x = 0; x < 192; x++) {
+        const wx = x * 2 + off + r * 173;
+        const hem = 34 + r * 16 + Math.sin(wx * 0.011 + t * 0.003 + r * 2) * 12 + Math.sin(wx * 0.031 - t * 0.005) * 5;
+        const len = (26 + r * 4) * (0.7 + 0.3 * Math.sin(wx * 0.02 + t * 0.006 + r));
+        const ray = 0.62 + 0.38 * Math.sin(wx * 0.33 + Math.sin(wx * 0.07) * 3 + t * 0.02);
+        const a = (0.22 + 0.2 * Math.sin(wx * 0.008 + t * 0.004 + r * 1.3)) * ray * (r === 1 ? 1 : 0.7);
+        if (a > 0.03) { aug.globalAlpha = a; aug.drawImage(aus, x, hem - len, 1, len); }
+      }
+      aug.globalAlpha = 1;
+    }
+    c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = alpha === undefined ? 1 : alpha; c.imageSmoothingEnabled = false;
+    c.drawImage(auc, 0, y || 0, W, 96); c.restore();
   }
   function layer(fn) { const [cv, g] = mk(LW, H); fn(g); return cv; }
   function mountains(col, shade, snow, base, amp, seed, snowline) {
@@ -206,7 +234,7 @@ const Backdrop = (() => {
         drawLayer(c, far, cx, 0.08, yo * 0.2); drawLayer(c, mid, cx, 0.22, yo * 0.35); drawLayer(c, near, cx, 0.42, yo * 0.5);
       };
     } else if (id === 'north') {
-      const s = sky(['#050820', '#0a1640', '#16346a', '#2c5a8c', '#6a7aa8', '#d89aa8']);
+      const s = sky(['#03050f', '#07103a', '#10285c', '#254a82', '#56689c', '#b88aa6']);
       const stars = layer(g => { const r = rng(19); for (let i = 0; i < 110; i++) R(g, r() * LW, r() * 130, 1, 1, r() < 0.25 ? '#ffffff' : '#8fa8d8'); });
       const [aur, ag] = mk(1, 64); { const gr = ag.createLinearGradient(0, 0, 0, 64); gr.addColorStop(0, 'rgba(120,255,190,0)'); gr.addColorStop(0.25, 'rgba(120,255,190,0.9)'); gr.addColorStop(0.6, 'rgba(90,200,255,0.45)'); gr.addColorStop(1, 'rgba(160,110,255,0)'); ag.fillStyle = gr; ag.fillRect(0, 0, 1, 64); }
       const far = mountains('#5a6ea8', '#46588e', '#f4f8ff', 44, 54, 601, 60);
@@ -226,15 +254,7 @@ const Backdrop = (() => {
       B = (c, cx, yo, t) => {
         c.drawImage(s, 0, 0, W, H);
         drawLayer(c, stars, cx, 0.02, 0);
-        c.save(); c.globalCompositeOperation = 'lighter';
-        for (let x = 0; x < W; x += 3) {
-          const wx = x + cx * 0.03;
-          const y0 = 18 + Math.sin(wx * 0.021 + t * 0.004) * 14 + Math.sin(wx * 0.053 - t * 0.007) * 7;
-          const len = 46 + Math.sin(wx * 0.07 + t * 0.011) * 18 + Math.sin(wx * 0.19 + t * 0.02) * 6;
-          c.globalAlpha = 0.16 + 0.14 * Math.sin(wx * 0.033 + t * 0.006) + 0.08 * Math.sin(wx * 0.4 + t * 0.03);
-          if (c.globalAlpha > 0.05) c.drawImage(aur, x, y0 | 0, 3, len | 0);
-        }
-        c.restore();
+        aurora(c, t, cx * 0.03, 0, 1);
         drawLayer(c, far, cx, 0.07, yo * 0.2 + 8); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.4, yo * 0.5);
       };
     } else if (id === 'canyon') {
@@ -521,5 +541,5 @@ const Backdrop = (() => {
     R(c, x - 2 * s, y - 5 * s, 4 * s, 5 * s, '#ff7a1a'); R(c, x - 1 * s + f * 0.5, y - 8 * s, 2 * s, 4 * s, '#ff9a2a'); R(c, x + f, y - 10 * s, 1 * s, 3 * s, '#ffc040');
     R(c, x - 1 * s, y - 4 * s, 2 * s, 4 * s, '#ffe890');
   }
-  return { build, makeAmbient, drawAmbient, prop, torch, flame, fore, sky, layer, hills, mountains, drawLayer, LW, mist };
+  return { build, makeAmbient, drawAmbient, prop, torch, flame, fore, aurora, sky, layer, hills, mountains, drawLayer, LW, mist };
 })();

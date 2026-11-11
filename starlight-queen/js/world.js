@@ -412,14 +412,6 @@ const World = (() => {
     for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.85 * (1 - k); c.strokeStyle = q.col; c.lineWidth = r > 60 ? 2 : 1; c.beginPath(); c.arc(Math.round(q.x - ox), Math.round(q.y - oy), r, 0, TAU); c.stroke(); }
     c.globalAlpha = 1;
     Backdrop.drawAmbient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
-    { // near silhouettes sliding past in front of everything: depth
-      const f = Backdrop.fore(bl.a.theme), LWf = Backdrop.LW, sx0 = (((w.cam.x * 1.4) % LWf) + LWf) % LWf | 0, fy = H - f.height + Math.max(0, Math.round((w.rows * T - H - w.cam.y) * 0.9));
-      // drawn in slices, and never over a pit, lava or water: hazards must stay readable
-      if (fy < H) for (let x = 0; x < W; x += T) {
-        const cxw = Math.floor((ox + x + 8) / T); if (cxw < 0 || cxw >= w.cols || w.grid[w.rows - 1][cxw] !== '#' || w.grid[w.rows - 3][cxw] !== '#') continue;
-        c.drawImage(f, (sx0 + x) % LWf, 0, T, f.height, x, fy, T, f.height);
-      }
-    }
     if (w.gemFx) {
       const fx = w.gemFx, x = fx.x - ox, y = fx.y - oy, k = Math.min(1, fx.t / 30);
       c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = fx.gem.tint;
@@ -430,7 +422,7 @@ const World = (() => {
     }
     if (w.hurtFx > 0) { c.globalAlpha = (w.hurtFx / 16) * (w.hurtFx / 16); c.drawImage(hurtImg, 0, 0); c.globalAlpha = 1; }
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
-    if (!w.card) hud(c);
+    // the interface is drawn crisp, above the pixels (scenes.js)
     // embers about to leap from lava below the screen are announced at its edge
     for (const e of w.ents) if (e.type === 'ember' && e.warn > 0 && e.x - ox > -10 && e.x - ox < W + 10) { const yy = Math.min(e.by - oy, H - 4); Art.glow(c, e.x - ox + 4, yy, 8 + (40 - e.warn) * 0.3, '#ff7a20', 0.5 + 0.3 * Math.sin(w.t * 0.6)); R(c, e.x - ox + 3, yy - 6 - (w.t >> 2) % 3, 2, 3, '#ffd070'); }
   }
