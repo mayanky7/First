@@ -135,7 +135,19 @@ const Vista = (() => {
     for (let i = 0; i < 7; i++) { const a = -Math.PI + i * (Math.PI / 6) + 0.05, len = h * 0.46 * (0.8 + (i % 3) * 0.12), ex = tx + Math.cos(a) * len + sw, ey = ty + Math.sin(a) * len * 0.55 + len * 0.42; c.beginPath(); c.moveTo(tx, ty); c.quadraticCurveTo(tx + Math.cos(a) * len * 0.6, ty + Math.sin(a) * len * 0.75 - 1, ex, ey); c.quadraticCurveTo(tx + Math.cos(a) * len * 0.5, ty + Math.sin(a) * len * 0.4 + 2.4, tx, ty); c.fill(); }
     c.fillStyle = '#6a4a2a'; c.beginPath(); c.arc(tx - 1, ty + 1.6, 1.3, 0, TAU); c.arc(tx + 1.4, ty + 1.8, 1.2, 0, TAU); c.fill();
   }
-  function kauai(c, t) {
+  // The mesa, after: the two of them, his lantern, the beacon burning, and still no summer in the sky
+  function mesa(c, t) {
+    const { soft, vgrad } = Paint;
+    Paint.backdrop(c, 'gloam', 40, 0, t, 0);
+    c.fillStyle = vgrad(c, 168, H, ['#3c2430', '#1a0c14']); c.beginPath(); c.moveTo(-2, 176); c.quadraticCurveTo(120, 168, 240, 174); c.quadraticCurveTo(320, 178, W + 2, 172); c.lineTo(W + 2, H + 2); c.lineTo(-2, H + 2); c.closePath(); c.fill();
+    c.fillStyle = 'rgba(160,128,136,0.5)'; c.beginPath(); c.moveTo(-2, 176); c.quadraticCurveTo(120, 168, 240, 174); c.quadraticCurveTo(320, 178, W + 2, 172); c.lineTo(W + 2, 173.4); c.quadraticCurveTo(320, 179.4, 240, 175.4); c.quadraticCurveTo(120, 169.4, -2, 177.4); c.closePath(); c.fill();
+    c.save(); c.translate(300, 174); c.scale(1.5, 1.5); Paint.beacon(c, 0, 0, t, 1); c.restore();
+    const ax = 96, ay = 172.4, k = 1.9;
+    soft(c, ax - 20, ay - 18, 22, '#ffc060', 0.55); Paint.figure(c, ax - 28, ay + 0.8, { face: 1, t: t + 30, scale: k, lantern: true }, Paint.MAYANK);
+    soft(c, ax + 9, ay - 46, 14, '#dff2ff', 0.6); Paint.star4(c, ax + 9, ay - 46, 3.4, '#ffffff', t * 0.02);
+    Paint.figure(c, ax, ay, { face: 1, t, scale: k, crown: true, raise: true });
+  }
+  function kauai(c, t, rise) {
     const { soft, disc, vgrad, rr } = Paint;
     c.fillStyle = vgrad(c, 0, 124, ['#2c4e94', '#5e8ecc', '#a9c4de', '#f6c8a0', '#ffe2a6']); c.fillRect(0, 0, W, 126);
     c.fillStyle = '#fff4e2'; c.globalAlpha = 0.5; for (const [x, y, wd] of [[40, 30, 70], [150, 18, 90], [270, 40, 80], [330, 66, 60]]) { const xx = (x + t * 0.015) % (W + 100) - 50; c.beginPath(); rr(c, xx, y, wd, 4, 2); for (let k = 0; k < 5; k++) { c.moveTo(xx + wd * (0.14 + k * 0.18) + 8, y + 1.5); c.ellipse(xx + wd * (0.14 + k * 0.18), y + 1.5, 8 + (k % 3) * 3, 5 + (k % 2) * 2.4, 0, Math.PI, 0); } c.fill(); } c.globalAlpha = 1;
@@ -174,8 +186,19 @@ const Vista = (() => {
     Paint.figure(c, ax, ay, { face: 1, t, scale: k, crown: true, speed: 0.12, ph: 0 });
     disc(c, ax - 3.4, ay - 41.6, 1.9, '#ff8ab0'); disc(c, ax - 3.4, ay - 41.6, 0.7, '#ffe36a'); // a plumeria behind her ear
     for (let i = 0; i < 9; i++) { const kk = ((t * 0.25 + i * 41) % 240) / 240, x = (i * 53 + kk * 60) % W, y = 40 + kk * 150 + Math.sin(kk * 9 + i) * 6; c.globalAlpha = 0.7 * Math.sin(kk * Math.PI); disc(c, x, y, 1, i % 2 ? '#ffd0e0' : '#fff6e0'); } c.globalAlpha = 1; // petals on the trade wind
+    if (rise > 0) { // she opens her hands: the light goes up out of the stones, one for each she carried, and away over the sea
+      const got = GEMS.filter(q => Game.gems[q.id] || Game.vault[q.id]), n = Math.max(3, got.length);
+      soft(c, ax + 6, ay - 40, 16 + 10 * Math.sin(Math.min(1, rise / 260) * Math.PI), '#fff6d0', 0.5 * clamp(1.4 - rise / 420, 0.25, 1));
+      for (let i = 0; i < n; i++) {
+        const gem = got[i % Math.max(1, got.length)] || GEMS[i], k0 = (rise - 24 - i * 20) / 240; if (k0 <= 0) continue;
+        // each one climbs out of her hands and then hangs in the evening like a new star
+        const kk = Math.min(1, k0), e = 1 - Math.pow(1 - kk, 3), tx = 40 + ((i * 97 + 30) % 300), ty = i % 2 ? 9 + (i * 53 % 20) : 90 + (i * 31 % 34), x = lerp(ax + 6, tx, e) + Math.sin(t * 0.02 + i) * 2 * e, y = lerp(ay - 40, ty, e) + Math.cos(t * 0.017 + i * 2) * 1.5 * e;
+        const tw = 0.8 + 0.2 * Math.sin(t * 0.09 + i * 1.9);
+        soft(c, x, y, 20 + 5 * tw, gem.tint, 0.55); soft(c, x, y, 9, '#ffffff', 0.85 * tw); disc(c, x, y, 1.5, '#ffffff'); Paint.star4(c, x, y, 5 + 1.5 * tw, '#ffffff', 0);
+      }
+    }
   }
-  return { draw, kauai };
+  return { draw, kauai, mesa };
 })();
 
 /* ---------- Title ---------- */
@@ -309,9 +332,9 @@ const PROLOGUE = [
   { s: 'Far in the north there is a small town called Kaamos. The name means the long dark.' },
   { s: 'The old people say the north belonged to the elves once: the star-folk. They went west over the sea. Every house still leaves one window unshuttered, in case.' },
   { s: 'Ana grew up at the last fence, looking at the place where the road stops being Kaamos and becomes everywhere else. Nothing ever came down it for her.' },
-  { s: 'Then, one winter, the stars began to go out. A king in the west was gathering the great diamonds of the world and shutting them away in the dark.', fx: 'gems' },
-  { s: '“A diamond is starlight that fell asleep in the earth,” said the Tonttu, who kept her house. “He has the Mountain of Light itself. He only wants to be warm. They always do.”' },
-  { s: 'Ana held out her hand, the way you would to see if it was snowing. The starlight came down into it like a bird that had been waiting for her to stand still.' },
+  { s: 'Then came the winter that did not end. A king in the west had gathered the great diamonds of the world and shut the light inside them. The sun did not come back in January. It did not come back at all.', fx: 'gems' },
+  { s: '“The summer is in those stones,” said the Tonttu, who kept her house. “All of it. He only wants to be warm; they always do. Somebody will have to fetch every one, and let the light out.”' },
+  { s: 'Ana held out her hand, the way you would to see if it was snowing. The last of the starlight came down into it like a bird that had been waiting for her to stand still.' },
   { s: '“Well,” said the Tonttu. “That explains the ears. Your boots are by the door. They have been by the door for years.”' }
 ];
 // Shared by the prologue and the epilogue: one card at a time, and nothing moves on until the reader does.
@@ -687,31 +710,35 @@ Scenes.list.vault = {
 
 /* ---------- Ending ---------- */
 const EPILOGUE = [
-  { s: 'Under the armour there was hardly anyone. He had only wanted to be warm.' },
-  { s: 'Every stone he had shut away woke at once. Over the mesa the stars came back on, like a street when people come home.' },
-  { s: 'His name is Mayank. He walked from India on the word of a dream, which had promised him an elf queen in a distant land. Dreams, it turns out, can be trusted with directions.' },
-  { s: 'Ana did not keep the Mountain of Light. She held it up until the sky took it back. In Kaamos they leave the window open now, and the Tonttu tells the children at the last fence: “That is the Starlight Queen. She is from here.”' },
-  { s: 'But she did not go home yet. Mayank took her hand, and took her west once more, over one more sea, to a green island called Kauaʻi, where the mountains walk down into the water and it rains with the sun out.', kauai: true },
-  { s: '“This,” said Mayank, “is the beginning of a new adventure.”', kauai: true }
+  { bg: 'mesa', s: 'Under the armour there was hardly anyone. He had only wanted to be warm.' },
+  { bg: 'mesa', s: 'His name is Mayank. He walked from India on the word of a dream, which had promised him an elf queen in a distant land. Dreams, it turns out, can be trusted with directions.' },
+  { bg: 'mesa', s: 'But the light was still shut inside the stones, and the winter still lay on the world. “I know a shore,” said Mayank, “where the sun goes last of all. Let it out there.”' },
+  { bg: 'kauai', rise: true, s: 'So they carried the diamonds west, over one more sea, to a green island called Kauaʻi. On the sand, at the end of the day, Ana opened her hands.' },
+  { bg: 'dawn', s: 'The light went home across the world, west to east, and summer followed it. It reached Kaamos by morning. The Tonttu tells the children at the last fence: “That is the Starlight Queen. She is from here.”' },
+  { bg: 'kauai', s: '“This,” said Mayank, “is the beginning of a new adventure.”' }
 ];
 Scenes.list.ending = {
-  enter() { this.t = 0; this.i = 0; this.pt = 0; this.gt = -1; this.kT = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
+  enter() { this.t = 0; this.i = 0; this.pt = 0; this.gt = -1; this.bg = EPILOGUE[0].bg; this.veil = 1; this.riseT = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
   update(busy) {
     this.t++;
-    { const want = this.gt >= 0 || EPILOGUE[this.i].kauai ? 1 : 0; this.kT += clamp(want - this.kT, -0.02, 0.02); }
+    { // one painting gives way to the next through a wash of light
+      const want = this.gt >= 0 ? 'kauai' : EPILOGUE[this.i].bg;
+      if (want !== this.bg) { this.veil = Math.min(1, this.veil + 0.045); if (this.veil >= 1) this.bg = want; } else this.veil = Math.max(0, this.veil - 0.03);
+      this.riseT = this.gt < 0 && EPILOGUE[this.i].rise && this.bg === 'kauai' ? this.riseT + 1 : 0;
+    }
     if (busy) return;
     if (this.gt >= 0) { this.gt++; if (Input.hit('enter') && this.gt > 150) Scenes.go('title'); return; }
     const r = Cards.step(this, EPILOGUE.length);
     if (r) { this.gt = 0; Sound.sfx('confirm'); }
   },
-  draw(c) { // Kaamos at dawn; then, through a wash of light, Kauaʻi
-    if (this.kT > 0.5) Vista.kauai(c, this.t); else Vista.draw(c, this.t, true, 0);
-    const veil = 1 - Math.abs(this.kT - 0.5) * 2; if (veil > 0.01) { c.fillStyle = `rgba(255,244,214,${veil})`; c.fillRect(0, 0, W, H); }
+  draw(c) {
+    if (this.bg === 'kauai') Vista.kauai(c, this.t, this.riseT); else if (this.bg === 'mesa') Vista.mesa(c, this.t); else Vista.draw(c, this.t, true, 0);
+    if (this.veil > 0.01) { c.fillStyle = `rgba(255,244,214,${this.veil})`; c.fillRect(0, 0, W, H); }
   },
   drawHi(u) {
     if (this.gt < 0) {
-      const g = u.ctx, s = u.s, a = clamp(this.pt / 34, 0, 1), card = EPILOGUE[this.i], lines = u.wrap(card.s, 296, 11, { italic: true }), lh = 15.5, cy = 58;
-      { const gr = g.createRadialGradient(192 * s, cy * s, 0, 192 * s, cy * s, 190 * s); gr.addColorStop(0, `rgba(20,16,50,${0.62 + 0.14 * this.kT})`); gr.addColorStop(0.6, `rgba(20,16,50,${0.36 + 0.12 * this.kT})`); gr.addColorStop(1, 'rgba(20,16,50,0)'); g.save(); g.translate(0, cy * s); g.scale(1, 0.42); g.translate(0, -cy * s); g.fillStyle = gr; g.fillRect(0, (cy - 200) * s, W * s, 400 * s); g.restore(); }
+      const g = u.ctx, s = u.s, a = clamp(this.pt / 34, 0, 1) * (1 - this.veil), card = EPILOGUE[this.i], lines = u.wrap(card.s, 296, 11, { italic: true }), lh = 15.5, cy = 58, dk = this.bg === 'kauai' ? 0.14 : 0;
+      { const gr = g.createRadialGradient(192 * s, cy * s, 0, 192 * s, cy * s, 190 * s); gr.addColorStop(0, `rgba(20,16,50,${0.62 + dk})`); gr.addColorStop(0.6, `rgba(20,16,50,${0.36 + dk})`); gr.addColorStop(1, 'rgba(20,16,50,0)'); g.save(); g.translate(0, cy * s); g.scale(1, 0.42); g.translate(0, -cy * s); g.fillStyle = gr; g.fillRect(0, (cy - 200) * s, W * s, 400 * s); g.restore(); }
       lines.forEach((ln, k) => u.text(ln, 192, cy + (k - (lines.length - 1) / 2) * lh + (1 - a) * 3, 11, { color: '#fffbe8', alpha: a, italic: true }));
       Cards.hint(u, this, EPILOGUE.length, 197);
       return;
@@ -732,7 +759,7 @@ Scenes.list.ending = {
       u.text(d, 192, y + 10, 7.2, { color: '#e6dcff', alpha: b, align: 'left', italic: true });
     });
     const perfect = G.n === GEMS.length && G.colour === 'D' && G.clarity[0] === 'FL' && G.cut === 'Excellent';
-    u.text(perfect ? 'A perfect stone. You stopped, and looked at everything.' : 'There is more out there to look at. The road will wait.', 272, 176, 7.2, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
+    u.text(perfect ? 'Every light is home, and you stopped to look at everything.' : G.n < GEMS.length ? `${GEMS.length - G.n} ${GEMS.length - G.n === 1 ? 'stone still holds' : 'stones still hold'} their light. The road will wait.` : 'Every light is home. There is more out there to look at.', 272, 176, 7.2, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
     u.text(Input.touch ? 'TAP TO RETURN' : 'ENTER TO RETURN TO THE TITLE', 272, 190, 5.4, { color: '#ffe9a8', alpha: clamp((tt - 220) / 40, 0, 1) * (0.6 + 0.4 * Math.sin(this.t * 0.1)), ls: 1.4, title: true });
   }
 };

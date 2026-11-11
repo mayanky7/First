@@ -5,10 +5,10 @@
 const ROWS = 22;
 const REGIONS = [
   {
-    theme: 'north', cols: 232, title: 'Finland', sub: 'Kaamos, in the long winter night', map: 0,
+    theme: 'north', cols: 232, title: 'Finland', sub: 'Kaamos, in the winter that did not end', map: 0,
     build(L) {
       L.g(0, 40, 3); L.start(3, 3);
-      L.sign(12, 3, 'Tonttu: “I’ll keep the porridge warm. Go.”');
+      L.sign(12, 3, 'Tonttu: “Bring the summer back. I’ll keep the porridge warm.”');
       L.door(39, 3, 8, 'The last gate of Kaamos stands open.');
       
       L.s(13, 4, 4);
@@ -49,14 +49,14 @@ const REGIONS = [
     }
   },
   {
-    theme: 'meads', cols: 252, title: 'Sweden', sub: 'The manic midsummer lands', map: 1, manic: 1.3,
+    theme: 'meads', cols: 252, title: 'Sweden', sub: 'The manic lands of the last midsummer', map: 1, manic: 1.3,
     build(L) {
       L.g(0, 30, 3);
       
       L.cp(7, 3);
       L.s(11, 4, 3); L.e('goblin', 17, 3);
       L.p(20, 5, 3); L.p(25, 8, 4); L.s(25, 10, 4); L.e('spider', 27, 8, { len: 4 });
-      L.g(31, 33, 5); L.g(34, 44, 3); L.e('wolf', 42, 3); L.b(37, 6, '???'); L.sign(35, 3, 'DANCE! EAT! LEAP! No sleeping till August!');
+      L.g(31, 33, 5); L.g(34, 44, 3); L.e('wolf', 42, 3); L.b(37, 6, '???'); L.sign(35, 3, 'DANCE! EAT! LEAP! If we stop, the summer will leave!');
       L.g(48, 70, 3);
       L.p(49, 5, 3); L.p(53, 8, 3); L.p(57, 11, 10); L.s(58, 13, 5); L.gem('colour', 65, 14);
       L.e('spider', 61, 11, { len: 8 }); L.e('goblin', 58, 3);
@@ -159,7 +159,7 @@ const REGIONS = [
     }
   },
   {
-    theme: 'gloam', cols: 232, title: 'The Hoarder’s Mesa', sub: 'Where the light was taken', map: 4,
+    theme: 'gloam', cols: 232, title: 'The Hoarder’s Mesa', sub: 'Where the summer is kept', map: 4,
     build(L) {
       L.liq(0, 231, 2);
       L.g(0, 20, 3);

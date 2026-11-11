@@ -5,14 +5,17 @@ for a letter, a wardrobe, or a wizard at the door.
 
 **Ana** grew up at the last fence of Kaamos, a small town at the top of Finland whose name means
 the long dark, looking at the place where the road stops being Kaamos and becomes everywhere
-else. The old people say the north belonged to the elves once. Then the stars begin to go out:
-a king in the west is shutting the world's great diamonds away in the dark. Ana holds out her
-hand, and the starlight comes down into it. So she goes: across the frozen gulf to the manic
-midsummer lands of Sweden, down through the iron deeps of Kiruna, over the sea to a far country
-called America, and, through a tear in the afternoon, to an Australia where it is already
-tomorrow. At the end of the road is the Hoarder King, the Koh-i-Noor, and **Mayank**, who has
-walked from India on the word of a dream, carrying a lantern. And when the light is
-back in the sky he takes her west once more, to Kauaʻi: "the beginning of a new adventure."
+else. The old people say the north belonged to the elves once. Then comes the winter that does
+not end: a king in the west has gathered the world's great diamonds and shut the light inside
+them, and the sun does not come back. The summer is in those stones. Ana holds out her hand, and
+the last of the starlight comes down into it. So she goes to fetch every one: across the frozen
+gulf to the manic lands of Sweden, dancing so the last midsummer cannot leave; down through the
+iron deeps of Kiruna; over the sea to a far country called America; and, through a tear in the
+afternoon, to an Australia where it is already tomorrow. At the end of the road is the Hoarder
+King, the Koh-i-Noor, and **Mayank**, who has walked from India on the word of a dream, carrying
+a lantern. He knows the shore where the sun goes last of all. They carry the diamonds west to
+Kauaʻi, and there Ana opens her hands and lets the summer out: the end of the quest, and
+"the beginning of a new adventure."
 
 It is a walk more than a fight: calm, painted, and short on words. There are things to find and
 things to simply stand and look at.
