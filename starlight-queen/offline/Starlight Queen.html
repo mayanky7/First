@@ -190,18 +190,37 @@ const Input = (() => {
   });
 
   function bindTouch() {
-    const els = document.querySelectorAll('.tb');
+    // The buttons are read from where the fingers ARE, every time anything about a touch changes, and not from a
+    // button's own down and up events: those can be lost (a finger that slides off, a system gesture, a browser that
+    // sends the lift somewhere else), and a lost lift leaves her walking with nobody's thumb on the screen.
+    const els = Array.from(document.querySelectorAll('.tb'));
+    const press = (el, on) => {
+      if (!!el._on === on) return;
+      el._on = on; el.classList.toggle('on', on);
+      const a = el.dataset.a; if (on) first();
+      set(a, 'touch', on); if (a === 'jump') set('enter', 'touchj', on);
+    };
+    const release = () => els.forEach(el => press(el, false));
+    // which button is this point on? The nearest one whose middle is within reach: a thumb is not a pixel
+    const at = (x, y) => {
+      let best = null, bd = 1e9;
+      for (const el of els) { const r = el.getBoundingClientRect(); if (!r.width) continue; const d = Math.hypot(x - r.left - r.width / 2, y - r.top - r.height / 2); if (d < r.width * 0.62 && d < bd) { bd = d; best = el; } }
+      return best;
+    };
+    const fingers = 'ontouchstart' in window;
+    if (fingers) {
+      const sync = e => { const hit = new Set(); for (let i = 0; i < e.touches.length; i++) { const el = at(e.touches[i].clientX, e.touches[i].clientY); if (el) hit.add(el); } els.forEach(el => press(el, hit.has(el))); };
+      ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach(n => document.addEventListener(n, sync, { passive: true, capture: true }));
+    }
     els.forEach(el => {
-      const a = el.dataset.a;
-      const on = e => { e.preventDefault(); first(); el.classList.add('on'); set(a, 'touch', true); if (a === 'jump') set('enter', 'touchj', true); };
-      const off = e => { e.preventDefault(); el.classList.remove('on'); set(a, 'touch', false); if (a === 'jump') set('enter', 'touchj', false); };
-      el.addEventListener('pointerdown', e => { try { el.releasePointerCapture(e.pointerId); } catch (_) {} on(e); }); // let the touch go, so a thumb can slide to the next button
-      el.addEventListener('pointerenter', e => { if (e.pointerType === 'touch' || e.buttons) on(e); });
-      el.addEventListener('pointerup', off);
-      el.addEventListener('pointercancel', off);
-      el.addEventListener('pointerleave', off);
+      // a mouse or a pen (and touch, in a browser with no touch events) presses the button itself
+      const mine = e => !(fingers && e.pointerType === 'touch');
+      el.addEventListener('pointerdown', e => { e.preventDefault(); if (mine(e)) press(el, true); });
+      ['pointerup', 'pointercancel', 'pointerleave'].forEach(n => el.addEventListener(n, e => { if (mine(e)) press(el, false); }));
       el.addEventListener('contextmenu', e => e.preventDefault());
     });
+    window.addEventListener('blur', release); window.addEventListener('pagehide', release);
+    document.addEventListener('visibilitychange', () => { if (document.hidden) release(); });
     const cv = document.getElementById('game');
     cv.addEventListener('pointerdown', e => {
       first();
