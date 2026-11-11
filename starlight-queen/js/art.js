@@ -154,6 +154,8 @@ const Art = (() => {
       hurt: frames(1, 24, 28, g => drawQueen(g, 'hurt', 0, false))
     });
     S.queen = mkset(false); S.queenShoot = mkset(true);
+    S.anaBig = frames(2, 46, 70, (g, f) => { g.translate(2, 1); drawAnaBig(g, f, false); }).map(im => rimLit(outlined(im), '#9fd0ff'));
+    S.anaBigCrown = frames(2, 46, 70, (g, f) => { g.translate(2, 1); drawAnaBig(g, f, true); }).map(im => rimLit(outlined(im), '#ffe6b0'));
     S.queenCrown = frames(2, 24, 28, (g, f) => drawQueen(g, 'idle', f, false, true)).map(im => outlined(im));
     const bset = shoot => ({
       idle: frames(2, 24, 28, (g, f) => drawBoy(g, 'idle', f, shoot)),
@@ -192,6 +194,51 @@ const Art = (() => {
   }
 
   function unused() { }
+
+  /* ---------- Ana, drawn large for the title, prologue and ending (never an enlarged game sprite) ---------- */
+  function drawAnaBig(g, f, crown) {
+    const HAIR = '#f6dc8c', HAIRL = '#fff0b4', HAIRD = '#c8963e', SKIN = '#f8e2c8', SKIND = '#d9b493', RED = '#d8343c', REDD = '#9c2230', REDL = '#f0585e',
+      TEAL = '#2aa59c', TEALD = '#1c7d80', TEALL = '#55c8bc', GOLD = '#f2c14e', GOLDD = '#b8862a', NAVY = '#35477e', NAVYD = '#26345e', BOOT = '#7a4a2a', BOOTD = '#553218', BAG = '#8a5a2b', BAGL = '#b07a44';
+    const sw = f ? 1 : 0;
+    // cloak, behind
+    for (let i = 0; i < 36; i++) { const xl = Math.round(15 - i * 0.16 - Math.sin(i * 0.22 + f * 1.4) * 1.2 - (i > 24 ? (i - 24) * 0.25 * sw : 0)); R(g, xl, 22 + i, 20 - xl, 1, i % 7 === 5 ? REDD : RED); R(g, xl, 22 + i, 1, 1, REDD); if (i % 7 === 2) R(g, xl + 2, 22 + i, 2, 1, REDL); }
+    // hair, long, behind the shoulder
+    for (let i = 0; i < 34; i++) { const x0 = Math.round(13 + Math.sin(i * 0.24 + f * 1.3) * 1.3 - (i > 18 ? (i - 18) * 0.12 : 0)); R(g, x0, 7 + i, 7, 1, i > 28 ? HAIRD : HAIR); R(g, x0, 7 + i, 1, 1, HAIRD); if (i % 5 < 2) R(g, x0 + 3, 7 + i, 1, 1, HAIRL); }
+    // legs and boots
+    R(g, 20, 50, 4, 9, NAVYD); R(g, 26, 50, 4, 9, NAVY); R(g, 27, 50, 1, 9, '#4a5e9c');
+    R(g, 19, 58, 6, 8, BOOTD); R(g, 25, 58, 7, 8, BOOT); R(g, 19, 58, 6, 2, '#e8eefc'); R(g, 25, 58, 7, 2, '#ffffff'); R(g, 19, 66, 7, 1, '#2a1a10'); R(g, 25, 66, 8, 1, '#2a1a10'); R(g, 30, 60, 1, 5, '#9a6238');
+    // tunic
+    R(g, 18, 25, 12, 13, TEAL); R(g, 18, 25, 2, 13, TEALD); R(g, 29, 26, 1, 12, TEALL);
+    for (let i = 0; i < 11; i++) { const xl = 17 - (i > 4 ? 1 : 0), xr = 31 + (i > 3 ? 1 : 0) + (i > 8 ? sw : 0); R(g, xl, 39 + i, xr - xl, 1, TEAL); R(g, xl, 39 + i, 2, 1, TEALD); if (i > 1) { R(g, 21 + (i >> 2), 39 + i, 1, 1, TEALD); R(g, 26 - (i >> 3), 39 + i, 1, 1, TEALD); } R(g, xr - 1, 39 + i, 1, 1, TEALL); }
+    R(g, 16, 49, 16 + sw, 1, GOLD); R(g, 16, 50, 16 + sw, 1, GOLDD);
+    R(g, 18, 37, 12, 2, GOLD); R(g, 18, 38, 12, 1, GOLDD); R(g, 23, 36, 3, 4, '#fff6c8'); R(g, 24, 37, 1, 2, GOLDD);
+    R(g, 23, 26, 1, 10, GOLD);
+    // satchel and strap
+    for (let i = 0; i < 13; i++) R(g, 19 + Math.round(i * 0.75), 24 + i, 2, 1, i % 4 === 3 ? BAG : BAGL);
+    R(g, 12, 38, 8, 9, BAG); R(g, 12, 38, 8, 3, BAGL); R(g, 12, 41, 8, 1, '#5a3a1a'); R(g, 15, 41, 2, 2, GOLD); R(g, 12, 46, 8, 1, '#5a3a1a');
+    // arm and hand
+    R(g, 27, 26, 4, 11, TEALD); R(g, 30, 27, 1, 9, TEAL); R(g, 27, 36, 4, 1, GOLD); R(g, 28, 37, 3, 3, SKIN); R(g, 28, 39, 3, 1, SKIND);
+    // scarf at the collar
+    R(g, 17, 20, 14, 5, RED); R(g, 17, 24, 14, 1, REDD); R(g, 19, 21, 8, 1, REDL); R(g, 28, 23, 3, 6 + sw, RED); R(g, 30, 24, 1, 5 + sw, REDD);
+    // head
+    R(g, 22, 19, 4, 2, SKIND);
+    R(g, 19, 8, 10, 11, SKIN); R(g, 20, 19, 8, 1, SKIN); R(g, 29, 10, 1, 7, SKIN); R(g, 19, 17, 2, 2, SKIND);
+    R(g, 17, 11, 2, 4, SKIND); R(g, 16, 10, 2, 2, SKIN); R(g, 15, 9, 1, 1, SKIN);
+    R(g, 25, 10, 4, 1, HAIRD); R(g, 26, 12, 2, 3, '#27386e'); R(g, 27, 12, 1, 1, '#ffffff'); R(g, 30, 14, 1, 2, SKIND); R(g, 26, 17, 3, 1, '#c8787a'); R(g, 23, 15, 2, 1, '#f2b8a8');
+    R(g, 18, 6, 6, 4, HAIR); R(g, 18, 8, 3, 9, HAIR); R(g, 19, 9, 1, 6, HAIRL); R(g, 24, 8, 3, 1, HAIR);
+    if (crown) {
+      R(g, 17, 5, 13, 2, '#fff2b0'); R(g, 17, 6, 13, 1, GOLDD); for (const [x, h] of [[18, 2], [21, 3], [24, 5], [27, 3], [29, 2]]) R(g, x, 5 - h, 1, h, '#fff2b0'); R(g, 24, 1, 1, 2, '#7df4ff'); R(g, 23, 3, 3, 2, '#fff2b0'); R(g, 18, 3, 11, 2, HAIR);
+    } else {
+      R(g, 17, 3, 13, 6, RED); R(g, 18, 2, 11, 1, RED); R(g, 17, 8, 13, 1, REDD); R(g, 18, 3, 9, 1, REDL); for (let x = 18; x < 30; x += 3) R(g, x, 6, 1, 2, REDD);
+      R(g, 26, 5, 2, 2, '#7df4ff'); R(g, 26, 5, 1, 1, '#ffffff');
+    }
+  }
+  function rimLit(img, col) { // one pixel of cool light down the right-hand edge
+    const g = img.getContext('2d'), d = g.getImageData(0, 0, img.width, img.height);
+    g.fillStyle = col;
+    for (let y = 0; y < img.height; y++) for (let x = img.width - 1; x > 0; x--) if (d.data[(y * img.width + x) * 4 + 3] > 0) { if (x > 1 && d.data[(y * img.width + x - 1) * 4 + 3] > 0) g.fillRect(x - 1, y, 1, 1); break; }
+    return img;
+  }
 
   /* ---------- Mayank ---------- */
   const B = { HAIR: '#1f1a26', HAIRL: '#3a3248', SKIN: '#c98d5e', SKIND: '#a36c42', SH: '#ef8a1f', SHD: '#bf6410', OV: '#f1e8d4', OVD: '#cdbf9f', BT: '#5a3a22', SC: '#3a4fb0', SCD: '#27357e', GOLD: '#ffd86a' };
@@ -400,7 +447,7 @@ const Art = (() => {
         if (v === 3) { R(g, 10, 3, 1, 3, P.dark); }
       } else {
         for (let i = 0; i < 3; i++) R(g, r() * 13, r() * 15, 2 + r() * 2, 1, r() < 0.6 ? P.dark : P.light);
-        if (v === 0) { R(g, 3, 5, 5, 3, P.speck); R(g, 4, 4, 3, 1, P.speck); R(g, 3, 5, 4, 1, P.light); R(g, 4, 8, 4, 1, P.dark); }
+        if (v === 0 && false) { R(g, 3, 5, 5, 3, P.speck); R(g, 4, 4, 3, 1, P.speck); R(g, 3, 5, 4, 1, P.light); R(g, 4, 8, 4, 1, P.dark); }
         if (v === 2) { R(g, 9, 10, 4, 2, P.speck); R(g, 9, 10, 3, 1, P.light); R(g, 10, 12, 3, 1, P.dark); }
         if (v === 3) { R(g, 1, 12, 7, 1, P.dark); R(g, 8, 13, 5, 1, P.dark); }
       }

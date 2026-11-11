@@ -41,7 +41,7 @@ const World = (() => {
     if (cp) { for (const p of w.players) p.sq = 1.3; for (let i = 0; i < 18; i++) { const a = i / 18 * TAU; w.parts.push({ x: sp.x + Math.cos(a) * 26, y: sp.y - 11 + Math.sin(a) * 26, vx: -Math.cos(a) * 2, vy: -Math.sin(a) * 2, life: 13, col: i % 2 ? '#bff4ff' : '#ffffff', glow: 1, sz: 2 }); } }
     for (const e of w.ents) if ((e.type === 'lantern' || (e.type === 'beacon' && !e.final)) && e.x + e.w / 2 <= sp.x + 1) { e.on = true; e.fire = 1; }
     w.cam.x = clamp(w.player.x - W / 2, 0, w.cols * T - W);
-    w.cam.y = clamp(w.player.y - H * 0.55, 0, w.rows * T - H);
+    w.cam.y = clamp(w.player.y - H * 0.66, 0, w.rows * T - H + 18);
     lastCamX = w.cam.x;
     w.zone = null; enterZone(zoneAt(w.player.x + 5));
     scatter();
@@ -248,13 +248,13 @@ const World = (() => {
 
     // camera
     const fx = alive.length ? alive.reduce((a, p) => a + p.x, 0) / alive.length : lead.x;
-    let tx = fx + 5 - W / 2 + (alive.length === 1 ? lead.face * 24 : 0), ty = lead.y + 11 - H * 0.56;
-    if (alive.length > 1) ty = (alive[0].y + alive[1].y) / 2 + 11 - H * 0.5;
+    let tx = fx + 5 - W / 2 + (alive.length === 1 ? lead.face * 24 : 0), ty = lead.y + 11 - H * 0.66;
+    if (alive.length > 1) ty = (alive[0].y + alive[1].y) / 2 + 11 - H * 0.6;
     if (w.fight) tx = w.arena.x0;
     if (w.state === 'clear') tx = lead.x + 5 - W / 2 + 30;
     w.cam.x += (clamp(tx, 0, w.cols * T - W) - w.cam.x) * (w.fight ? 0.06 : 0.1);
-    if (lead.onGround || Math.abs(ty - w.cam.y) > 46) w.cam.y += (clamp(ty, 0, w.rows * T - H) - w.cam.y) * 0.08;
-    w.cam.y = clamp(w.cam.y, 0, w.rows * T - H);
+    if (lead.onGround || Math.abs(ty - w.cam.y) > 46) w.cam.y += (clamp(ty, 0, w.rows * T - H + 18) - w.cam.y) * 0.08; // show less dead ground
+    w.cam.y = clamp(w.cam.y, 0, w.rows * T - H + 18);
 
     if (w.state === 'clear') { w.clearT++; if (w.clearT === 330) Game.finish(); }
     else if (!alive.length) { if (++w.deadT === 62) Game.playerDied(); }
@@ -277,7 +277,7 @@ const World = (() => {
           c.drawImage(ts.fill[v6], x, y);
           const up = cy > 0 ? w.grid[cy - 1][cx] : '#', dn = cy < w.rows - 1 ? w.grid[cy + 1][cx] : '#';
           let depth = 0; while (depth < 5 && cy - depth - 1 >= 0 && w.grid[cy - depth - 1][cx] === '#') depth++;
-          if (depth) { c.fillStyle = `rgba(10,8,30,${Math.min(0.42, depth * 0.1)})`; c.fillRect(x, y, T, T); }
+          if (depth) { c.fillStyle = `rgba(7,6,20,${Math.min(0.62, depth * 0.16)})`; c.fillRect(x, y, T, T); }
           if (cx > 0 && w.grid[cy][cx - 1] !== '#') { R(c, x, y, 1, T, P.light); if (v & 1) R(c, x, y + 5 + v, 1, 3, P.dark); }
           if (cx < w.cols - 1 && w.grid[cy][cx + 1] !== '#') { R(c, x + T - 2, y, 2, T, P.dark); if (v > 1) R(c, x + T - 3, y + 3 + v * 2, 1, 4, P.dark); }
           if (dn !== '#' && dn !== '~') { R(c, x, y + T - 2, T, 2, P.dark); if (v < 2) R(c, x + 4 + v * 5, y + T, 2, 2 + v, P.dark); }
@@ -401,6 +401,13 @@ const World = (() => {
     if (yb < H) for (let cx = Math.max(0, Math.floor(ox / T)); cx <= Math.min(w.cols - 1, Math.floor((ox + W) / T)); cx++) if (w.grid[w.rows - 1][cx] === '.') c.drawImage(pitOf(w.colTheme[cx]), cx * T - ox, yb);
     drawLiquid(c, ox, oy, false);
     drawTiles(c, ox, oy);
+    { // whatever lies under the last row carries on down, so the frame never shows sky beneath the world
+      const yb2 = w.rows * T - oy;
+      if (yb2 < H) for (let cx = Math.max(0, Math.floor(ox / T)); cx <= Math.min(w.cols - 1, Math.floor((ox + W) / T)); cx++) {
+        const ch = w.grid[w.rows - 1][cx], th = w.colTheme[cx];
+        R(c, cx * T - ox, yb2, T, H - yb2, ch === '~' ? th.liquid.deep : ch === '.' ? (th.pit || '#05060c') : mix(th.tiles.body, '#07060f', 0.62));
+      }
+    }
     for (const e of w.ents) { const d = ENT[e.type]; if (!d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     for (let i = w.players.length - 1; i >= 0; i--) drawPlayer(c, w, w.players[i], ox, oy);
     drawParts(c, ox, oy, false);

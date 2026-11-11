@@ -34,12 +34,11 @@
         const px = pad, py = ch / 2;
         if (o.metal) { // engraved gold: hard shadow, dark keyline, vertical metal gradient, a lit upper edge
           const hgt = size * s, gr = g.createLinearGradient(0, py - hgt * 0.42, 0, py + hgt * 0.4);
-          gr.addColorStop(0, '#fff6cf'); gr.addColorStop(0.38, '#f3d384'); gr.addColorStop(0.55, '#d9a94e'); gr.addColorStop(0.78, '#b07a2c'); gr.addColorStop(1, '#e9c377');
+          gr.addColorStop(0, '#fff4cf'); gr.addColorStop(0.46, '#f3c768'); gr.addColorStop(0.54, '#a8681f'); gr.addColorStop(1, '#e2aa4e');
           g.lineJoin = 'round';
-          g.shadowColor = 'rgba(2,3,12,0.9)'; g.shadowBlur = hgt * 0.22; g.shadowOffsetY = hgt * 0.05; g.fillStyle = '#05060f'; g.fillText(str, px, py);
-          g.shadowColor = 'transparent'; g.shadowBlur = 0; g.shadowOffsetY = 0;
-          g.strokeStyle = '#2a1806'; g.lineWidth = Math.max(1.5, hgt * 0.085); g.strokeText(str, px, py);
-          g.fillStyle = '#3a2208'; g.fillText(str, px, py + Math.max(1, hgt * 0.035));
+          g.fillStyle = 'rgba(7,10,30,0.85)'; g.fillText(str, px, py + 1.2 * s); // hard shadow
+          g.strokeStyle = '#2e1a06'; g.lineWidth = Math.max(1.5, s * 1); g.strokeText(str, px, py);
+          g.fillStyle = '#fffbe6'; g.fillText(str, px, py - 0.4 * s); // lit upper edge
           g.fillStyle = gr; g.fillText(str, px, py);
           e = { tc, pad, tw: tw - ls, ch }; cache.set(key, e);
         } else {

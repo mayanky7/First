@@ -167,14 +167,14 @@ const Vista = (() => {
     for (let i = 0; i < 9; i++) { const x = (i * 97 + 31) % W, y = (i * 53 + 11) % 100, k = Math.sin(t * 0.05 + i * 1.7); if (k > 0.55) { R(c, x - 1, y, 3, 1, '#ffffff'); R(c, x, y - 1, 1, 3, '#ffffff'); } }
     { const k = (t % 900) / 40; if (k < 1) { const x = 300 - k * 90, y = 20 + k * 34; for (let j = 0; j < 9; j++) R(c, x + j * 2.2, y - j * 0.85, 2, 1, `rgba(255,255,255,${(1 - j / 9) * (1 - k)})`); } }
     // moon
-    Art.glow(c, 52, 30, 24, '#cfe0ff', 0.3); c.fillStyle = '#f2f6ff'; c.beginPath(); c.arc(52, 30, 8, 0, TAU); c.fill(); c.fillStyle = '#d5def5'; c.beginPath(); c.arc(49, 27, 2, 0, TAU); c.arc(55, 33, 2.4, 0, TAU); c.fill();
+    c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = 'rgba(190,224,255,0.07)'; c.beginPath(); c.moveTo(188, 18); c.lineTo(196, 18); c.lineTo(276, 172); c.lineTo(224, 172); c.fill(); c.restore();
     Backdrop.aurora(c, t, 0, 0, 1);
     c.drawImage(N.far2, 0, 0); c.drawImage(N.far, 0, 6);
     c.drawImage(N.valley, 0, 0);
     // the lake keeps a faint copy of the sky's fire
     c.save(); c.beginPath(); for (let y = 162; y < 173; y++) { const k = Math.sin((y - 160) / 14 * Math.PI), hw = 30 + k * 62; c.rect(250 - hw, y, hw * 2, 1); } c.clip();
     c.translate(0, 172); c.scale(1, -0.24); Backdrop.aurora(c, t, 0, -8, 0.55); c.restore();
-    for (let i = 0; i < 6; i++) R(c, 300 + Math.sin(t * 0.04 + i * 2) * 5, 163 + i * 1.6, 3 + (i % 2) * 2, 1, 'rgba(240,246,255,0.55)');
+    for (let i = 0; i < 6; i++) R(c, 248 + Math.sin(t * 0.04 + i * 2) * 4, 162 + i * 1.8, 4 + (i % 2) * 3, 1, 'rgba(223,240,255,0.6)');
     // chimney smoke, window glow
     N.smoke.forEach(([x, y], i) => { for (let j = 0; j < 5; j++) { const k = ((t * 0.5 + i * 17 + j * 12) % 60) / 60; R(c, x + Math.sin(k * 5 + i) * 2 + k * 5, y - k * 16, 1 + (k > 0.5), 1, `rgba(200,208,232,${0.5 * (1 - k)})`); } if (i % 3 !== 2) Art.glow(c, x - 4, y + 10, 6, '#ffb84a', 0.25 + 0.05 * Math.sin(t * 0.07 + i)); });
     Art.glow(c, 298, 140, 6, '#ffb84a', 0.35);
@@ -184,7 +184,7 @@ const Vista = (() => {
     Art.glow(c, 60, ay - 22, 22, '#ffb84a', 0.3 + 0.05 * Math.sin(t * 0.09));
     c.drawImage(Art.S.tonttu[(t >> 5) % 2], 40, ay - 33, 30, 34);
     R(c, 71, ay - 20, 1, 8, '#6a5a4a'); R(c, 69, ay - 13, 5, 6, '#ffd56a'); R(c, 70, ay - 12, 3, 4, '#fff6c8'); R(c, 69, ay - 14, 5, 1, '#3a2c20');
-    c.drawImage(Art.S.queen.idle[(t >> 5) % 2], 78, ay - 57, 48, 56);
+    c.drawImage(Art.S.anaBig[(t >> 5) % 2], 80, ay - 68);
     if (!snow) snow = Backdrop.makeAmbient('snow');
     Backdrop.drawAmbient(c, snow, t, 0.25);
   }
@@ -224,10 +224,10 @@ const Vista = (() => {
     Backdrop.drawLayer(c, dawn ? L.hD : L.hN, dawn ? 0 : scroll * 1.6, 1, 4);
     cliff(c, dawn ? '#2a5a3c' : '#05080f', dawn ? '#6ab868' : '#1a2440');
     // the Queen
-    const img = Art.S.queenCrown[(t >> 5) % 2];
+    const img = Art.S.anaBigCrown[(t >> 5) % 2];
     if (dawn && Game.metBoy) c.drawImage(Art.S.boy.idle[(t >> 5) % 2], 36, 94, 48, 56);
     Art.glow(c, 104, 122, 44 + Math.sin(t * 0.05) * 4, dawn ? '#fff6d0' : '#9fd8ff', dawn ? 0.5 : 0.6);
-    c.drawImage(img, 80, 94, 48, 56);
+    c.drawImage(img, 82, 82);
     for (let i = 0; i < 8; i++) {
       const k = ((t * 0.5 + i * 31) % 120) / 120;
       c.fillStyle = `rgba(200,240,255,${(1 - k) * 0.8})`; c.fillRect(Math.round(104 + Math.sin(i * 2.4 + k * 5) * 22), Math.round(146 - k * 70), 1, 1);
@@ -264,22 +264,23 @@ Scenes.list.title = {
   drawHi(u) {
     const t = this.t, a = clamp((t - 10) / 50, 0, 1), g = u.ctx, s = u.s;
     // lockup: a small cut stone, two lines of engraved gold in one tracking, a hairline, the subtitle
-    if (a > 0.05) { g.save(); g.globalAlpha = a; g.scale(s, s); drawGemHi(g, 192, 20, 6, GEM_BY_ID.kohinoor, t); g.restore(); }
-    u.text('STARLIGHT', 192, 46, 30, { metal: true, ls: 7, alpha: a, title: true });
-    u.text('QUEEN', 192, 77, 30, { metal: true, ls: 7, alpha: a, title: true });
+    if (a > 0.05) { g.save(); g.globalAlpha = a; g.scale(s, s); drawGemHi(g, 192, 19, 6, GEM_BY_ID.kohinoor, t); g.restore(); }
+    u.text('STARLIGHT', 192, 46, 26.5, { metal: true, ls: 2.7, alpha: a, title: true });
+    u.text('QUEEN', 192, 74, 26.5, { metal: true, ls: 4.3, alpha: a, title: true });
     g.save(); g.globalAlpha = a * 0.9; g.fillStyle = '#d9b566';
-    { const hw = u.width('Ana & the Mountain of Light', 9.5, { italic: true }) / 2 + 7, th = Math.max(1, s * 0.35); g.fillRect((192 - hw - 46) * s, 99 * s, 46 * s, th); g.fillRect((192 + hw) * s, 99 * s, 46 * s, th); } g.restore();
-    u.text('Ana & the Mountain of Light', 192, 98.5, 9.5, { color: '#eef2ff', italic: true, alpha: a });
+    { const hw = u.width('Ana & the Mountain of Light', 9.5, { italic: true }) / 2 + 7, th = Math.max(1, s * 0.35); g.fillRect((192 - hw - 40) * s, 97 * s, 40 * s, th); g.fillRect((192 + hw) * s, 97 * s, 40 * s, th); } g.restore();
+    u.text('Ana & the Mountain of Light', 192, 96.5, 9.5, { color: '#eef2ff', italic: true, alpha: a });
     const b = clamp((t - 60) / 40, 0, 1), vn = Object.keys(Game.vault).length;
-    { const y0 = 108 * s, y1 = (132 + this.items.length * 13) * s, gr = g.createLinearGradient(0, y0, 0, y1); gr.addColorStop(0, 'rgba(4,7,26,0)'); gr.addColorStop(0.35, 'rgba(4,7,26,0.6)'); gr.addColorStop(0.7, 'rgba(4,7,26,0.6)'); gr.addColorStop(1, 'rgba(4,7,26,0)'); g.save(); g.globalAlpha = b; g.fillStyle = gr; g.fillRect(0, y0, W * s, y1 - y0); g.restore(); }
+    { const cy = (118 + this.items.length * 6.5) * s, gr = g.createRadialGradient(192 * s, cy, 0, 192 * s, cy, 96 * s); gr.addColorStop(0, 'rgba(6,9,25,0.72)'); gr.addColorStop(0.55, 'rgba(6,9,25,0.5)'); gr.addColorStop(1, 'rgba(6,9,25,0)'); g.save(); g.globalAlpha = b; g.translate(0, cy); g.scale(1, 0.34); g.translate(0, -cy); g.fillStyle = gr; g.fillRect(0, cy - 110 * s, W * s, 220 * s); g.restore();
+      const bg = g.createLinearGradient(0, (H - 24) * s, 0, H * s); bg.addColorStop(0, 'rgba(4,6,26,0)'); bg.addColorStop(1, 'rgba(4,6,26,0.85)'); g.save(); g.globalAlpha = b; g.fillStyle = bg; g.fillRect(0, (H - 24) * s, W * s, 24 * s); g.restore(); }
     this.items.forEach((it, i) => {
       const on = i === this.sel, y = 122 + i * 13;
       const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${MAP_NAMES[Game.saved.region || 0]}` : `The vault  ·  ${vn} of ${GEMS.length} diamonds`;
-      u.text(label, 192, y, 10, { color: on ? '#fff3c4' : '#c3cdee', alpha: b });
+      u.text(label, 192, y, on ? 10 : 8.4, { color: on ? '#ffe9a8' : '#aab3d4', alpha: b * (on ? 1 : 0.8) });
       if (on) { const hw = u.width(label, 10) / 2 + 8, d = 1.7 + 0.3 * Math.sin(t * 0.12); g.save(); g.globalAlpha = b; g.fillStyle = '#f3d384'; for (const sx of [-1, 1]) { g.save(); g.translate((192 + sx * hw) * s, y * s); g.rotate(Math.PI / 4); g.fillRect(-d * s / 2, -d * s / 2, d * s, d * s); g.restore(); } g.restore(); }
     });
     if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.items.length * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
-    u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208, 4.8, { color: '#c6d0ee', alpha: b * 0.85, ls: 1.6, title: true });
+    u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, 4.4, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.6, title: true });
   }
 };
 
@@ -323,7 +324,7 @@ Scenes.list.intro = {
       const a = this.i === 0 || this.i === 4 ? clamp(this.pt / 80, 0, 1) : 1;
       c.globalAlpha = a;
       Art.glow(c, 192, 66, 40 + Math.sin(t * 0.05) * 4, '#9fd8ff', 0.7 * a);
-      c.drawImage(Art.S.queen.idle[(t >> 5) % 2], 168, 36, 48, 56);
+      c.drawImage(Art.S.anaBig[(t >> 5) % 2], 169, 24);
       c.globalAlpha = 1;
     }
   },
@@ -417,7 +418,7 @@ Scenes.list.map = {
     g.drawImage(Art.S.queen.idle[(t >> 5) % 2], (mx - 12) * s, (my - 27 + Math.sin(t * 0.08)) * s, 24 * s, 28 * s);
     g.restore();
     const a = clamp((t - 30) / 40, 0, 1);
-    u.panel(72, 166, 240, 34, 0.9 * a, '#2a1a0a');
+    u.plate(72, 166, 240, 34, 0.95 * a);
     u.text(MAP_NAMES[this.to], 192, 177, 10, { color: '#f6e2a0', alpha: a, title: true, ls: 1 });
     u.text(`${Object.keys(Game.gems).length} of ${GEMS.length} diamonds   ·   ${Game.carats().toFixed(2)} carats carried`, 192, 187, 6.6, { color: '#e6dcc0', italic: true, alpha: a });
     u.text(Input.touch ? 'TAP TO SET FORTH' : 'ENTER TO SET FORTH', 192, 195.5, 5.6, { color: '#f0d896', alpha: a * (0.85 + 0.15 * Math.sin(t * 0.1)), ls: 1.2, title: true });
@@ -462,8 +463,8 @@ Scenes.list.play = {
     }
     const g = u.ctx, s = u.s, showUI = !w.card && !w.gemFx && w.state !== 'clear';
     if (showUI) { // ---- the interface: crisp, quiet, one visual language ----
-      const top = g.createLinearGradient(0, 0, 0, 30 * s); top.addColorStop(0, 'rgba(3,5,16,0.5)'); top.addColorStop(1, 'rgba(3,5,16,0)');
-      g.fillStyle = top; g.fillRect(0, 0, W * s, 30 * s);
+      const top = g.createLinearGradient(0, 0, 0, 36 * s); top.addColorStop(0, 'rgba(10,14,36,0.62)'); top.addColorStop(1, 'rgba(10,14,36,0)');
+      g.fillStyle = top; g.fillRect(0, 0, W * s, 36 * s);
       const heart = (x, y, sz, full, pop) => {
         g.save(); g.translate(x * s, y * s); g.scale(sz * s * (1 + pop * 0.25) / 10, sz * s * (1 + pop * 0.25) / 10);
         g.beginPath(); g.moveTo(0, 3.6); g.bezierCurveTo(-1.2, -1.4, -6, -1.6, -6, 1.6); g.bezierCurveTo(-6, 5, -1.6, 7, 0, 9.4); g.bezierCurveTo(1.6, 7, 6, 5, 6, 1.6); g.bezierCurveTo(6, -1.6, 1.2, -1.4, 0, 3.6); g.closePath();
@@ -474,10 +475,10 @@ Scenes.list.play = {
       w.players.forEach((p, k) => {
         const y = 7 + k * 21;
         for (let i = 0; i < 3; i++) heart(12 + i * 12, y, 8.4, i < p.hp, i === p.hp - 1 && p.inv > 96 ? 1 : 0);
-        for (let i = 0; i < 3; i++) { const on = i < p.arrows; g.save(); g.translate((9 + i * 6) * s, (y + 15.5) * s); g.rotate(Math.PI / 4); g.fillStyle = on ? '#dffbff' : 'rgba(223,251,255,0.22)'; if (on) { g.shadowColor = '#7fd8ff'; g.shadowBlur = 3 * s; } g.fillRect(-1.5 * s, -1.5 * s, 3 * s, 3 * s); g.restore(); }
-        if (p.arrows < 3) { g.fillStyle = 'rgba(223,251,255,0.25)'; g.fillRect(27 * s, (y + 15) * s, 12 * s, s); g.fillStyle = '#dffbff'; g.fillRect(27 * s, (y + 15) * s, 12 * s * p.arrowT / 48, s); }
+        for (let i = 0; i < 3; i++) { const on = i < p.arrows; g.save(); g.translate((10 + i * 7.5) * s, (y + 15.5) * s); g.rotate(Math.PI / 4); g.fillStyle = on ? '#dffbff' : 'rgba(223,251,255,0.22)'; if (on) { g.shadowColor = '#7fd8ff'; g.shadowBlur = 3 * s; } g.fillRect(-1.9 * s, -1.9 * s, 3.8 * s, 3.8 * s); g.restore(); }
+        if (p.arrows < 3) { g.fillStyle = 'rgba(223,251,255,0.25)'; g.fillRect(31 * s, (y + 15) * s, 11 * s, s); g.fillStyle = '#dffbff'; g.fillRect(31 * s, (y + 15) * s, 11 * s * p.arrowT / 48, s); }
         if (p.radiant > 0) { g.fillStyle = 'rgba(255,246,176,0.25)'; g.fillRect(6 * s, (y + 19.5) * s, 34 * s, s); g.fillStyle = '#fff6b0'; g.fillRect(6 * s, (y + 19.5) * s, 34 * s * p.radiant / 600, s); }
-        if (w.players.length > 1) u.text(k ? 'MAYANK' : 'ANA', 46, y + 4.2, 4.6, { color: k ? '#ffd070' : '#bff4ff', align: 'left', ls: 0.8, title: true });
+        if (w.players.length > 1) u.text(k ? 'MAYANK' : 'ANA', 46, y + 4.2, 4.6, { color: '#d9c48a', align: 'left', ls: 0.8, title: true });
       });
       const pop = w.hudPop > 0 ? w.hudPop / 8 : 0;
       g.save(); g.scale(s, s); drawGemHi(g, W - 12, 9.5, 4.2, GEM_BY_ID.kohinoor, w.t); g.restore();
@@ -485,11 +486,12 @@ Scenes.list.play = {
       g.save(); g.translate((W - 12) * s, 23 * s); g.rotate(Math.PI / 4); g.fillStyle = '#bff4ff'; g.shadowColor = '#7fd8ff'; g.shadowBlur = 3 * s; const dd = (2.6 + pop * 1.4) * s; g.fillRect(-dd / 2, -dd / 2, dd, dd); g.restore();
       u.text(String(Game.melee), W - 20, 23.2, 7.4 + pop * 1.5, { color: pop ? '#ffffff' : '#dffbff', align: 'right', title: true });
       if (w.fight && w.boss && !w.boss.dead && w.boss.st !== 'intro') {
-        const bw = 150, x = (W - bw) / 2, y = H - 12, k = Math.max(0, w.boss.hp / w.boss.max), vul = ENT.boss.vulnerable(w.boss);
+        const bw = 170, x = (W - bw) / 2, y = 15, k = Math.max(0, w.boss.hp / w.boss.max), vul = ENT.boss.vulnerable(w.boss);
         g.fillStyle = 'rgba(4,5,14,0.75)'; g.beginPath(); g.roundRect ? g.roundRect((x - 1) * s, (y - 1) * s, (bw + 2) * s, 5 * s, 2.5 * s) : g.rect((x - 1) * s, (y - 1) * s, (bw + 2) * s, 5 * s); g.fill();
         const gr = g.createLinearGradient(x * s, 0, (x + bw) * s, 0); gr.addColorStop(0, vul ? '#fff6c8' : '#ff8a3a'); gr.addColorStop(1, vul ? '#f3d384' : '#d8341c');
         g.fillStyle = gr; g.beginPath(); g.roundRect ? g.roundRect(x * s, y * s, Math.max(3, bw * k) * s, 3 * s, 1.5 * s) : g.rect(x * s, y * s, bw * k * s, 3 * s); g.fill();
-        u.text('THE HOARDER KING', 192, y - 6, 4.8, { color: '#f3d384', ls: 1.8, title: true });
+        g.strokeStyle = 'rgba(217,179,106,0.7)'; g.lineWidth = Math.max(1, s * 0.3); g.beginPath(); g.roundRect ? g.roundRect((x - 1) * s, (y - 1) * s, (bw + 2) * s, 5 * s, 2.5 * s) : g.rect((x - 1) * s, (y - 1) * s, (bw + 2) * s, 5 * s); g.stroke();
+        u.text('THE HOARDER KING', 192, y - 6.5, 4.6, { color: '#f3d384', ls: 1.8, title: true });
       }
     }
     // dialogue: eases in and out, speaker set apart, keys shown as keycaps
@@ -507,10 +509,10 @@ Scenes.list.play = {
       if (who) u.text(who.toUpperCase(), 192, y0 + 7, 4.6, { color: '#d9b566', ls: 2, title: true, alpha: a, shadow: false });
       lines.forEach((ln, i) => u.rich(ln, 192, y0 + (who ? 16.5 : 11) + i * lh, fs, { color: '#eef2ff', alpha: a, shadow: false }));
     }
-    if (w.toastT > 0 && w.state === 'play' && !w.card && !w.gemFx) {
+    if (w.toastT > 0 && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !(this.signA > 0.3 && /\[/.test(w.toastText))) {
       const tm = w.toastMax || 240, a = clamp(w.toastT / 24, 0, 1) * clamp((tm - w.toastT) / 12, 0, 1), tl = w.toastText.split('|'), ease = 1 - (1 - a) * (1 - a);
       const wd = Math.max(...tl.map(l => u.width(l, 8.4, { italic: tl.length === 1 }))) + 26, hgt = tl.length * 11.5 + 8;
-      const ty = (this.signA > 0.3 && this.signLow ? 40 + 44 : w.introT > 0 ? 112 : 32) - (1 - ease) * 5;
+      const ty = (this.signA > 0.3 && !this.signLow ? 34 : 190 - hgt / 2) + (1 - ease) * 5;
       u.plate(192 - wd / 2, ty, wd, hgt, a * 0.92);
       tl.forEach((ln, i) => u.rich(ln, 192, ty + 10 + i * 11.5, 8.4, { color: '#fff3c4', alpha: a, italic: tl.length === 1, shadow: false }));
     }
@@ -520,7 +522,7 @@ Scenes.list.play = {
       u.text('THE HOARDER KING', 192, 70, 22 * (1 + 0.4 * clamp(1 - (w.boss.t0 - 30) / 6, 0, 1)), { color: '#ffb070', glow: '#ff3a10', alpha: w.boss.t0 < 30 ? 0 : clamp((110 - w.boss.t0) / 20, 0, 1), title: true, ls: 4 });
       u.text('Thief of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     }
-    if (Game.metBoy && !Game.coop && showUI && !this.paused && !Input.touch) u.rich('Player two   [2]', W - 34, 37, 5.6, { color: '#ffd070', italic: true });
+    if (Game.metBoy && !Game.coop && showUI && !this.paused && !Input.touch) u.rich('Player two   [2]', W - 27, 37, 5.6, { color: '#d9c48a', italic: true });
     if (w.state === 'clear') {
       const a = clamp((w.clearT - 50) / 40, 0, 1);
       u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
@@ -539,7 +541,6 @@ Scenes.list.play = {
         u.text(v, 192, y, 9.6, { color: on ? '#fff3c4' : '#c3cdee' });
         if (on) { const hw = u.width(v, 9.6) / 2 + 8, gg = u.ctx, ss = u.s; gg.save(); gg.fillStyle = '#f3d384'; for (const sx of [-1, 1]) { gg.save(); gg.translate((192 + sx * hw) * ss, y * ss); gg.rotate(Math.PI / 4); gg.fillRect(-0.9 * ss, -0.9 * ss, 1.8 * ss, 1.8 * ss); gg.restore(); } gg.restore(); }
       });
-      if (!tt) (Game.coop ? ['Ana    [A] [D]  walk     [W]  leap     [X]  arrow', 'Mayank    [←] [→]  walk     [↑]  leap     [K]  sling'] : ['[←] [→]  walk     [SPACE]  leap, again in the air to glide     [X]  arrow']).forEach((ln, i) => u.rich(ln, 192, 166 + i * 13, 6.6, { color: '#aeb9d6' }));
     }
   }
 };
@@ -608,12 +609,12 @@ Scenes.list.ending = {
     if (i < EPILOGUE.length) {
       const a = clamp(pt / 50, 0, 1) * clamp((EP - pt) / 40, 0, 1);
       const lines = u.wrap(EPILOGUE[i], 204, 9.6, { italic: true }), y0 = 200 - lines.length * 13;
-      u.panel(156, y0 - 10, 222, lines.length * 13 + 14, 0.62 * a, '#1a1030');
+      u.plate(156, y0 - 10, 222, lines.length * 13 + 14, 0.9 * a);
       lines.forEach((ln, k) => u.text(ln, 267, y0 + k * 13, 9.6, { color: '#fffbe8', italic: true, alpha: a }));
       return;
     }
     const tt = this.t - EPILOGUE.length * EP, a = clamp(tt / 60, 0, 1), G = this.g;
-    u.panel(164, 26, 208, 178, 0.86 * a, '#140c28');
+    u.plate(164, 26, 208, 178, 0.94 * a);
     u.text('YOUR JOURNEY, GRADED', 268, 40, 8.5, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 2.4 });
     u.rule(268, 51, 120, '#f6e2a0', a);
     const rows = [
