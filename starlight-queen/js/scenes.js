@@ -271,12 +271,12 @@ Scenes.list.title = {
 /* ---------- Another way in (hidden): begin from any land, keeping whatever has been found ---------- */
 const PLACES = [
   { name: 'Kaamos', note: 'Finland, where the road begins' },
-  { name: 'The Midsummer Lands', note: 'Sweden', theme: 'meads', col: 3 },
+  { name: 'The Manic Lands', note: 'Sweden', theme: 'meads', col: 3 },
   { name: 'The Iron Deeps', note: 'Kiruna', theme: 'halls', col: 3 },
   { name: 'The Western Sea', note: 'two rafts, and a whale', theme: 'sea', col: 9 },
   { name: 'Red Rock Country', note: 'the United States', theme: 'canyon', col: 3 },
   { name: 'Australia', note: 'through the tear, where it is already tomorrow', mark: 'ozArrive' },
-  { name: 'The Hoarder’s Mesa', note: 'where the light was taken', theme: 'gloam', col: 3 },
+  { name: 'The Hoarder’s Mesa', note: 'where the summer is kept', theme: 'gloam', col: 3 },
   { name: 'The Hoarder King', note: 'at his door', theme: 'gloam', col: 172 },
   { name: 'Past the King', note: 'the stone is hers; somebody is singing', after: true }
 ];
@@ -329,12 +329,11 @@ Scenes.list.places = {
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  { s: 'Far in the north there is a small town called Kaamos. The name means the long dark.' },
-  { s: 'The old people say the north belonged to the elves once: the star-folk. They went west over the sea. Every house still leaves one window unshuttered, in case.' },
+  { s: 'Far in the north is a small town called Kaamos: the long dark. The old people say elves lived here once, and went west over the sea. Every house still leaves one window unshuttered, in case.' },
   { s: 'Ana grew up at the last fence, looking at the place where the road stops being Kaamos and becomes everywhere else. Nothing ever came down it for her.' },
-  { s: 'Then came the winter that did not end. A king in the west had gathered the great diamonds of the world and shut the light inside them. The sun did not come back in January. It did not come back at all.', fx: 'gems' },
-  { s: '“The summer is in those stones,” said the Tonttu, who kept her house. “All of it. He only wants to be warm; they always do. Somebody will have to fetch every one, and let the light out.”' },
-  { s: 'Ana held out her hand, the way you would to see if it was snowing. The last of the starlight came down into it like a bird that had been waiting for her to stand still.' },
+  { s: 'Then came the winter that did not end. A king in the west had shut the world’s light inside its great diamonds, and dropped most of them on the long way home. The sun rose thin as a coin and warmed nothing.', fx: 'gems' },
+  { s: '“The summer is in those stones,” said the Tonttu, who kept her house. “All of it. Somebody will have to fetch every one, and let the light out.”' },
+  { s: 'Ana held out her hand, the way you would to see if it was snowing. Starlight came down into it like a bird that had been waiting for her to stand still.' },
   { s: '“Well,” said the Tonttu. “That explains the ears. Your boots are by the door. They have been by the door for years.”' }
 ];
 // Shared by the prologue and the epilogue: one card at a time, and nothing moves on until the reader does.
@@ -459,8 +458,8 @@ Scenes.list.map = {
     g.restore();
     u.text('N', 346, 23, 6.5, { color: ink, shadow: false, title: true });
     u.text('THE ROAD WEST', 192, 25, 12, { color: ink, ls: 5, shadow: false, title: true });
-    u.text('from Kaamos to the Mountain of Light', 192, 37, 6.8, { color: '#6a4a28', italic: true, shadow: false });
-    const lbl = [['Kaamos', 'FINLAND', 350, 150], ['Midsummer Lands', 'SWEDEN', 262, 84], ['Iron Deeps', 'KIRUNA', 192, 152], ['Red Rock Country', 'UNITED STATES', 126, 76], ['The Hoarder’s Mesa', '', 62, 137]];
+    u.text('from Kaamos, after the summer', 192, 37, 6.8, { color: '#6a4a28', italic: true, shadow: false });
+    const lbl = [['Kaamos', 'FINLAND', 350, 150], ['The Manic Lands', 'SWEDEN', 262, 84], ['Iron Deeps', 'KIRUNA', 192, 152], ['Red Rock Country', 'UNITED STATES', 126, 76], ['The Hoarder’s Mesa', '', 62, 137]];
     lbl.forEach(([a, b, x, y], i) => {
       const lw = Math.max(u.width(a, 7.2, { italic: true }), b ? u.width(b, 5, { title: true }) + b.length * 0.8 : 0) + 8;
       u.panel(x - lw / 2, y - 5.5, lw, b ? 18 : 11, 0.88, '#dcc79a');
@@ -711,10 +710,9 @@ Scenes.list.vault = {
 /* ---------- Ending ---------- */
 const EPILOGUE = [
   { bg: 'mesa', s: 'Under the armour there was hardly anyone. He had only wanted to be warm.' },
-  { bg: 'mesa', s: 'His name is Mayank. He walked from India on the word of a dream, which had promised him an elf queen in a distant land. Dreams, it turns out, can be trusted with directions.' },
-  { bg: 'mesa', s: 'But the light was still shut inside the stones, and the winter still lay on the world. “I know a shore,” said Mayank, “where the sun goes last of all. Let it out there.”' },
+  { bg: 'mesa', s: 'The weather had eased with every stone. But the summer itself was still shut inside them. “I know a shore,” said Mayank, “where the sun goes last of all. Let it out there, and it has the whole world to cross.”' },
   { bg: 'kauai', rise: true, s: 'So they carried the diamonds west, over one more sea, to a green island called Kauaʻi. On the sand, at the end of the day, Ana opened her hands.' },
-  { bg: 'dawn', s: 'The light went home across the world, west to east, and summer followed it. It reached Kaamos by morning. The Tonttu tells the children at the last fence: “That is the Starlight Queen. She is from here.”' },
+  { bg: 'dawn', s: 'The light went home along her road, and summer followed it. It reached Kaamos by morning. “That is the Starlight Queen,” the Tonttu tells the children. “She is from here.”' },
   { bg: 'kauai', s: '“This,” said Mayank, “is the beginning of a new adventure.”' }
 ];
 Scenes.list.ending = {
@@ -759,7 +757,7 @@ Scenes.list.ending = {
       u.text(d, 192, y + 10, 7.2, { color: '#e6dcff', alpha: b, align: 'left', italic: true });
     });
     const perfect = G.n === GEMS.length && G.colour === 'D' && G.clarity[0] === 'FL' && G.cut === 'Excellent';
-    u.text(perfect ? 'Every light is home, and you stopped to look at everything.' : G.n < GEMS.length ? `${GEMS.length - G.n} ${GEMS.length - G.n === 1 ? 'stone still holds' : 'stones still hold'} their light. The road will wait.` : 'Every light is home. There is more out there to look at.', 272, 176, 7.2, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
+    u.text(perfect ? 'Every light is home, and you stopped to look at everything.' : G.n < GEMS.length ? `A pale summer yet: ${GEMS.length - G.n} ${GEMS.length - G.n === 1 ? 'stone still holds its' : 'stones still hold their'} light.` : 'Every light is home. There is more out there to look at.', 272, 176, 7.2, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
     u.text(Input.touch ? 'TAP TO RETURN' : 'ENTER TO RETURN TO THE TITLE', 272, 190, 5.4, { color: '#ffe9a8', alpha: clamp((tt - 220) / 40, 0, 1) * (0.6 + 0.4 * Math.sin(this.t * 0.1)), ls: 1.4, title: true });
   }
 };

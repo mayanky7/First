@@ -128,14 +128,14 @@ const REGIONS = [
     }
   },
   {
-    theme: 'canyon', cols: 252, title: 'United States', sub: 'A far country of red rock and rivers', map: 3,
+    theme: 'canyon', cols: 252, title: 'United States', sub: 'A far country of red rock and frost', map: 3,
     build(L) {
       L.liq(0, 251, 1);
       L.g(0, 22, 3); L.cp(3, 3); L.cp(19, 3, true);
       
       L.sign(10, 3, 'There is a field here where anyone may dig for diamonds.');
       L.b(16, 6, '?'); L.gemBlock('unclesam', 17, 6); L.b(18, 6, '?');
-      L.s(9, 4, 3); L.e('wraith', 30, 6); L.sign(21, 3, 'A lantern, already lit. She did not light it.');
+      L.s(9, 4, 3); L.e('wraith', 30, 6);
       L.g(26, 34, 3); L.e('wolf', 31, 3);
       L.p(36, 2, 2); L.p(39, 2, 2); L.s(36, 4, 2); L.s(39, 4, 2); L.e('wraith', 41, 7);
       L.g(43, 60, 3); L.b(47, 6, '???'); L.e('goblin', 49, 3); L.spk(53, 54, 3);
@@ -269,4 +269,4 @@ function buildWorld() {
   return out;
 }
 const WONDER_TOTAL = 7;
-const MAP_NAMES = ['Kaamos · Finland', 'The Midsummer Lands · Sweden', 'The Iron Deeps of Kiruna', 'Red Rock Country · United States', 'The Hoarder’s Mesa'];
+const MAP_NAMES = ['Kaamos · Finland', 'The Manic Lands · Sweden', 'The Iron Deeps of Kiruna', 'Red Rock Country · United States', 'The Hoarder’s Mesa'];

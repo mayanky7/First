@@ -1836,10 +1836,11 @@ Paint.tiles = function (g, w, ox, oy) {
   };
 
   /* ---------- weather, drifting across the whole frame ---------- */
-  Paint.makeAmbient = kind => { const n = { pollen: 18, leaves: 16, dust: 22, mist: 0, ash: 40, snow: 70 }[kind] || 0, ps = []; for (let i = 0; i < n; i++) ps.push({ x: rand(W), y: rand(H), p: rand(TAU), s: rand(0.4, 1.3) }); return { kind, ps }; };
-  Paint.ambient = function (g, amb, t, dx) {
+  Paint.makeAmbient = (kind, n0) => { const n = n0 || { pollen: 18, leaves: 16, dust: 22, mist: 0, ash: 40, snow: 70 }[kind] || 0, ps = []; for (let i = 0; i < n; i++) ps.push({ x: rand(W), y: rand(H), p: rand(TAU), s: rand(0.4, 1.3) }); return { kind, ps }; };
+  Paint.ambient = function (g, amb, t, dx, n) { // n: draw only the first n of them (the weather thins and thickens)
     if (!amb) return;
-    for (const q of amb.ps) {
+    const lim = n === undefined ? amb.ps.length : Math.min(amb.ps.length, n);
+    for (let qi = 0; qi < lim; qi++) { const q = amb.ps[qi];
       q.x -= dx * (0.3 + q.s * 0.5);
       if (amb.kind === 'snow') { q.y += 0.22 + q.s * 0.3; q.x += Math.sin(t * 0.015 + q.p) * 0.25 - 0.12; }
       else if (amb.kind === 'ash') { q.y -= 0.18 + q.s * 0.22; q.x += Math.sin(t * 0.02 + q.p) * 0.3; }
@@ -2224,14 +2225,14 @@ const REGIONS = [
     }
   },
   {
-    theme: 'canyon', cols: 252, title: 'United States', sub: 'A far country of red rock and rivers', map: 3,
+    theme: 'canyon', cols: 252, title: 'United States', sub: 'A far country of red rock and frost', map: 3,
     build(L) {
       L.liq(0, 251, 1);
       L.g(0, 22, 3); L.cp(3, 3); L.cp(19, 3, true);
       
       L.sign(10, 3, 'There is a field here where anyone may dig for diamonds.');
       L.b(16, 6, '?'); L.gemBlock('unclesam', 17, 6); L.b(18, 6, '?');
-      L.s(9, 4, 3); L.e('wraith', 30, 6); L.sign(21, 3, 'A lantern, already lit. She did not light it.');
+      L.s(9, 4, 3); L.e('wraith', 30, 6);
       L.g(26, 34, 3); L.e('wolf', 31, 3);
       L.p(36, 2, 2); L.p(39, 2, 2); L.s(36, 4, 2); L.s(39, 4, 2); L.e('wraith', 41, 7);
       L.g(43, 60, 3); L.b(47, 6, '???'); L.e('goblin', 49, 3); L.spk(53, 54, 3);
@@ -2365,7 +2366,7 @@ function buildWorld() {
   return out;
 }
 const WONDER_TOTAL = 7;
-const MAP_NAMES = ['Kaamos · Finland', 'The Midsummer Lands · Sweden', 'The Iron Deeps of Kiruna', 'Red Rock Country · United States', 'The Hoarder’s Mesa'];
+const MAP_NAMES = ['Kaamos · Finland', 'The Manic Lands · Sweden', 'The Iron Deeps of Kiruna', 'Red Rock Country · United States', 'The Hoarder’s Mesa'];
 
 </script>
 <script>
@@ -2966,7 +2967,7 @@ ENT.boss = {
         if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
           e.p2 = true; Sound.sfx('roar'); w.shake = 24; Sound.setRate(0.88); w.flash = 0.5;
           w.ents.push(makeEnt({ t: 'cake', x: (A.x0 + A.x1) / 2, y: A.floor - 44 }));
-          World.toast('The crown burns brighter. He is afraid.');
+          World.toast('The crown burns brighter. He shivers.');
         }
         if (e.t0 > 26) go('idle');
         break;
@@ -2974,7 +2975,6 @@ ENT.boss = {
         if (e.t0 % 7 === 0) { Sound.sfx('bosshit'); w.shake = 8; for (let i = 0; i < 8; i++) w.parts.push({ x: e.x + rand(22), y: e.y + rand(44), vx: rand(-2, 2), vy: rand(-3, 0), life: 40, col: ['#ff7a20', '#ffc040', '#2a2a36'][i % 3], g: 0.08, sz: 2 + (i % 2), glow: i % 3 < 2 }); }
         if (e.t0 === 130) {
           Sound.sfx('shatter'); w.flash = 1; w.shake = 30; e.dead = true;
-          for (let i = 0; i < 7; i++) w.ents.push(makeEnt({ t: 'star', x: e.x + 11, y: e.y + 2, i }));
           World.ring(e.x + 11, e.y + 20, 8, 150, 24, '#ffffff'); World.ring(e.x + 11, e.y + 20, 4, 90, 30, '#ffb040');
           for (let i = 0; i < 70; i++) { const a = rand(TAU), s = rand(1, 5); w.parts.push({ x: e.x + 11, y: e.y + 20, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(40, 90), col: i % 2 ? '#3a3a4a' : '#ff7a20', g: 0.05, sz: 2, glow: i % 2 }); }
           World.bossDefeated(e.x + 11);
@@ -3340,6 +3340,23 @@ const World = (() => {
   const [lavaImg, lvg] = mk(1, 64);
   { const g = lvg.createLinearGradient(0, 0, 0, 64); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.9, 'rgba(0,0,0,0.85)'); g.addColorStop(1, 'rgba(0,0,0,0.85)'); lvg.fillStyle = g; lvg.fillRect(0, 0, 1, 64); }
   let lastCamX = 0;
+  /* The winter lies on every land until the stones are won. Each diamond she takes up lets a little of its light out:
+     the snow thins, the lid of cloud opens, and the land's own weather comes back. The summer itself waits for Kauaʻi. */
+  const WEATHER = ['The snow thins a little.', 'The wind drops.', 'A gap opens in the cloud.', 'Somewhere a bird tries one note.', 'The cold lets go of her fingers.', 'Up above, a patch of blue.',
+    'The air smells of rain, not snow.', 'Her shadow comes back.', 'Warm on the back of her neck.', 'The snow is only falling out of habit now.', 'A green shoot, through the frost.', 'The sky is holding its breath.', 'The last cloud stands aside.'];
+  const LID = { north: '92,108,150', gloam: '104,84,96', canyon: '196,198,210', oz: '200,200,212' }, OPEN = { halls: 0, gloam: 0.7 }; // cloud colour by land; how much sky a land has
+  const gemCount = () => GEMS.reduce((n, q) => n + (Game.gems[q.id] ? 1 : 0), 0);
+  function thawNote() { const n = gemCount(); w.thawT = 300; if (n > 0) toast(WEATHER[Math.min(n, WEATHER.length) - 1], true); }
+  function winterSky(c, cold, lidCol) { // the lid of cloud, and slow wisps under it
+    const gr = c.createLinearGradient(0, 0, 0, H * 0.7); gr.addColorStop(0, `rgba(${lidCol},${0.58 * cold})`); gr.addColorStop(0.55, `rgba(${lidCol},${0.34 * cold})`); gr.addColorStop(1, `rgba(${lidCol},0)`);
+    c.fillStyle = gr; c.fillRect(0, 0, W, H * 0.7 + 1);
+    c.fillStyle = `rgb(${lidCol})`;
+    for (let i = 0; i < 6; i++) {
+      const x = ((i * 97 + w.t * (0.03 + (i % 3) * 0.012) - w.cam.x * 0.04) % (W + 200) + W + 200) % (W + 200) - 100, y = 14 + (i * 23 % 52), rx = 46 + (i * 31 % 40), ry = 5 + (i % 3) * 2.2;
+      c.globalAlpha = 0.2 * cold; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, TAU); c.fill(); c.beginPath(); c.ellipse(x + rx * 0.3, y - ry * 0.5, rx * 0.6, ry * 0.9, 0, 0, TAU); c.fill();
+    }
+    c.globalAlpha = 1;
+  }
 
   const zoneAt = x => { for (const z of w.zones) if (x < z.x1) return z; return w.zones[w.zones.length - 1]; };
 
@@ -3376,6 +3393,7 @@ const World = (() => {
     w.cam.x = clamp(w.player.x - W / 2, w.bx0, w.bx1 - W);
     w.cam.y = clamp(w.player.y - H * 0.72, 0, w.rows * T - H + 18);
     lastCamX = w.cam.x;
+    w.thaw = gemCount() / GEMS.length; w.thawT = 0; w.snow = Paint.makeAmbient('snow', 120);
     scatter();
     Sound.duck(false);
   }
@@ -3383,7 +3401,7 @@ const World = (() => {
     w.zone = z; w.theme = THEMES[z.theme];
     w.bx0 = z.warp ? z.x0 : 0; w.bx1 = z.warp ? z.x1 : (w.mainEnd || w.cols * T);
     if (!w.fight) { w.minX = w.bx0; w.maxX = w.bx1; }
-    w.amb = Paint.makeAmbient(w.theme.amb);
+    w.amb = w.theme.amb === 'snow' ? null : Paint.makeAmbient(w.theme.amb); // the snow belongs to the winter now, not to any one land
     if (!w.fight) { Sound.music(Game.bossDown && z.theme === 'gloam' ? 'dawn' : w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
     Game.region = z.map; Game.oz = !!z.warp;
     const key = z.title + '|' + z.sub;
@@ -3587,10 +3605,11 @@ const World = (() => {
     }
     if (w.card) {
       w.card.t++;
-      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.sfx('confirm'); if (w.gemQ && w.gemQ.length) { w.gemFx = w.gemQ.shift(); Sound.sfx('gem'); } else Sound.duck(false); }
+      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.sfx('confirm'); if (w.gemQ && w.gemQ.length) { w.gemFx = w.gemQ.shift(); Sound.sfx('gem'); } else { Sound.duck(false); thawNote(); } }
       return;
     }
     w.t++;
+    w.thaw += (gemCount() / GEMS.length - w.thaw) * 0.01; if (w.thawT > 0) w.thawT--;
     const calm = World.calm;
     if (calm) { if (w.flash > 0.2) w.flash = 0.2; if (w.shake > 3) w.shake = 3; }
     else { if (w.flash > 1) w.flash = 1; if (w.shake > 28) w.shake = 28; }
@@ -3750,6 +3769,13 @@ const World = (() => {
       Paint.backdrop(g2, bl.b.theme, w.cam.x, yo, w.t, w.lit);
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = bl.k; c.drawImage(blendCv, 0, 0); c.restore();
     }
+    const sky = lerp(OPEN[bl.a.theme] === undefined ? 1 : OPEN[bl.a.theme], bl.b ? (OPEN[bl.b.theme] === undefined ? 1 : OPEN[bl.b.theme]) : 0, bl.b ? bl.k : 0), cold = (1 - w.thaw) * sky;
+    if (cold > 0.01) winterSky(c, cold, LID[bl.a.theme] || '186,198,220');
+    if (w.thawT > 0 && sky > 0.01) { // a diamond has just been won: for a breath, light comes down through the cloud
+      const k = Math.sin((1 - w.thawT / 300) * Math.PI) * sky, gr = c.createLinearGradient(0, 0, 0, H * 0.85); gr.addColorStop(0, `rgba(255,238,196,${0.34 * k})`); gr.addColorStop(1, 'rgba(255,238,196,0)');
+      c.fillStyle = gr; c.fillRect(0, 0, W, H);
+      c.save(); c.globalAlpha = 0.055 * k; c.fillStyle = "#fff3cc"; for (let i = 0; i < 4; i++) { const x = 60 + i * 84 + Math.sin(w.t * 0.004 + i) * 10; c.beginPath(); c.moveTo(x - 9, -2); c.lineTo(x + 13, -2); c.lineTo(x - 30 + 26, H * 0.8); c.lineTo(x - 70, H * 0.8); c.closePath(); c.fill(); } c.restore();
+    }
     if (w.dawn > 0) { c.fillStyle = `rgba(255,190,120,${w.dawn * 0.25})`; c.fillRect(0, 0, W, H); }
     if (w.state === 'clear') { // far beacons answer, one by one
       [[60, 92], [168, 78], [318, 96]].forEach(([x, y], i) => {
@@ -3778,7 +3804,10 @@ const World = (() => {
     drawParts(c, ox, oy, true);
     for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.22 * (1 - k); c.strokeStyle = q.col; c.lineWidth = 3 + r * 0.06; c.beginPath(); c.arc(q.x - ox, q.y - oy, Math.max(0.1, r), 0, TAU); c.stroke(); } // a soft swell of light, not a drawn circle
     c.globalAlpha = 1;
-    Paint.ambient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
+    { const dx = w.cam.x - lastCamX, k = w.amb && (w.amb.kind === 'pollen' || w.amb.kind === 'leaves') ? 0.2 + 0.8 * w.thaw : 1;
+      if (w.amb) Paint.ambient(c, w.amb, w.t, dx, Math.round(w.amb.ps.length * k)); // the land's own weather comes back as the winter lets go
+      if (cold > 0.01) { Paint.ambient(c, w.snow, w.t, dx, Math.round(w.snow.ps.length * Math.pow(cold, 0.8))); c.fillStyle = `rgba(206,220,244,${0.07 * cold})`; c.fillRect(0, 0, W, H); }
+      lastCamX = w.cam.x; }
     if (w.gemFx) {
       const fx = w.gemFx, x = fx.x - ox, y = fx.y - oy, k = Math.min(1, fx.t / 30);
       c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = fx.gem.tint;
@@ -4087,12 +4116,12 @@ Scenes.list.title = {
 /* ---------- Another way in (hidden): begin from any land, keeping whatever has been found ---------- */
 const PLACES = [
   { name: 'Kaamos', note: 'Finland, where the road begins' },
-  { name: 'The Midsummer Lands', note: 'Sweden', theme: 'meads', col: 3 },
+  { name: 'The Manic Lands', note: 'Sweden', theme: 'meads', col: 3 },
   { name: 'The Iron Deeps', note: 'Kiruna', theme: 'halls', col: 3 },
   { name: 'The Western Sea', note: 'two rafts, and a whale', theme: 'sea', col: 9 },
   { name: 'Red Rock Country', note: 'the United States', theme: 'canyon', col: 3 },
   { name: 'Australia', note: 'through the tear, where it is already tomorrow', mark: 'ozArrive' },
-  { name: 'The Hoarder’s Mesa', note: 'where the light was taken', theme: 'gloam', col: 3 },
+  { name: 'The Hoarder’s Mesa', note: 'where the summer is kept', theme: 'gloam', col: 3 },
   { name: 'The Hoarder King', note: 'at his door', theme: 'gloam', col: 172 },
   { name: 'Past the King', note: 'the stone is hers; somebody is singing', after: true }
 ];
@@ -4145,12 +4174,11 @@ Scenes.list.places = {
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  { s: 'Far in the north there is a small town called Kaamos. The name means the long dark.' },
-  { s: 'The old people say the north belonged to the elves once: the star-folk. They went west over the sea. Every house still leaves one window unshuttered, in case.' },
+  { s: 'Far in the north is a small town called Kaamos: the long dark. The old people say elves lived here once, and went west over the sea. Every house still leaves one window unshuttered, in case.' },
   { s: 'Ana grew up at the last fence, looking at the place where the road stops being Kaamos and becomes everywhere else. Nothing ever came down it for her.' },
-  { s: 'Then came the winter that did not end. A king in the west had gathered the great diamonds of the world and shut the light inside them. The sun did not come back in January. It did not come back at all.', fx: 'gems' },
-  { s: '“The summer is in those stones,” said the Tonttu, who kept her house. “All of it. He only wants to be warm; they always do. Somebody will have to fetch every one, and let the light out.”' },
-  { s: 'Ana held out her hand, the way you would to see if it was snowing. The last of the starlight came down into it like a bird that had been waiting for her to stand still.' },
+  { s: 'Then came the winter that did not end. A king in the west had shut the world’s light inside its great diamonds, and dropped most of them on the long way home. The sun rose thin as a coin and warmed nothing.', fx: 'gems' },
+  { s: '“The summer is in those stones,” said the Tonttu, who kept her house. “All of it. Somebody will have to fetch every one, and let the light out.”' },
+  { s: 'Ana held out her hand, the way you would to see if it was snowing. Starlight came down into it like a bird that had been waiting for her to stand still.' },
   { s: '“Well,” said the Tonttu. “That explains the ears. Your boots are by the door. They have been by the door for years.”' }
 ];
 // Shared by the prologue and the epilogue: one card at a time, and nothing moves on until the reader does.
@@ -4275,8 +4303,8 @@ Scenes.list.map = {
     g.restore();
     u.text('N', 346, 23, 6.5, { color: ink, shadow: false, title: true });
     u.text('THE ROAD WEST', 192, 25, 12, { color: ink, ls: 5, shadow: false, title: true });
-    u.text('from Kaamos to the Mountain of Light', 192, 37, 6.8, { color: '#6a4a28', italic: true, shadow: false });
-    const lbl = [['Kaamos', 'FINLAND', 350, 150], ['Midsummer Lands', 'SWEDEN', 262, 84], ['Iron Deeps', 'KIRUNA', 192, 152], ['Red Rock Country', 'UNITED STATES', 126, 76], ['The Hoarder’s Mesa', '', 62, 137]];
+    u.text('from Kaamos, after the summer', 192, 37, 6.8, { color: '#6a4a28', italic: true, shadow: false });
+    const lbl = [['Kaamos', 'FINLAND', 350, 150], ['The Manic Lands', 'SWEDEN', 262, 84], ['Iron Deeps', 'KIRUNA', 192, 152], ['Red Rock Country', 'UNITED STATES', 126, 76], ['The Hoarder’s Mesa', '', 62, 137]];
     lbl.forEach(([a, b, x, y], i) => {
       const lw = Math.max(u.width(a, 7.2, { italic: true }), b ? u.width(b, 5, { title: true }) + b.length * 0.8 : 0) + 8;
       u.panel(x - lw / 2, y - 5.5, lw, b ? 18 : 11, 0.88, '#dcc79a');
@@ -4527,10 +4555,9 @@ Scenes.list.vault = {
 /* ---------- Ending ---------- */
 const EPILOGUE = [
   { bg: 'mesa', s: 'Under the armour there was hardly anyone. He had only wanted to be warm.' },
-  { bg: 'mesa', s: 'His name is Mayank. He walked from India on the word of a dream, which had promised him an elf queen in a distant land. Dreams, it turns out, can be trusted with directions.' },
-  { bg: 'mesa', s: 'But the light was still shut inside the stones, and the winter still lay on the world. “I know a shore,” said Mayank, “where the sun goes last of all. Let it out there.”' },
+  { bg: 'mesa', s: 'The weather had eased with every stone. But the summer itself was still shut inside them. “I know a shore,” said Mayank, “where the sun goes last of all. Let it out there, and it has the whole world to cross.”' },
   { bg: 'kauai', rise: true, s: 'So they carried the diamonds west, over one more sea, to a green island called Kauaʻi. On the sand, at the end of the day, Ana opened her hands.' },
-  { bg: 'dawn', s: 'The light went home across the world, west to east, and summer followed it. It reached Kaamos by morning. The Tonttu tells the children at the last fence: “That is the Starlight Queen. She is from here.”' },
+  { bg: 'dawn', s: 'The light went home along her road, and summer followed it. It reached Kaamos by morning. “That is the Starlight Queen,” the Tonttu tells the children. “She is from here.”' },
   { bg: 'kauai', s: '“This,” said Mayank, “is the beginning of a new adventure.”' }
 ];
 Scenes.list.ending = {
@@ -4575,7 +4602,7 @@ Scenes.list.ending = {
       u.text(d, 192, y + 10, 7.2, { color: '#e6dcff', alpha: b, align: 'left', italic: true });
     });
     const perfect = G.n === GEMS.length && G.colour === 'D' && G.clarity[0] === 'FL' && G.cut === 'Excellent';
-    u.text(perfect ? 'Every light is home, and you stopped to look at everything.' : G.n < GEMS.length ? `${GEMS.length - G.n} ${GEMS.length - G.n === 1 ? 'stone still holds' : 'stones still hold'} their light. The road will wait.` : 'Every light is home. There is more out there to look at.', 272, 176, 7.2, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
+    u.text(perfect ? 'Every light is home, and you stopped to look at everything.' : G.n < GEMS.length ? `A pale summer yet: ${GEMS.length - G.n} ${GEMS.length - G.n === 1 ? 'stone still holds its' : 'stones still hold their'} light.` : 'Every light is home. There is more out there to look at.', 272, 176, 7.2, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
     u.text(Input.touch ? 'TAP TO RETURN' : 'ENTER TO RETURN TO THE TITLE', 272, 190, 5.4, { color: '#ffe9a8', alpha: clamp((tt - 220) / 40, 0, 1) * (0.6 + 0.4 * Math.sin(this.t * 0.1)), ls: 1.4, title: true });
   }
 };

@@ -108,10 +108,11 @@
   };
 
   /* ---------- weather, drifting across the whole frame ---------- */
-  Paint.makeAmbient = kind => { const n = { pollen: 18, leaves: 16, dust: 22, mist: 0, ash: 40, snow: 70 }[kind] || 0, ps = []; for (let i = 0; i < n; i++) ps.push({ x: rand(W), y: rand(H), p: rand(TAU), s: rand(0.4, 1.3) }); return { kind, ps }; };
-  Paint.ambient = function (g, amb, t, dx) {
+  Paint.makeAmbient = (kind, n0) => { const n = n0 || { pollen: 18, leaves: 16, dust: 22, mist: 0, ash: 40, snow: 70 }[kind] || 0, ps = []; for (let i = 0; i < n; i++) ps.push({ x: rand(W), y: rand(H), p: rand(TAU), s: rand(0.4, 1.3) }); return { kind, ps }; };
+  Paint.ambient = function (g, amb, t, dx, n) { // n: draw only the first n of them (the weather thins and thickens)
     if (!amb) return;
-    for (const q of amb.ps) {
+    const lim = n === undefined ? amb.ps.length : Math.min(amb.ps.length, n);
+    for (let qi = 0; qi < lim; qi++) { const q = amb.ps[qi];
       q.x -= dx * (0.3 + q.s * 0.5);
       if (amb.kind === 'snow') { q.y += 0.22 + q.s * 0.3; q.x += Math.sin(t * 0.015 + q.p) * 0.25 - 0.12; }
       else if (amb.kind === 'ash') { q.y -= 0.18 + q.s * 0.22; q.x += Math.sin(t * 0.02 + q.p) * 0.3; }

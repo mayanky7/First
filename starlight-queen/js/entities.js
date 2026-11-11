@@ -595,7 +595,7 @@ ENT.boss = {
         if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
           e.p2 = true; Sound.sfx('roar'); w.shake = 24; Sound.setRate(0.88); w.flash = 0.5;
           w.ents.push(makeEnt({ t: 'cake', x: (A.x0 + A.x1) / 2, y: A.floor - 44 }));
-          World.toast('The crown burns brighter. He is afraid.');
+          World.toast('The crown burns brighter. He shivers.');
         }
         if (e.t0 > 26) go('idle');
         break;
@@ -603,7 +603,6 @@ ENT.boss = {
         if (e.t0 % 7 === 0) { Sound.sfx('bosshit'); w.shake = 8; for (let i = 0; i < 8; i++) w.parts.push({ x: e.x + rand(22), y: e.y + rand(44), vx: rand(-2, 2), vy: rand(-3, 0), life: 40, col: ['#ff7a20', '#ffc040', '#2a2a36'][i % 3], g: 0.08, sz: 2 + (i % 2), glow: i % 3 < 2 }); }
         if (e.t0 === 130) {
           Sound.sfx('shatter'); w.flash = 1; w.shake = 30; e.dead = true;
-          for (let i = 0; i < 7; i++) w.ents.push(makeEnt({ t: 'star', x: e.x + 11, y: e.y + 2, i }));
           World.ring(e.x + 11, e.y + 20, 8, 150, 24, '#ffffff'); World.ring(e.x + 11, e.y + 20, 4, 90, 30, '#ffb040');
           for (let i = 0; i < 70; i++) { const a = rand(TAU), s = rand(1, 5); w.parts.push({ x: e.x + 11, y: e.y + 20, vx: Math.cos(a) * s, vy: Math.sin(a) * s, life: rand(40, 90), col: i % 2 ? '#3a3a4a' : '#ff7a20', g: 0.05, sz: 2, glow: i % 2 }); }
           World.bossDefeated(e.x + 11);

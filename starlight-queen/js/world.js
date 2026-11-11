@@ -16,6 +16,23 @@ const World = (() => {
   const [lavaImg, lvg] = mk(1, 64);
   { const g = lvg.createLinearGradient(0, 0, 0, 64); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(0.9, 'rgba(0,0,0,0.85)'); g.addColorStop(1, 'rgba(0,0,0,0.85)'); lvg.fillStyle = g; lvg.fillRect(0, 0, 1, 64); }
   let lastCamX = 0;
+  /* The winter lies on every land until the stones are won. Each diamond she takes up lets a little of its light out:
+     the snow thins, the lid of cloud opens, and the land's own weather comes back. The summer itself waits for Kauaʻi. */
+  const WEATHER = ['The snow thins a little.', 'The wind drops.', 'A gap opens in the cloud.', 'Somewhere a bird tries one note.', 'The cold lets go of her fingers.', 'Up above, a patch of blue.',
+    'The air smells of rain, not snow.', 'Her shadow comes back.', 'Warm on the back of her neck.', 'The snow is only falling out of habit now.', 'A green shoot, through the frost.', 'The sky is holding its breath.', 'The last cloud stands aside.'];
+  const LID = { north: '92,108,150', gloam: '104,84,96', canyon: '196,198,210', oz: '200,200,212' }, OPEN = { halls: 0, gloam: 0.7 }; // cloud colour by land; how much sky a land has
+  const gemCount = () => GEMS.reduce((n, q) => n + (Game.gems[q.id] ? 1 : 0), 0);
+  function thawNote() { const n = gemCount(); w.thawT = 300; if (n > 0) toast(WEATHER[Math.min(n, WEATHER.length) - 1], true); }
+  function winterSky(c, cold, lidCol) { // the lid of cloud, and slow wisps under it
+    const gr = c.createLinearGradient(0, 0, 0, H * 0.7); gr.addColorStop(0, `rgba(${lidCol},${0.58 * cold})`); gr.addColorStop(0.55, `rgba(${lidCol},${0.34 * cold})`); gr.addColorStop(1, `rgba(${lidCol},0)`);
+    c.fillStyle = gr; c.fillRect(0, 0, W, H * 0.7 + 1);
+    c.fillStyle = `rgb(${lidCol})`;
+    for (let i = 0; i < 6; i++) {
+      const x = ((i * 97 + w.t * (0.03 + (i % 3) * 0.012) - w.cam.x * 0.04) % (W + 200) + W + 200) % (W + 200) - 100, y = 14 + (i * 23 % 52), rx = 46 + (i * 31 % 40), ry = 5 + (i % 3) * 2.2;
+      c.globalAlpha = 0.2 * cold; c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, TAU); c.fill(); c.beginPath(); c.ellipse(x + rx * 0.3, y - ry * 0.5, rx * 0.6, ry * 0.9, 0, 0, TAU); c.fill();
+    }
+    c.globalAlpha = 1;
+  }
 
   const zoneAt = x => { for (const z of w.zones) if (x < z.x1) return z; return w.zones[w.zones.length - 1]; };
 
@@ -52,6 +69,7 @@ const World = (() => {
     w.cam.x = clamp(w.player.x - W / 2, w.bx0, w.bx1 - W);
     w.cam.y = clamp(w.player.y - H * 0.72, 0, w.rows * T - H + 18);
     lastCamX = w.cam.x;
+    w.thaw = gemCount() / GEMS.length; w.thawT = 0; w.snow = Paint.makeAmbient('snow', 120);
     scatter();
     Sound.duck(false);
   }
@@ -59,7 +77,7 @@ const World = (() => {
     w.zone = z; w.theme = THEMES[z.theme];
     w.bx0 = z.warp ? z.x0 : 0; w.bx1 = z.warp ? z.x1 : (w.mainEnd || w.cols * T);
     if (!w.fight) { w.minX = w.bx0; w.maxX = w.bx1; }
-    w.amb = Paint.makeAmbient(w.theme.amb);
+    w.amb = w.theme.amb === 'snow' ? null : Paint.makeAmbient(w.theme.amb); // the snow belongs to the winter now, not to any one land
     if (!w.fight) { Sound.music(Game.bossDown && z.theme === 'gloam' ? 'dawn' : w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
     Game.region = z.map; Game.oz = !!z.warp;
     const key = z.title + '|' + z.sub;
@@ -263,10 +281,11 @@ const World = (() => {
     }
     if (w.card) {
       w.card.t++;
-      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.sfx('confirm'); if (w.gemQ && w.gemQ.length) { w.gemFx = w.gemQ.shift(); Sound.sfx('gem'); } else Sound.duck(false); }
+      if (w.card.t > 70 && (Input.hit('enter') || Input.hit('jump') || Input.hit('jump2') || Input.hit('tap'))) { w.card = null; Sound.sfx('confirm'); if (w.gemQ && w.gemQ.length) { w.gemFx = w.gemQ.shift(); Sound.sfx('gem'); } else { Sound.duck(false); thawNote(); } }
       return;
     }
     w.t++;
+    w.thaw += (gemCount() / GEMS.length - w.thaw) * 0.01; if (w.thawT > 0) w.thawT--;
     const calm = World.calm;
     if (calm) { if (w.flash > 0.2) w.flash = 0.2; if (w.shake > 3) w.shake = 3; }
     else { if (w.flash > 1) w.flash = 1; if (w.shake > 28) w.shake = 28; }
@@ -426,6 +445,13 @@ const World = (() => {
       Paint.backdrop(g2, bl.b.theme, w.cam.x, yo, w.t, w.lit);
       c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = bl.k; c.drawImage(blendCv, 0, 0); c.restore();
     }
+    const sky = lerp(OPEN[bl.a.theme] === undefined ? 1 : OPEN[bl.a.theme], bl.b ? (OPEN[bl.b.theme] === undefined ? 1 : OPEN[bl.b.theme]) : 0, bl.b ? bl.k : 0), cold = (1 - w.thaw) * sky;
+    if (cold > 0.01) winterSky(c, cold, LID[bl.a.theme] || '186,198,220');
+    if (w.thawT > 0 && sky > 0.01) { // a diamond has just been won: for a breath, light comes down through the cloud
+      const k = Math.sin((1 - w.thawT / 300) * Math.PI) * sky, gr = c.createLinearGradient(0, 0, 0, H * 0.85); gr.addColorStop(0, `rgba(255,238,196,${0.34 * k})`); gr.addColorStop(1, 'rgba(255,238,196,0)');
+      c.fillStyle = gr; c.fillRect(0, 0, W, H);
+      c.save(); c.globalAlpha = 0.055 * k; c.fillStyle = "#fff3cc"; for (let i = 0; i < 4; i++) { const x = 60 + i * 84 + Math.sin(w.t * 0.004 + i) * 10; c.beginPath(); c.moveTo(x - 9, -2); c.lineTo(x + 13, -2); c.lineTo(x - 30 + 26, H * 0.8); c.lineTo(x - 70, H * 0.8); c.closePath(); c.fill(); } c.restore();
+    }
     if (w.dawn > 0) { c.fillStyle = `rgba(255,190,120,${w.dawn * 0.25})`; c.fillRect(0, 0, W, H); }
     if (w.state === 'clear') { // far beacons answer, one by one
       [[60, 92], [168, 78], [318, 96]].forEach(([x, y], i) => {
@@ -454,7 +480,10 @@ const World = (() => {
     drawParts(c, ox, oy, true);
     for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.22 * (1 - k); c.strokeStyle = q.col; c.lineWidth = 3 + r * 0.06; c.beginPath(); c.arc(q.x - ox, q.y - oy, Math.max(0.1, r), 0, TAU); c.stroke(); } // a soft swell of light, not a drawn circle
     c.globalAlpha = 1;
-    Paint.ambient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
+    { const dx = w.cam.x - lastCamX, k = w.amb && (w.amb.kind === 'pollen' || w.amb.kind === 'leaves') ? 0.2 + 0.8 * w.thaw : 1;
+      if (w.amb) Paint.ambient(c, w.amb, w.t, dx, Math.round(w.amb.ps.length * k)); // the land's own weather comes back as the winter lets go
+      if (cold > 0.01) { Paint.ambient(c, w.snow, w.t, dx, Math.round(w.snow.ps.length * Math.pow(cold, 0.8))); c.fillStyle = `rgba(206,220,244,${0.07 * cold})`; c.fillRect(0, 0, W, H); }
+      lastCamX = w.cam.x; }
     if (w.gemFx) {
       const fx = w.gemFx, x = fx.x - ox, y = fx.y - oy, k = Math.min(1, fx.t / 30);
       c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = fx.gem.tint;

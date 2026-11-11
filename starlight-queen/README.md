@@ -6,9 +6,10 @@ for a letter, a wardrobe, or a wizard at the door.
 **Ana** grew up at the last fence of Kaamos, a small town at the top of Finland whose name means
 the long dark, looking at the place where the road stops being Kaamos and becomes everywhere
 else. The old people say the north belonged to the elves once. Then comes the winter that does
-not end: a king in the west has gathered the world's great diamonds and shut the light inside
-them, and the sun does not come back. The summer is in those stones. Ana holds out her hand, and
-the last of the starlight comes down into it. So she goes to fetch every one: across the frozen
+not end: a king in the west has shut the world's light inside its great diamonds, and the sun
+rises thin as a coin and warms nothing. The summer is in those stones, and each one she takes up
+eases the weather a little: the snow thins, the cloud opens. Ana holds out her hand, and
+starlight comes down into it. So she goes to fetch every one: across the frozen
 gulf to the manic lands of Sweden, dancing so the last midsummer cannot leave; down through the
 iron deeps of Kiruna; over the sea to a far country called America; and, through a tear in the
 afternoon, to an Australia where it is already tomorrow. At the end of the road is the Hoarder
