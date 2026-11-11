@@ -5,7 +5,7 @@ anything, and she is stuck in Kaamos, a small town at the top of Finland where n
 happened. Then word comes that a Hoarder King is gathering the world's great diamonds for
 himself. Somebody small will have to fetch them back. Walk out past the last gate, cross the
 frozen gulf to the manic midsummer lands of Sweden, sail to a faraway world called America,
-meet Sam, and win back the Koh-i-Noor — and come home a queen of starlight.
+meet Mayank, and win back the Koh-i-Noor — and come home a queen of starlight.
 
 One long, continuous road. No build step, no dependencies, no asset files: every sprite,
 backdrop, sound and tune is generated in code.
@@ -19,7 +19,7 @@ cd starlight-queen
 python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
-| Action | One player | Two players: Ana | Two players: Sam |
+| Action | One player | Two players: Ana | Two players: Mayank |
 | --- | --- | --- | --- |
 | Walk | ← → or A D | A D | ← → |
 | Leap (hold for height) | Space, W or ↑ | W or Space | ↑ |
@@ -28,9 +28,12 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 | Drop through a ledge | ↓ + leap | S + leap | ↓ + leap |
 
 Esc pauses, M toggles sound, G toggles fullscreen, V opens the Vault from the title.
-Gamepads work (first pad is Ana, second is Sam), and touch buttons appear on phones.
+Gamepads work (first pad is Ana, second is Mayank), and touch buttons appear on phones.
 
-**Co-op:** once Ana meets Sam in America, a second player presses **2** to join or leave.
+**Mayank** has walked all the way from India: a dream promised him an elf queen in a distant
+land. He meets Ana in America.
+
+**Co-op:** once Ana meets Mayank in America, a second player presses **2** to join or leave.
 
 ## The diamonds
 
@@ -62,7 +65,7 @@ Lanterns and beacons are checkpoints; there are no lives, only flaws on your fin
 | `js/art.js` | sprites, tiles, glow, HUD digits |
 | `js/backdrops.js` | themes, parallax backdrops, scenery, ambient particles |
 | `js/levels.js` | the road, region by region, written with a small builder API |
-| `js/entities.js` | Ana, Sam, foes, pickups, diamonds, the boss |
+| `js/entities.js` | Ana, Mayank, foes, pickups, diamonds, the boss |
 | `js/world.js` | simulation step, camera, region blending, lighting, rendering |
 | `js/scenes.js` | title, prologue, map, play, diamond cards, vault, graded ending |
 | `js/main.js` | boot, fixed-timestep loop, presentation |

@@ -364,7 +364,7 @@ Scenes.list.play = {
     }
     if (Input.hit('join') && Game.metBoy && w.state === 'play' && !w.card && w.players.every(p => !p.dead)) {
       Game.coop = !Game.coop;
-      if (Game.coop) { w.addPlayer2(); w.toast('ANA   A D walk  ·  W leap  ·  X arrow|SAM   ← → walk  ·  ↑ leap  ·  K sling', true); } else { w.dropPlayer2(); w.toast('Sam waves, and falls behind. Press [2] to call him back.'); }
+      if (Game.coop) { w.addPlayer2(); w.toast('ANA   A D walk  ·  W leap  ·  X arrow|MAYANK   ← → walk  ·  ↑ leap  ·  K sling', true); } else { w.dropPlayer2(); w.toast('Mayank waves, and falls behind. Press [2] to call him back.'); }
       Game.save();
     }
     if (!Game.seen.hello && w.state === 'play' && w.introT <= 0) { Game.seen.hello = 1; w.toast(Input.touch ? '◀ ▶ walk   ·   ▲ leap   ·   ✦ arrow' : '← → walk   ·   SPACE leap   ·   X arrow', true); }
@@ -402,7 +402,7 @@ Scenes.list.play = {
       u.text('Thief of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     } else if (w.fight && w.boss && !w.boss.dead) u.text('THE HOARDER KING', 192, H - 21, 5, { color: '#ffc8a0', alpha: 0.9, ls: 1.5, title: true });
     if (Game.metBoy && !Game.coop && w.state === 'play' && !w.card && !this.paused && !Input.touch) { u.panel(W - 109, 30, 106, 10, 0.5, '#080a14'); u.text('PLAYER 2  ·  PRESS 2 TO JOIN', W - 7, 35.2, 4.8, { color: '#ffd070', align: 'right', ls: 0.9, title: true }); }
-    if (w.players.length > 1 && !w.card) { u.text('ANA', 57.5, 9.5, 4.8, { color: '#bff4ff', align: 'right', ls: 0.4, title: true }); u.text('SAM', 57.5, 33.5, 4.8, { color: '#ffd070', align: 'right', ls: 0.6, title: true }); }
+    if (w.players.length > 1 && !w.card) { u.text('ANA', 67.5, 9.5, 4.8, { color: '#bff4ff', align: 'right', ls: 0.4, title: true }); u.text('MAYANK', 67.5, 33.5, 4.8, { color: '#ffd070', align: 'right', ls: 0.6, title: true }); }
     if (w.state === 'clear') {
       const a = clamp((w.clearT - 50) / 40, 0, 1);
       u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
@@ -417,7 +417,7 @@ Scenes.list.play = {
       u.rule(192, 76, 80, '#c8a860', 1);
       const tt = Input.touch, rows = [[tt ? '›' : 'ENTER', 'resume'], [tt ? '›' : 'R', this.armR ? (tt ? 'tap again to confirm' : 'press R again to confirm') : 'return to the last lantern'], [tt ? '›' : 'M', 'sound ' + (Sound.muted ? 'off' : 'on')], [tt ? '›' : 'Q', 'save and quit to title']];
       rows.forEach(([k, v], i) => { u.text(k, 172, 96 + i * 14, 5.6, { color: '#d6ba78', align: 'right', ls: 1.4, title: true }); u.text(v, 182, 96 + i * 14, 9, { color: '#dfe8ff', align: 'left' }); });
-      const ctl = Game.coop ? [['ANA', 'A D walk   ·   W or SPACE leap   ·   X or F arrow'], ['SAM', '← → walk   ·   ↑ leap   ·   K or / sling']] : [['WALK', '← →  or  A D'], ['LEAP', 'SPACE or ↑   ·   again in the air, held: glide'], ['ARROW', 'X or K']];
+      const ctl = Game.coop ? [['ANA', 'A D walk   ·   W or SPACE leap   ·   X or F arrow'], ['MAYANK', '← → walk   ·   ↑ leap   ·   K or / sling']] : [['WALK', '← →  or  A D'], ['LEAP', 'SPACE or ↑   ·   again in the air, held: glide'], ['ARROW', 'X or K']];
       if (!tt) ctl.forEach(([k, v], i) => { u.text(k, 132, 160 + i * 11, 5, { color: '#8f9cc0', align: 'right', ls: 1.4, title: true }); u.text(v, 140, 160 + i * 11, 7.4, { color: '#aeb9d6', align: 'left' }); });
     }
   }
@@ -467,7 +467,8 @@ const EPILOGUE = [
   'The Hoarder King is fallen, and the Mountain of Light shines for everyone again.',
   'Ana does not keep it. Great diamonds, she has learned, are only ever borrowed — from the deep earth, and from everyone who comes after.',
   'In Kaamos the long night ends. The Tonttu sets a lantern in the window, in case she should come home.',
-  'She does come home — for a week, with Sam, who has never seen snow. Then the road calls. And in Kaamos they tell it still: the girl who walked out past the last gate, and came back queen of nothing but starlight.'
+  'She does come home — for a week, with Mayank, who has never seen snow. He had walked from India after a dream of an elf queen in a distant land. He says he knew her at once, by her ears.',
+  'Then the road calls again. And in Kaamos they tell it still: the girl who walked out past the last gate, and came back queen of nothing but starlight.'
 ];
 Scenes.list.ending = {
   enter() { this.t = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },

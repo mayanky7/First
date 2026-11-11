@@ -436,8 +436,8 @@ const World = (() => {
   }
   function hud(c) {
     const S = Art.S, two = w.players.length > 1;
-    c.fillStyle = 'rgba(8,10,20,0.5)'; c.fillRect(3, 3, two ? 58 : 40, two ? 49 : 25); c.fillRect(W - 53, 3, 50, 25);
-    if (two) R(c, 6, 28, 52, 1, 'rgba(214,186,120,0.4)');
+    c.fillStyle = 'rgba(8,10,20,0.5)'; c.fillRect(3, 3, two ? 68 : 40, two ? 49 : 25); c.fillRect(W - 53, 3, 50, 25);
+    if (two) R(c, 6, 28, 62, 1, 'rgba(214,186,120,0.4)');
     w.players.forEach((p, k) => {
       const y = 6 + k * 24;
       for (let i = 0; i < 3; i++) c.drawImage(i < p.hp ? S.heart : S.heartEmpty, 6 + i * 11, y);

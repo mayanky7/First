@@ -161,7 +161,7 @@ const REGIONS = [
       L.sign(6, 3, 'The Hoarder’s mesa. Every great diamond he has taken|lies somewhere on this road. Leave him none.');
       L.e('goblin', 12, 3); L.e('goblin', 17, 3);
       L.g(23, 24, 3); L.e('ember', 21, 2, { h: 6 }); L.e('ember', 26, 2, { h: 6, ph: 0.5 });
-      L.g(27, 45, 3); L.e('troll', 37, 3); L.b(31, 6, '?H?');
+      L.g(27, 45, 3); L.sign(28, 3, 'The Mountain of Light was dug from the earth of India —|Mayank’s home. No king has ever kept it long.'); L.e('troll', 38, 3); L.b(31, 6, '?H?');
       L.g(46, 48, 5); L.g(49, 51, 7); L.g(52, 70, 9); L.s(46, 6, 3); L.s(49, 8, 3);
       L.e('goblin', 55, 9); L.e('goblin', 58, 9); L.e('wraith', 66, 11); L.spk(62, 63, 9); L.sign(69, 9, '♪ The road goes west, the road goes far —|we’ll walk it home by a borrowed star.');
       L.mp(71, 8, 3, 2, 0, 180); L.mp(78, 8, 3, 2, 0, 180, 0.5); L.e('ember', 76, 2, { h: 10 }); L.arc(72, 12, 4); L.arc(79, 12, 4);

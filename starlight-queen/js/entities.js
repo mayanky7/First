@@ -1,5 +1,5 @@
 'use strict';
-/* Starlight Queen — Ana and Sam, their foes, items, diamonds, and the Hoarder King */
+/* Starlight Queen — Ana and Mayank, their foes, items, diamonds, and the Hoarder King */
 
 const SOLID = { '#': 1, 'B': 1, '?': 1, 'H': 1, 'S': 1, 'G': 1, 'U': 1, 'X': 1 };
 function tileAt(w, cx, cy) { if (cy < 0 || cy >= w.rows || cx < 0 || cx >= w.cols) return '.'; return w.grid[cy][cx]; }
@@ -675,7 +675,7 @@ ENT.gem = {
   },
   light(e) { return 34 + e.def.n * 2; }
 };
-/* ----- Sam, met in America ----- */
+/* ----- Mayank, met in America: he has walked from India, following a dream ----- */
 ENT.boy = {
   init(e) { e.w = 10; e.h = 22; e.x -= 5; e.y -= 22; },
   update(w, e) {
@@ -684,7 +684,7 @@ ENT.boy = {
     e.dir = p.x < e.x ? -1 : 1;
     if (near) {
       if (!Game.metBoy) { Game.metBoy = true; Sound.sfx('oneup'); World.sparkle(e.x + 5, e.y + 6, '#ffd070', 14); Game.save(); }
-      w.signText = 'Sam: “You walked here from Finland? Alone? Not any more.|I know where the diamonds hide. Let’s go together!”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
+      w.signText = 'Mayank: “A dream promised me an elf queen, in a distant land.|I have walked from India to find her. May I walk with you?”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
     }
   },
   draw(c, w, e, ox, oy) {

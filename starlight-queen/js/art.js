@@ -193,8 +193,8 @@ const Art = (() => {
 
   function unused() { }
 
-  /* ---------- Sam ---------- */
-  const B = { HAIR: '#6a4428', SKIN: '#f2c9a2', SKIND: '#d09a78', HAT: '#8f6238', HATD: '#6a4424', SH: '#c9432e', SHD: '#96301f', OV: '#3d5fa3', OVD: '#2a4379', BT: '#4a3020', SC: '#ffd070', SCD: '#d89a30' };
+  /* ---------- Mayank ---------- */
+  const B = { HAIR: '#1f1a26', HAIRL: '#3a3248', SKIN: '#c98d5e', SKIND: '#a36c42', SH: '#ef8a1f', SHD: '#bf6410', OV: '#f1e8d4', OVD: '#cdbf9f', BT: '#5a3a22', SC: '#3a4fb0', SCD: '#27357e', GOLD: '#ffd86a' };
   function drawBoy(g, pose, f, shoot) {
     const bob = (pose === 'idle' && f === 1) || (pose === 'run' && (f === 1 || f === 4)) ? 1 : 0;
     const air = pose === 'jump' || pose === 'fall' || pose === 'glide';
@@ -211,12 +211,12 @@ const Art = (() => {
     } else if (pose === 'jump') { R(g, 9, y0 + 16, 3, 4, B.OVD); R(g, 8, y0 + 20, 4, 2, B.BT); R(g, 13, y0 + 15, 3, 3, B.OV); R(g, 13, y0 + 18, 4, 2, B.BT); }
     else { R(g, 8, y0 + 16, 3, 5, B.OVD); R(g, 7, y0 + 21, 4, 2, B.BT); R(g, 13, y0 + 16, 3, 5, B.OV); R(g, 13, y0 + 21, 4, 2, B.BT); }
     // torso
-    R(g, 8, y0 + 8, 7, 9, B.SH); R(g, 8, y0 + 8, 1, 9, B.SHD); R(g, 9, y0 + 11, 5, 6, B.OV); R(g, 9, y0 + 9, 1, 3, B.OV); R(g, 13, y0 + 9, 1, 3, B.OV); R(g, 11, y0 + 12, 2, 1, B.SC);
+    R(g, 8, y0 + 8, 7, 9, B.SH); R(g, 8, y0 + 8, 1, 9, B.SHD); R(g, 11, y0 + 9, 1, 6, B.GOLD); R(g, 8, y0 + 16, 7, 1, B.GOLD); R(g, 14, y0 + 9, 1, 8, B.SHD); R(g, 7, y0 + 13, 2, 4, '#8a5a2b'); R(g, 7, y0 + 13, 2, 1, '#b07a44');
     R(g, 8, y0 + 7, 7, 2, B.SC); R(g, 8, y0 + 8, 7, 1, B.SCD);
     // head + hat
     R(g, 9, y0 + 1, 6, 6, B.SKIN); R(g, 14, y0 + 6, 1, 1, B.SKIND); R(g, 8, y0 + 1, 2, 5, B.HAIR); R(g, 10, y0 + 1, 2, 1, B.HAIR);
-    R(g, 13, y0 + 3, 1, 2, '#2a2a3a'); R(g, 13, y0 + 6, 1, 1, '#c87a6a'); R(g, 10, y0 + 3, 1, 2, B.SKIND);
-    R(g, 6, y0, 12, 1, B.HAT); R(g, 5, y0, 1, 1, B.HATD); R(g, 8, y0 - 3, 7, 3, B.HAT); R(g, 8, y0 - 1, 7, 1, B.SH); R(g, 8, y0 - 3, 1, 3, B.HATD); R(g, 9, y0 - 4, 5, 1, B.HAT);
+    R(g, 13, y0 + 3, 1, 2, '#1a1420'); R(g, 13, y0 + 6, 1, 1, '#8a4a3a'); R(g, 10, y0 + 3, 1, 2, B.SKIND);
+    R(g, 8, y0 - 1, 7, 2, B.HAIR); R(g, 9, y0 - 2, 5, 1, B.HAIR); R(g, 12, y0 + 1, 3, 1, B.HAIR); R(g, 10, y0 - 1, 3, 1, B.HAIRL); R(g, 13, y0 - 2 - (f & 1), 1, 1, B.HAIR);
     // arms
     if (shoot) {
       R(g, 12, y0 + 10, 6, 2, B.SH); R(g, 18, y0 + 10, 1, 2, B.SKIN);
