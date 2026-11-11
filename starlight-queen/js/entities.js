@@ -533,7 +533,7 @@ ENT.boss = {
         if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
           e.p2 = true; Sound.sfx('roar'); w.shake = 24; Sound.setRate(0.88); w.flash = 0.5;
           w.ents.push(makeEnt({ t: 'cake', x: (A.x0 + A.x1) / 2, y: A.floor - 44 }));
-          World.toast('The Hoarder’s crown blazes with wrath!');
+          World.toast('The crown burns brighter. He is afraid.');
         }
         if (e.t0 > 26) go('idle');
         break;

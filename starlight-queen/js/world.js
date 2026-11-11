@@ -147,7 +147,7 @@ const World = (() => {
   function clearHazards() { for (const e of w.ents) if (e.type === 'wave' || e.type === 'fall') e.dead = true; }
   function bossDefeated(x) {
     w.fight = false; setGate(w.arena.gr, '.'); setGate(w.arena.gl, '.'); w.minX = 0; w.maxX = w.cols * T;
-    w.dawning = true; Sound.music('dawn'); toast('The Hoarder King is fallen — set the Mountain of Light free!');
+    w.dawning = true; Sound.music('dawn'); toast('The Hoarder King is fallen. The Mountain of Light is waiting.');
     Game.stats.foes++; Game.bossDown = true;
     w.ents.push(makeEnt({ t: 'gem', x: clamp(x, w.arena.x0 + 40, w.arena.x1 - 40), y: w.arena.floor - 30, gem: 'kohinoor' }));
     Game.save();

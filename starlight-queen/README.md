@@ -1,11 +1,16 @@
 # Starlight Queen — Ana & the Mountain of Light
 
-A classic side-scrolling 2D platformer for the browser. **Ana** loves adventure more than
-anything, and she is stuck in Kaamos, a small town at the top of Finland where nothing has ever
-happened. Then word comes that a Hoarder King is gathering the world's great diamonds for
-himself. Somebody small will have to fetch them back. Walk out past the last gate, cross the
-frozen gulf to the manic midsummer lands of Sweden, sail to a faraway world called America,
-meet Mayank, and win back the Koh-i-Noor — and come home a queen of starlight.
+A classic side-scrolling 2D platformer for the browser, written for grown-ups who were once
+children waiting for a letter, a wardrobe, or a wizard at the door.
+
+**Ana** waited hardest, in Kaamos, a small town at the top of Finland where the people are
+kind and every road leads back to the square. Nothing came. So, years later, she laces her
+boots and goes herself: across the frozen gulf to the manic midsummer lands of Sweden, down
+through the iron deeps of Kiruna, over the sea to a far country called America, where she
+meets **Mayank**, who has walked from India after a dream of an elf queen. Ahead is a Hoarder
+King, and the Koh-i-Noor, the Mountain of Light.
+
+On the surface it is a quest. Underneath it is the shape of a life.
 
 One long, continuous road. No build step, no dependencies, no asset files: every sprite,
 backdrop, sound and tune is generated in code.
@@ -29,9 +34,6 @@ python3 -m http.server 8000   # then visit http://localhost:8000
 
 Esc pauses, M toggles sound, G toggles fullscreen, V opens the Vault from the title.
 Gamepads work (first pad is Ana, second is Mayank), and touch buttons appear on phones.
-
-**Mayank** has walked all the way from India: a dream promised him an elf queen in a distant
-land. He meets Ana in America.
 
 **Co-op:** once Ana meets Mayank in America, a second player presses **2** to join or leave.
 

@@ -465,10 +465,10 @@ Scenes.list.vault = {
 /* ---------- Ending ---------- */
 const EPILOGUE = [
   'The Hoarder King is fallen. The Mountain of Light, it turns out, is heavy, and cold, and not hers.',
-  'She does not keep it. Diamonds are only ever borrowed — from the deep earth, and from everyone who comes after. So, she begins to suspect, is everything worth having.',
-  'What she keeps is smaller. A quiver. A song with one verse still missing. A man from India who dreamed of an elf queen and found, instead, someone who argues about maps — and stayed, and stays.',
-  'In Kaamos the long night ends, as it always did, without her. The Tonttu sets a lantern in the window. She comes home for a week and sees, for the first time, that it is beautiful. Both things are true.',
-  'They tell it there still: the girl who walked out past the last gate, and came back queen of nothing but starlight. She never did get her letter. She became, instead, the sort of person who sends them.'
+  'She does not keep it. It was never the Hoarder’s, nor hers to give; where it goes next is not her story to finish. Diamonds are only ever borrowed. She sets it where anyone may look.',
+  'What they keep is smaller. A quiver. A song with one verse still missing. And, not kept at all: Mayank, who dreamed of an elf queen and found someone who argues about maps. He stayed. So did she.',
+  'In Kaamos the long night ends without her. The Tonttu sets a lantern in the window. She comes home for a week. It is beautiful. It always was; she was the one in a hurry. She leaves on the Sunday.',
+  'It is not much of a legend: a girl walked out past the last gate, and came back queen of nothing but starlight. She never did get her letter. She became, instead, the sort of person who sends them.'
 ];
 const EP = 520;
 Scenes.list.ending = {
