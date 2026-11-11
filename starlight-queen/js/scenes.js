@@ -4,7 +4,7 @@ const Game = {
   cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0,
   stats: { foes: 0, deaths: 0, hits: 0, frames: 0 }, saved: null, vault: {}, shelf: {}, sights: {}, best: null,
   newGame() {
-    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, bossHp: 0, oz: false, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
+    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, bossHp: 0, bossOut: false, oz: false, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
   },
   read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
   write(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
@@ -166,7 +166,7 @@ const Vista = (() => {
       c.strokeStyle = 'rgba(10,40,30,0.22)'; c.lineWidth = 0.7; c.beginPath(); for (let k = 0; k < pts.length; k += 2) { const [x, y] = pts[k]; c.moveTo(x, y); c.quadraticCurveTo(x + 3, (y + base) / 2, x + 7, base + 1); } c.stroke(); // the flutes
       c.fillStyle = 'rgba(255,240,200,0.16)'; c.beginPath(); for (let k = 0; k + 1 < pts.length; k += 2) { const [x, y] = pts[k]; c.moveTo(x, y); c.lineTo(x + 7, pts[k + 1][1]); c.lineTo(x + 5, (y + base) / 2); c.closePath(); } c.fill();
       if (i === 2) { c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(60, 58); c.lineTo(60.6, 124); c.stroke(); soft(c, 60.4, 124, 5, '#ffffff', 0.5); } // a waterfall, a long way off
-      c.fillStyle = `rgba(255,236,200,${0.1 + i * 0.02})`; c.fillRect(0, base - 8, reach + 20, 12); // sea mist at the foot
+      { const mg = c.createLinearGradient(0, base - 12, 0, base + 5), ma = 0.16 + i * 0.03; mg.addColorStop(0, 'rgba(255,236,200,0)'); mg.addColorStop(0.6, `rgba(255,236,200,${ma})`); mg.addColorStop(1, 'rgba(255,236,200,0)'); c.fillStyle = mg; c.beginPath(); c.ellipse(reach * 0.45, base - 3, reach * 0.75, 9, 0, 0, TAU); c.fill(); } // sea mist at the foot
     });
     // surf, and the beach
     c.fillStyle = 'rgba(255,255,255,0.85)'; c.beginPath(); c.moveTo(-2, 168); c.quadraticCurveTo(90, 156 + Math.sin(t * 0.03) * 1.4, 190, 172 + Math.sin(t * 0.03 + 1) * 1.6); c.quadraticCurveTo(270, 186, W + 2, 196); c.lineTo(W + 2, 200); c.quadraticCurveTo(270, 190, 190, 176); c.quadraticCurveTo(90, 161, -2, 172); c.closePath(); c.fill();
@@ -577,12 +577,13 @@ Scenes.list.play = {
     const wc = w.wonderCard && w.state === 'play' && !w.card && !w.gemFx && !this.paused ? w.wonderCard : null;
     if (wc) { // a wonder: the frame narrows like a film's, it is named once in gold, and then it is left alone
       const a = clamp(wc.t / 36, 0, 1) * clamp((600 - wc.t) / 50, 0, 1), ease = 1 - (1 - a) * (1 - a), lines = u.wrap(wc.def.line, 340, 8.6, { italic: true });
-      const th = 31 * ease, bh = (13 + lines.length * 11) * ease, hair = Math.max(1, s * 0.4);
+      const up = Input.touch, th = (31 + (up ? lines.length * 11 + 3 : 0)) * ease, bh = (up ? 9 : 13 + lines.length * 11) * ease, hair = Math.max(1, s * 0.4); // on touch the words go up top, clear of the buttons
       u.panel(0, 0, W, th, 0.9, '#04050d'); u.panel(0, H - bh, W, bh + 1, 0.9, '#04050d');
       g.fillStyle = `rgba(214,186,120,${0.55 * a})`; g.fillRect(0, th * s, W * s, hair); g.fillRect(0, (H - bh) * s - hair, W * s, hair);
-      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, th - 22.5, 5.4, { color: '#d9b566', ls: 1.8, title: true, alpha: a, shadow: false });
-      u.text(wc.def.name.toUpperCase(), 192, th - 10.5, 11.5, { metal: true, title: true, ls: 4, alpha: a });
-      lines.forEach((ln, i) => u.text(ln, 192, H - bh + 11.5 + i * 11, 8.4, { color: '#f4ecd6', italic: true, alpha: a, shadow: false }));
+      const ny = up ? 31 * ease : th;
+      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, ny - 22.5, 5.4, { color: '#d9b566', ls: 1.8, title: true, alpha: a, shadow: false });
+      u.text(wc.def.name.toUpperCase(), 192, ny - 10.5, 11.5, { metal: true, title: true, ls: 4, alpha: a });
+      lines.forEach((ln, i) => u.text(ln, 192, (up ? ny + 3 : H - bh + 11.5) + i * 11, 8.4, { color: '#f4ecd6', italic: true, alpha: a, shadow: false }));
     }
     const want = w.signText && w.state === 'play' && !this.paused && !w.card && !w.gemFx && !wc;
     if (wc || w.state === 'clear') this.signA = 0;
@@ -657,7 +658,7 @@ Scenes.list.vault = {
   enter() {
     this.t = 0; this.sel = 0; this.open = false; Game.loadSave();
     this.items = [];
-    GEMS.forEach((gem, i) => this.items.push({ kind: 'gem', def: gem, i, row: i < 7 ? 0 : 1, x: (i < 7 ? 36 : 62) + (i % 7) * 52, y: i < 7 ? 66 : 116 }));
+    GEMS.forEach((gem, i) => this.items.push({ kind: 'gem', def: gem, i, row: i < 7 ? 0 : 1, x: (i < 7 ? 42 : 66) + (i % 7) * 46, y: i < 7 ? 66 : 116 }));
     KEEPS.forEach((k, i) => this.items.push({ kind: 'keep', def: k, i, row: 2, x: 32 + i * 22, y: 171 }));
     WONDERS.forEach((q, i) => this.items.push({ kind: 'wonder', def: q, i, row: 2, x: 220 + i * 22, y: 171 }));
   },

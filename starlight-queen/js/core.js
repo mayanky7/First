@@ -83,7 +83,8 @@ const Input = (() => {
       const a = el.dataset.a;
       const on = e => { e.preventDefault(); first(); el.classList.add('on'); set(a, 'touch', true); if (a === 'jump') set('enter', 'touchj', true); };
       const off = e => { e.preventDefault(); el.classList.remove('on'); set(a, 'touch', false); if (a === 'jump') set('enter', 'touchj', false); };
-      el.addEventListener('pointerdown', on);
+      el.addEventListener('pointerdown', e => { try { el.releasePointerCapture(e.pointerId); } catch (_) {} on(e); }); // let the touch go, so a thumb can slide to the next button
+      el.addEventListener('pointerenter', e => { if (e.pointerType === 'touch' || e.buttons) on(e); });
       el.addEventListener('pointerup', off);
       el.addEventListener('pointercancel', off);
       el.addEventListener('pointerleave', off);

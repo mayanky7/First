@@ -67,6 +67,7 @@ function updatePlayer(w, p) {
   // the lantern: starlight, raised
   if (p.lumOut && p.lum > 30) p.lumOut = false;
   if (p.autoLit > 0) p.autoLit--; // sometimes the starlight comes without being asked
+  if (ctl && act(p, 'light', true) && !p.lumOut) p.autoLit = Math.max(p.autoLit || 0, 84); // and one tap holds it up for a breath: long enough for a door
   const lightNow = ctl && (act(p, 'light') || p.autoLit > 0) && !p.lumOut && !p.cloak;
   if (lightNow && !p.lit) Sound.sfx('light');
   p.lit = lightNow;
@@ -82,10 +83,11 @@ function updatePlayer(w, p) {
   if (jHit) p.jbuf = 7; else p.jbuf--;
   if (p.jbuf > 0 && p.coy > 0) {
     if (act(p, 'down') && p.onGround && standingOnPlat(w, p)) { p.drop = 10; p.y += 1; }
-    else { p.vy = -5.6; p.jumping = true; p.sq = 1.22; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
+    else { p.vy = -5.6; p.jumping = true; p.jt = 0; p.sq = 1.22; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
     p.jbuf = 0; p.coy = 0; p.onGround = false; if (p.ride) p.carry = p.ride.ddx; p.ride = null;
   } else if (jHit && !p.onGround && p.glide > 0) { p.gliding = true; Sound.sfx('glide'); }
-  if (p.jumping && p.vy < 0 && !jHeld) { p.vy *= 0.45; p.jumping = false; }
+  if (p.jumping) p.jt = (p.jt || 0) + 1;
+  if (p.jumping && p.vy < 0 && !jHeld && p.jt > 7) { p.vy *= 0.45; p.jumping = false; } // the shortest leap still clears a two-tile step
   if (p.vy >= 0) p.jumping = false;
   if (!jHeld || p.glide <= 0 || p.onGround) p.gliding = false;
   p.vy += p.vy < 0 ? 0.22 : 0.32;
@@ -201,7 +203,7 @@ function killPlayer(w, p, pit) {
   if (p.dead || w.state !== 'play') return;
   if (w.god && !pit) return;
   p.dead = 1; p.hp = 0; Sound.sfx('die'); w.shake = 10; Game.stats.deaths++;
-  if (w.fight && w.boss) Game.bossHp = Math.max(2, Math.min(Game.bossHp || w.boss.hp, w.boss.hp) - 3); // each time she falls to him, he is nearer falling himself
+  if (w.fight && w.boss) { if ((Game.bossHp || 10) <= 2) Game.bossOut = true; Game.bossHp = Math.max(2, Math.min(Game.bossHp || w.boss.hp, w.boss.hp) - 3); } // each time she falls to him, he is nearer falling himself; the fourth time, his fire is out
   if (w.players.every(q => q.dead)) Sound.duck(true);
   w.hitstop = 8;
   for (let i = 0; i < 26; i++) { const a = rand(TAU), s = rand(0.5, 2.6); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, life: rand(40, 80), col: i % 2 ? '#bff4ff' : '#fff6b0', g: -0.01, glow: 1, sz: 1 + (i % 2) }); }
@@ -527,7 +529,7 @@ ENT.beacon = {
 /* ============ The Hoarder King ============ */
 ENT.boss = {
   foe: true, stomp: false, arrow: false,
-  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.max = 10; e.hp = clamp(Game.bossHp || 10, 2, 10); e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
+  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.max = 10; e.hp = clamp(Game.bossHp || 10, 2, 10); e.weak = e.hp < e.max; e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
   update(w, e) {
     const A = w.arena, p = nearP(w, e);
     e.t0++;
@@ -540,7 +542,12 @@ ENT.boss = {
       case 'intro':
         for (const q of w.players) { q.control = e.t0 > 105; if (e.t0 <= 105) q.vx *= 0.8; }
         if (e.t0 === 30) { Sound.sfx('roar'); w.shake = 24; World.ring(e.x + 11, e.y + 10, 6, 160, 30, '#ff6a20'); }
-        if (e.t0 > 110) go('idle');
+        if (e.t0 > 110) {
+          if (Game.bossOut) { // nobody is kept here for want of a fight: his fire has gone out by itself
+            for (const q of w.players) q.control = true;
+            e.hp = 0; go('dying'); Sound.music(null); w.bossAlive = false; World.clearHazards(); w.slow = 80; World.toast('His fire has gone out. He was only ever cold.');
+          } else go('idle');
+        }
         break;
       case 'idle': {
         face();
@@ -592,7 +599,7 @@ ENT.boss = {
         if (e.t0 > e.stunLen || e.stunDmg >= 4) go('recover');
         break;
       case 'recover':
-        if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
+        if (e.t0 === 1 && !e.p2 && !e.weak && e.hp <= e.max / 2) { // a king already worn down does not find a second wind
           e.p2 = true; Sound.sfx('roar'); w.shake = 24; Sound.setRate(0.88); w.flash = 0.5;
           w.ents.push(makeEnt({ t: 'cake', x: (A.x0 + A.x1) / 2, y: A.floor - 44 }));
           World.toast('The crown burns brighter. He shivers.');

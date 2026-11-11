@@ -15,8 +15,8 @@ const REGIONS = [
       L.b(20, 6, '?');
       
       L.b(31, 5, '???'); L.b(32, 8, '?'); L.gem('first', 32, 11);
-      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.e('goblin', 53, 5);
-      L.g(58, 66, 3); L.sign(60, 3, '[X]  loose a starlight arrow');
+      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.sign(49, 5, '[X]  loose a starlight arrow');
+      L.g(58, 66, 3); L.e('goblin', 62, 3);
       
       L.g(70, 84, 3); L.b(74, 6, '?S?'); L.e('goblin', 79, 3);
       L.p(86, 4, 2); L.p(89, 5, 2); L.s(86, 6, 2); L.keep('himmeli', 90, 8);

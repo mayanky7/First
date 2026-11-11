@@ -72,6 +72,10 @@ Enter or a tap turns the page, ← goes back.
   in it, opens doors that only show in it, makes creatures shy away, undoes dust-wraiths, and
   opens the tear to Australia. A key appears over her head wherever it is wanted.
 - **The cloak** hides her from wolves and from the Hoarder King's gaze.
+- **Beside a lantern nothing can harm her**: no creature, and not his gaze.
+- **A tap is enough.** One tap of the light opens a door; the shortest leap clears a two-tile step.
+- **Nobody is kept at the Hoarder King.** Each fall wears him down, and after the fourth his fire
+  goes out by itself.
 - While there is a wonder to look at, everything else on the road stops to look too.
 - Nothing is timed, and nothing counts your mistakes.
 

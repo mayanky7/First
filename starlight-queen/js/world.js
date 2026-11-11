@@ -186,16 +186,17 @@ const World = (() => {
     { // does this place want her light, or her stillness? Then show the key over her head, not a sentence.
       const p = w.player; let pr = null; w.promptRoad = false; // promptRoad: the light is needed to go on, not just to see something extra
       if (w.gaze && !p.cloak) pr = 'down';
-      else if (!p.lit && !p.dead && !p.lumOut) {
+      else if (!p.dead && !p.lumOut) {
         const pcx = Math.floor((p.x + 5) / T), pcy = Math.floor((p.y + 10) / T);
-        scan: for (let cy = Math.max(0, pcy - 4); cy <= Math.min(w.rows - 1, pcy + 4); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if (ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) { pr = 'light'; w.promptRoad = true; break scan; } }
-        if (!pr) for (const e of w.ents) if ((e.type === 'warp' && Math.abs(e.x + 8 - p.x - 5) < 56 && Math.abs(e.y + 48 - p.y - p.h) < 50) || (e.type === 'wonder' && e.def.id === 'undersky' && !e.seen && Math.abs(e.cx - p.x - 5) < 120 && Math.abs(e.gy - p.y - p.h) < 40)) { pr = 'light'; break; }
+        scan: for (let cy = Math.max(0, pcy - 6); cy <= Math.min(w.rows - 1, pcy + 6); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if ((ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) && Math.hypot(cx * T + 8 - (p.x + 5), cy * T + 8 - (p.y + 10)) <= 92) { pr = 'light'; w.promptRoad = true; break scan; } }
+        if (!pr) for (const e of w.ents) if ((e.type === 'warp' && Math.abs(e.x + 8 - p.x - 5) < 130 && Math.abs(e.y + 48 - p.y - p.h) < 50) || (e.type === 'wonder' && e.def.id === 'undersky' && !e.seen && Math.abs(e.cx - p.x - 5) < 120 && Math.abs(e.gy - p.y - p.h) < 40)) { pr = 'light'; break; }
       }
+      const need = pr === 'light'; if (need && p.lit) pr = null; // the tab is only for a hand that is down; the waiting counts either way
       w.prompt = pr;
       // Nobody should stand stuck at a door or a gap for want of being told. First the words; and if she still
       // does not raise her hand, the starlight comes to it by itself.
       const want = pr === 'light';
-      w.needT = want ? (w.needT || 0) + 1 : 0;
+      w.needT = need ? (w.needT || 0) + 1 : 0;
       const blocked = want && p.onGround && w.needT > 50, fell = want && p.fallAt && p.fallAt.n >= 2 && Math.abs(p.x - p.fallAt.x) < 60;
       if (blocked && w.state === 'play' && !w.signText) { w.signText = 'Hold [E] to raise her starlight.'; w.signNear = null; }
       if (want && w.promptRoad && !p.lumOut && w.state === 'play' && (w.needT > 420 || (fell && w.needT > 40))) { p.autoLit = 150; w.needT = 0; if (p.fallAt) p.fallAt.n = 0; toast('The starlight comes to her hand.'); }
@@ -219,7 +220,6 @@ const World = (() => {
       if (Game.doors[d.id]) continue;
       const k = d.id;
       if (d.seen === w.t) { w.doorP[k] = (w.doorP[k] || 0) + 1; if (w.doorP[k] % 6 === 0) sparkle(d.cx * T + rand(16), (d.cy - rand(d.h)) * T + 8, '#dff2ff', 2); }
-      else if (w.doorP[k] > 0) w.doorP[k] -= 0.5;
       if (w.doorP[k] >= 70) {
         Game.doors[k] = 1; Sound.sfx('door'); w.shake = 6; w.flash = 0.35;
         for (let i = 0; i < d.h; i++) { w.grid[d.cy - i][d.cx] = '.'; for (let j = 0; j < 6; j++) w.parts.push({ x: d.cx * T + rand(16), y: (d.cy - i) * T + rand(16), vx: rand(-1, 1), vy: rand(-1.6, 0.4), life: rand(30, 60), col: j % 2 ? '#dff2ff' : '#8fb4ff', glow: 1, sz: 1 + (j % 2) }); }
@@ -230,8 +230,10 @@ const World = (() => {
     }
   }
   /* ---------- the Hoarder's gaze: on his own ground he looks for her; a stone by the road is not looked at ---------- */
+  // nothing harms her beside a lantern, lit or waiting to be: not a creature, and not his gaze
+  function byLantern(p) { for (const l of w.ents) if (l.type === 'lantern' && Math.abs(l.x + 6 - p.x - 5) < 88 && Math.abs(l.y + 26 - p.y - p.h) < 64) return true; return false; }
   function hoarderGaze() {
-    const on = w.theme.gaze && w.bossAlive && !w.fight && !w.wonderCard && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
+    const on = !byLantern(w.player) && w.theme.gaze && w.bossAlive && !w.fight && !w.wonderCard && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
     if (!on) { w.gaze = null; return; }
     if (!w.gaze) { if (!w.wonderCard && --w.gazeT <= 0 && w.player.onGround) { w.gaze = { t: 0, caught: false }; Sound.sfx('gaze'); } return; }
     const g = w.gaze; g.t++;
@@ -334,6 +336,7 @@ const World = (() => {
     if (w.state === 'play' && !hush && !w.warpFx) for (const p of alive) for (const e of w.ents) {
       const d = ENT[e.type];
       if (!d.foe || e.dead || p.dead || !overlap(e, p)) continue;
+      if (e.type !== 'boss' && byLantern(p)) continue;
       const above = p.vy > 0.3 && p.y + p.h - p.vy <= e.y + Math.max(8, e.h * 0.5);
       if (e.type === 'boss') {
         if (d.vulnerable(e) && above) { bossHit(w, e, 2, p.x + 5, p.y + p.h); p.vy = -5; p.glide = GLIDE_MAX; }

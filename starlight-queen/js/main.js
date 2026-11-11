@@ -156,8 +156,10 @@
 
   const STEP = 1000 / 60;
   let last = 0, acc = 0;
+  const turned = window.matchMedia ? matchMedia('(orientation:portrait) and (pointer:coarse)') : { matches: false };
   function loop(now) {
     requestAnimationFrame(loop);
+    if (turned.matches) { last = 0; acc = 0; return; } // the turn-your-screen card is up: the road waits
     if (!last) last = now;
     acc += Math.min(100, now - last); last = now;
     let n = 0;

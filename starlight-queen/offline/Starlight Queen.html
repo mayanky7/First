@@ -107,7 +107,7 @@
   <div class="tb sm" id="bC" data-a="down">&#9660;</div>
   <div class="tb" id="bP" data-a="pause"><svg viewBox="0 0 10 10" width="38%" height="38%" aria-hidden="true"><rect x="1.6" y="1" width="2.4" height="8" rx="0.8" fill="currentColor"/><rect x="6" y="1" width="2.4" height="8" rx="0.8" fill="currentColor"/></svg></div>
 </div>
-<div id="turn">Turn your phone sideways<br>to walk the road west.</div>
+<div id="turn">Turn your screen sideways<br>to walk the road west.</div>
 <noscript>Starlight Queen needs JavaScript to run.</noscript>
 <script>
 'use strict';
@@ -195,7 +195,8 @@ const Input = (() => {
       const a = el.dataset.a;
       const on = e => { e.preventDefault(); first(); el.classList.add('on'); set(a, 'touch', true); if (a === 'jump') set('enter', 'touchj', true); };
       const off = e => { e.preventDefault(); el.classList.remove('on'); set(a, 'touch', false); if (a === 'jump') set('enter', 'touchj', false); };
-      el.addEventListener('pointerdown', on);
+      el.addEventListener('pointerdown', e => { try { el.releasePointerCapture(e.pointerId); } catch (_) {} on(e); }); // let the touch go, so a thumb can slide to the next button
+      el.addEventListener('pointerenter', e => { if (e.pointerType === 'touch' || e.buttons) on(e); });
       el.addEventListener('pointerup', off);
       el.addEventListener('pointercancel', off);
       el.addEventListener('pointerleave', off);
@@ -2112,8 +2113,8 @@ const REGIONS = [
       L.b(20, 6, '?');
       
       L.b(31, 5, '???'); L.b(32, 8, '?'); L.gem('first', 32, 11);
-      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.e('goblin', 53, 5);
-      L.g(58, 66, 3); L.sign(60, 3, '[X]  loose a starlight arrow');
+      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.sign(49, 5, '[X]  loose a starlight arrow');
+      L.g(58, 66, 3); L.e('goblin', 62, 3);
       
       L.g(70, 84, 3); L.b(74, 6, '?S?'); L.e('goblin', 79, 3);
       L.p(86, 4, 2); L.p(89, 5, 2); L.s(86, 6, 2); L.keep('himmeli', 90, 8);
@@ -2439,6 +2440,7 @@ function updatePlayer(w, p) {
   // the lantern: starlight, raised
   if (p.lumOut && p.lum > 30) p.lumOut = false;
   if (p.autoLit > 0) p.autoLit--; // sometimes the starlight comes without being asked
+  if (ctl && act(p, 'light', true) && !p.lumOut) p.autoLit = Math.max(p.autoLit || 0, 84); // and one tap holds it up for a breath: long enough for a door
   const lightNow = ctl && (act(p, 'light') || p.autoLit > 0) && !p.lumOut && !p.cloak;
   if (lightNow && !p.lit) Sound.sfx('light');
   p.lit = lightNow;
@@ -2454,10 +2456,11 @@ function updatePlayer(w, p) {
   if (jHit) p.jbuf = 7; else p.jbuf--;
   if (p.jbuf > 0 && p.coy > 0) {
     if (act(p, 'down') && p.onGround && standingOnPlat(w, p)) { p.drop = 10; p.y += 1; }
-    else { p.vy = -5.6; p.jumping = true; p.sq = 1.22; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
+    else { p.vy = -5.6; p.jumping = true; p.jt = 0; p.sq = 1.22; Sound.sfx('jump'); World.dust(p.x + 5, p.y + p.h, 4); }
     p.jbuf = 0; p.coy = 0; p.onGround = false; if (p.ride) p.carry = p.ride.ddx; p.ride = null;
   } else if (jHit && !p.onGround && p.glide > 0) { p.gliding = true; Sound.sfx('glide'); }
-  if (p.jumping && p.vy < 0 && !jHeld) { p.vy *= 0.45; p.jumping = false; }
+  if (p.jumping) p.jt = (p.jt || 0) + 1;
+  if (p.jumping && p.vy < 0 && !jHeld && p.jt > 7) { p.vy *= 0.45; p.jumping = false; } // the shortest leap still clears a two-tile step
   if (p.vy >= 0) p.jumping = false;
   if (!jHeld || p.glide <= 0 || p.onGround) p.gliding = false;
   p.vy += p.vy < 0 ? 0.22 : 0.32;
@@ -2573,7 +2576,7 @@ function killPlayer(w, p, pit) {
   if (p.dead || w.state !== 'play') return;
   if (w.god && !pit) return;
   p.dead = 1; p.hp = 0; Sound.sfx('die'); w.shake = 10; Game.stats.deaths++;
-  if (w.fight && w.boss) Game.bossHp = Math.max(2, Math.min(Game.bossHp || w.boss.hp, w.boss.hp) - 3); // each time she falls to him, he is nearer falling himself
+  if (w.fight && w.boss) { if ((Game.bossHp || 10) <= 2) Game.bossOut = true; Game.bossHp = Math.max(2, Math.min(Game.bossHp || w.boss.hp, w.boss.hp) - 3); } // each time she falls to him, he is nearer falling himself; the fourth time, his fire is out
   if (w.players.every(q => q.dead)) Sound.duck(true);
   w.hitstop = 8;
   for (let i = 0; i < 26; i++) { const a = rand(TAU), s = rand(0.5, 2.6); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, life: rand(40, 80), col: i % 2 ? '#bff4ff' : '#fff6b0', g: -0.01, glow: 1, sz: 1 + (i % 2) }); }
@@ -2899,7 +2902,7 @@ ENT.beacon = {
 /* ============ The Hoarder King ============ */
 ENT.boss = {
   foe: true, stomp: false, arrow: false,
-  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.max = 10; e.hp = clamp(Game.bossHp || 10, 2, 10); e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
+  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.max = 10; e.hp = clamp(Game.bossHp || 10, 2, 10); e.weak = e.hp < e.max; e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
   update(w, e) {
     const A = w.arena, p = nearP(w, e);
     e.t0++;
@@ -2912,7 +2915,12 @@ ENT.boss = {
       case 'intro':
         for (const q of w.players) { q.control = e.t0 > 105; if (e.t0 <= 105) q.vx *= 0.8; }
         if (e.t0 === 30) { Sound.sfx('roar'); w.shake = 24; World.ring(e.x + 11, e.y + 10, 6, 160, 30, '#ff6a20'); }
-        if (e.t0 > 110) go('idle');
+        if (e.t0 > 110) {
+          if (Game.bossOut) { // nobody is kept here for want of a fight: his fire has gone out by itself
+            for (const q of w.players) q.control = true;
+            e.hp = 0; go('dying'); Sound.music(null); w.bossAlive = false; World.clearHazards(); w.slow = 80; World.toast('His fire has gone out. He was only ever cold.');
+          } else go('idle');
+        }
         break;
       case 'idle': {
         face();
@@ -2964,7 +2972,7 @@ ENT.boss = {
         if (e.t0 > e.stunLen || e.stunDmg >= 4) go('recover');
         break;
       case 'recover':
-        if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
+        if (e.t0 === 1 && !e.p2 && !e.weak && e.hp <= e.max / 2) { // a king already worn down does not find a second wind
           e.p2 = true; Sound.sfx('roar'); w.shake = 24; Sound.setRate(0.88); w.flash = 0.5;
           w.ents.push(makeEnt({ t: 'cake', x: (A.x0 + A.x1) / 2, y: A.floor - 44 }));
           World.toast('The crown burns brighter. He shivers.');
@@ -3510,16 +3518,17 @@ const World = (() => {
     { // does this place want her light, or her stillness? Then show the key over her head, not a sentence.
       const p = w.player; let pr = null; w.promptRoad = false; // promptRoad: the light is needed to go on, not just to see something extra
       if (w.gaze && !p.cloak) pr = 'down';
-      else if (!p.lit && !p.dead && !p.lumOut) {
+      else if (!p.dead && !p.lumOut) {
         const pcx = Math.floor((p.x + 5) / T), pcy = Math.floor((p.y + 10) / T);
-        scan: for (let cy = Math.max(0, pcy - 4); cy <= Math.min(w.rows - 1, pcy + 4); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if (ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) { pr = 'light'; w.promptRoad = true; break scan; } }
-        if (!pr) for (const e of w.ents) if ((e.type === 'warp' && Math.abs(e.x + 8 - p.x - 5) < 56 && Math.abs(e.y + 48 - p.y - p.h) < 50) || (e.type === 'wonder' && e.def.id === 'undersky' && !e.seen && Math.abs(e.cx - p.x - 5) < 120 && Math.abs(e.gy - p.y - p.h) < 40)) { pr = 'light'; break; }
+        scan: for (let cy = Math.max(0, pcy - 6); cy <= Math.min(w.rows - 1, pcy + 6); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if ((ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) && Math.hypot(cx * T + 8 - (p.x + 5), cy * T + 8 - (p.y + 10)) <= 92) { pr = 'light'; w.promptRoad = true; break scan; } }
+        if (!pr) for (const e of w.ents) if ((e.type === 'warp' && Math.abs(e.x + 8 - p.x - 5) < 130 && Math.abs(e.y + 48 - p.y - p.h) < 50) || (e.type === 'wonder' && e.def.id === 'undersky' && !e.seen && Math.abs(e.cx - p.x - 5) < 120 && Math.abs(e.gy - p.y - p.h) < 40)) { pr = 'light'; break; }
       }
+      const need = pr === 'light'; if (need && p.lit) pr = null; // the tab is only for a hand that is down; the waiting counts either way
       w.prompt = pr;
       // Nobody should stand stuck at a door or a gap for want of being told. First the words; and if she still
       // does not raise her hand, the starlight comes to it by itself.
       const want = pr === 'light';
-      w.needT = want ? (w.needT || 0) + 1 : 0;
+      w.needT = need ? (w.needT || 0) + 1 : 0;
       const blocked = want && p.onGround && w.needT > 50, fell = want && p.fallAt && p.fallAt.n >= 2 && Math.abs(p.x - p.fallAt.x) < 60;
       if (blocked && w.state === 'play' && !w.signText) { w.signText = 'Hold [E] to raise her starlight.'; w.signNear = null; }
       if (want && w.promptRoad && !p.lumOut && w.state === 'play' && (w.needT > 420 || (fell && w.needT > 40))) { p.autoLit = 150; w.needT = 0; if (p.fallAt) p.fallAt.n = 0; toast('The starlight comes to her hand.'); }
@@ -3543,7 +3552,6 @@ const World = (() => {
       if (Game.doors[d.id]) continue;
       const k = d.id;
       if (d.seen === w.t) { w.doorP[k] = (w.doorP[k] || 0) + 1; if (w.doorP[k] % 6 === 0) sparkle(d.cx * T + rand(16), (d.cy - rand(d.h)) * T + 8, '#dff2ff', 2); }
-      else if (w.doorP[k] > 0) w.doorP[k] -= 0.5;
       if (w.doorP[k] >= 70) {
         Game.doors[k] = 1; Sound.sfx('door'); w.shake = 6; w.flash = 0.35;
         for (let i = 0; i < d.h; i++) { w.grid[d.cy - i][d.cx] = '.'; for (let j = 0; j < 6; j++) w.parts.push({ x: d.cx * T + rand(16), y: (d.cy - i) * T + rand(16), vx: rand(-1, 1), vy: rand(-1.6, 0.4), life: rand(30, 60), col: j % 2 ? '#dff2ff' : '#8fb4ff', glow: 1, sz: 1 + (j % 2) }); }
@@ -3554,8 +3562,10 @@ const World = (() => {
     }
   }
   /* ---------- the Hoarder's gaze: on his own ground he looks for her; a stone by the road is not looked at ---------- */
+  // nothing harms her beside a lantern, lit or waiting to be: not a creature, and not his gaze
+  function byLantern(p) { for (const l of w.ents) if (l.type === 'lantern' && Math.abs(l.x + 6 - p.x - 5) < 88 && Math.abs(l.y + 26 - p.y - p.h) < 64) return true; return false; }
   function hoarderGaze() {
-    const on = w.theme.gaze && w.bossAlive && !w.fight && !w.wonderCard && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
+    const on = !byLantern(w.player) && w.theme.gaze && w.bossAlive && !w.fight && !w.wonderCard && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
     if (!on) { w.gaze = null; return; }
     if (!w.gaze) { if (!w.wonderCard && --w.gazeT <= 0 && w.player.onGround) { w.gaze = { t: 0, caught: false }; Sound.sfx('gaze'); } return; }
     const g = w.gaze; g.t++;
@@ -3658,6 +3668,7 @@ const World = (() => {
     if (w.state === 'play' && !hush && !w.warpFx) for (const p of alive) for (const e of w.ents) {
       const d = ENT[e.type];
       if (!d.foe || e.dead || p.dead || !overlap(e, p)) continue;
+      if (e.type !== 'boss' && byLantern(p)) continue;
       const above = p.vy > 0.3 && p.y + p.h - p.vy <= e.y + Math.max(8, e.h * 0.5);
       if (e.type === 'boss') {
         if (d.vulnerable(e) && above) { bossHit(w, e, 2, p.x + 5, p.y + p.h); p.vy = -5; p.glide = GLIDE_MAX; }
@@ -3849,7 +3860,7 @@ const Game = {
   cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0,
   stats: { foes: 0, deaths: 0, hits: 0, frames: 0 }, saved: null, vault: {}, shelf: {}, sights: {}, best: null,
   newGame() {
-    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, bossHp: 0, oz: false, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
+    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, bossHp: 0, bossOut: false, oz: false, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
   },
   read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
   write(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
@@ -4011,7 +4022,7 @@ const Vista = (() => {
       c.strokeStyle = 'rgba(10,40,30,0.22)'; c.lineWidth = 0.7; c.beginPath(); for (let k = 0; k < pts.length; k += 2) { const [x, y] = pts[k]; c.moveTo(x, y); c.quadraticCurveTo(x + 3, (y + base) / 2, x + 7, base + 1); } c.stroke(); // the flutes
       c.fillStyle = 'rgba(255,240,200,0.16)'; c.beginPath(); for (let k = 0; k + 1 < pts.length; k += 2) { const [x, y] = pts[k]; c.moveTo(x, y); c.lineTo(x + 7, pts[k + 1][1]); c.lineTo(x + 5, (y + base) / 2); c.closePath(); } c.fill();
       if (i === 2) { c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(60, 58); c.lineTo(60.6, 124); c.stroke(); soft(c, 60.4, 124, 5, '#ffffff', 0.5); } // a waterfall, a long way off
-      c.fillStyle = `rgba(255,236,200,${0.1 + i * 0.02})`; c.fillRect(0, base - 8, reach + 20, 12); // sea mist at the foot
+      { const mg = c.createLinearGradient(0, base - 12, 0, base + 5), ma = 0.16 + i * 0.03; mg.addColorStop(0, 'rgba(255,236,200,0)'); mg.addColorStop(0.6, `rgba(255,236,200,${ma})`); mg.addColorStop(1, 'rgba(255,236,200,0)'); c.fillStyle = mg; c.beginPath(); c.ellipse(reach * 0.45, base - 3, reach * 0.75, 9, 0, 0, TAU); c.fill(); } // sea mist at the foot
     });
     // surf, and the beach
     c.fillStyle = 'rgba(255,255,255,0.85)'; c.beginPath(); c.moveTo(-2, 168); c.quadraticCurveTo(90, 156 + Math.sin(t * 0.03) * 1.4, 190, 172 + Math.sin(t * 0.03 + 1) * 1.6); c.quadraticCurveTo(270, 186, W + 2, 196); c.lineTo(W + 2, 200); c.quadraticCurveTo(270, 190, 190, 176); c.quadraticCurveTo(90, 161, -2, 172); c.closePath(); c.fill();
@@ -4422,12 +4433,13 @@ Scenes.list.play = {
     const wc = w.wonderCard && w.state === 'play' && !w.card && !w.gemFx && !this.paused ? w.wonderCard : null;
     if (wc) { // a wonder: the frame narrows like a film's, it is named once in gold, and then it is left alone
       const a = clamp(wc.t / 36, 0, 1) * clamp((600 - wc.t) / 50, 0, 1), ease = 1 - (1 - a) * (1 - a), lines = u.wrap(wc.def.line, 340, 8.6, { italic: true });
-      const th = 31 * ease, bh = (13 + lines.length * 11) * ease, hair = Math.max(1, s * 0.4);
+      const up = Input.touch, th = (31 + (up ? lines.length * 11 + 3 : 0)) * ease, bh = (up ? 9 : 13 + lines.length * 11) * ease, hair = Math.max(1, s * 0.4); // on touch the words go up top, clear of the buttons
       u.panel(0, 0, W, th, 0.9, '#04050d'); u.panel(0, H - bh, W, bh + 1, 0.9, '#04050d');
       g.fillStyle = `rgba(214,186,120,${0.55 * a})`; g.fillRect(0, th * s, W * s, hair); g.fillRect(0, (H - bh) * s - hair, W * s, hair);
-      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, th - 22.5, 5.4, { color: '#d9b566', ls: 1.8, title: true, alpha: a, shadow: false });
-      u.text(wc.def.name.toUpperCase(), 192, th - 10.5, 11.5, { metal: true, title: true, ls: 4, alpha: a });
-      lines.forEach((ln, i) => u.text(ln, 192, H - bh + 11.5 + i * 11, 8.4, { color: '#f4ecd6', italic: true, alpha: a, shadow: false }));
+      const ny = up ? 31 * ease : th;
+      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, ny - 22.5, 5.4, { color: '#d9b566', ls: 1.8, title: true, alpha: a, shadow: false });
+      u.text(wc.def.name.toUpperCase(), 192, ny - 10.5, 11.5, { metal: true, title: true, ls: 4, alpha: a });
+      lines.forEach((ln, i) => u.text(ln, 192, (up ? ny + 3 : H - bh + 11.5) + i * 11, 8.4, { color: '#f4ecd6', italic: true, alpha: a, shadow: false }));
     }
     const want = w.signText && w.state === 'play' && !this.paused && !w.card && !w.gemFx && !wc;
     if (wc || w.state === 'clear') this.signA = 0;
@@ -4502,7 +4514,7 @@ Scenes.list.vault = {
   enter() {
     this.t = 0; this.sel = 0; this.open = false; Game.loadSave();
     this.items = [];
-    GEMS.forEach((gem, i) => this.items.push({ kind: 'gem', def: gem, i, row: i < 7 ? 0 : 1, x: (i < 7 ? 36 : 62) + (i % 7) * 52, y: i < 7 ? 66 : 116 }));
+    GEMS.forEach((gem, i) => this.items.push({ kind: 'gem', def: gem, i, row: i < 7 ? 0 : 1, x: (i < 7 ? 42 : 66) + (i % 7) * 46, y: i < 7 ? 66 : 116 }));
     KEEPS.forEach((k, i) => this.items.push({ kind: 'keep', def: k, i, row: 2, x: 32 + i * 22, y: 171 }));
     WONDERS.forEach((q, i) => this.items.push({ kind: 'wonder', def: q, i, row: 2, x: 220 + i * 22, y: 171 }));
   },
@@ -4788,8 +4800,10 @@ Scenes.list.ending = {
 
   const STEP = 1000 / 60;
   let last = 0, acc = 0;
+  const turned = window.matchMedia ? matchMedia('(orientation:portrait) and (pointer:coarse)') : { matches: false };
   function loop(now) {
     requestAnimationFrame(loop);
+    if (turned.matches) { last = 0; acc = 0; return; } // the turn-your-screen card is up: the road waits
     if (!last) last = now;
     acc += Math.min(100, now - last); last = now;
     let n = 0;
