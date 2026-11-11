@@ -147,7 +147,7 @@ const Input = (() => {
     ArrowLeft: 'left2', ArrowRight: 'right2', ArrowUp: 'jump2', ArrowDown: 'down2',
     KeyK: 'fire2', KeyJ: 'fire2', Slash: 'fire2', KeyL: 'light2', Period: 'light2', ShiftRight: 'light2',
     Enter: 'enter', NumpadEnter: 'enter',
-    Escape: 'pause', KeyP: 'pause', KeyM: 'mute', KeyR: 'restart', KeyQ: 'quit', KeyG: 'full', KeyV: 'vault'
+    Escape: 'pause', KeyP: 'pause', KeyM: 'mute', KeyR: 'restart', KeyQ: 'quit', KeyG: 'full', KeyV: 'vault', KeyT: 'travel'
   };
   const MENU_ALIAS = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'dn', KeyS: 'dn', Space: 'enter', KeyZ: 'enter', KeyX: 'enter' };
   const held = {}, queued = {}, sources = {};
@@ -3894,6 +3894,9 @@ Scenes.list.title = {
     if (Input.hit('up')) { this.sel = (this.sel + n - 1) % n; Sound.sfx('select'); }
     if (Input.hit('dn')) { this.sel = (this.sel + 1) % n; Sound.sfx('select'); }
     if (Input.hit('vault')) { Scenes.go('vault'); return; }
+    // the way in that is not on the menu: T, or three taps on the little stone above the name
+    if (Input.hit('tap') && Math.abs(Input.tapX - 192) < 16 && Math.abs(Input.tapY - 19) < 14) { this.knock = (this.knock || 0) + 1; if (this.knock < 3) return; }
+    if (Input.hit('travel') || this.knock >= 3) { this.knock = 0; Sound.sfx('lantern'); Scenes.go('places'); return; }
     if (Input.hit('enter') && this.t > 20) {
       if (Input.hit('tap')) { const k = Math.round((Input.tapY - 122) / 13); if (k < 0 || k >= this.items.length || Math.abs(Input.tapX - 192) > 110) return; this.sel = k; }
       Sound.sfx('confirm');
@@ -3925,6 +3928,65 @@ Scenes.list.title = {
     });
     if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.items.length * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
     u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, Input.touch ? 6.2 : 5, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.4, title: true });
+  }
+};
+
+/* ---------- Another way in (hidden): begin from any land, keeping whatever has been found ---------- */
+const PLACES = [
+  { name: 'Kaamos', note: 'Finland, where the road begins' },
+  { name: 'The Midsummer Lands', note: 'Sweden', theme: 'meads', col: 3 },
+  { name: 'The Iron Deeps', note: 'Kiruna', theme: 'halls', col: 3 },
+  { name: 'The Western Sea', note: 'two rafts, and a whale', theme: 'sea', col: 9 },
+  { name: 'Red Rock Country', note: 'the United States', theme: 'canyon', col: 3 },
+  { name: 'Australia', note: 'through the tear, where it is already tomorrow', mark: 'ozArrive' },
+  { name: 'The Hoarder’s Mesa', note: 'where the light was taken', theme: 'gloam', col: 3 },
+  { name: 'The Hoarder King', note: 'at his door', theme: 'gloam', col: 172 },
+  { name: 'Past the King', note: 'the stone is hers; somebody is singing', after: true }
+];
+Scenes.list.places = {
+  noBloom: true,
+  enter() {
+    this.t = 0; this.sel = 0; Game.loadSave();
+    const L = buildWorld(), rows = L.rows;
+    const ground = (cx) => { let cy = rows - 1; if (L.grid[cy][cx] !== '#') return null; while (cy > 0 && L.grid[cy - 1][cx] === '#') cy--; return { x: cx * T + 8, y: cy * T }; };
+    for (const pl of PLACES) {
+      if (pl.mark) pl.cp = L.marks[pl.mark];
+      else if (pl.after) pl.cp = { x: L.arena.x1 - 30, y: L.arena.floor };
+      else if (pl.theme) { const z = L.zones.find(q => q.theme === pl.theme), cx = Math.round(z.x0 / T) + pl.col; pl.cp = ground(cx) || ground(cx + 1) || ground(cx + 2); }
+      else pl.cp = null;
+    }
+  },
+  start(pl) {
+    if (Game.saved) Game.resume(); else Game.newGame(); // what has been found on this journey comes along
+    Game.cp = pl.cp ? { x: pl.cp.x, y: pl.cp.y } : null;
+    if (pl.after) { Game.bossDown = true; Game.gems.kohinoor = 1; }
+    Game.seen.hello = 1; Game.save(); Sound.sfx('confirm'); Scenes.go('play', { resume: true });
+  },
+  update(busy) {
+    this.t++;
+    if (busy) return;
+    const n = PLACES.length;
+    if (Input.hit('up')) { this.sel = (this.sel + n - 1) % n; Sound.sfx('select'); }
+    if (Input.hit('dn')) { this.sel = (this.sel + 1) % n; Sound.sfx('select'); }
+    if (Input.hit('pause') || Input.hit('travel') || Input.hit('quit')) { Scenes.go('title'); return; }
+    if (Input.hit('enter') && this.t > 20) {
+      if (Input.hit('tap')) { const k = Math.round((Input.tapY - 62) / 14); if (k < 0 || k >= n) { if (Input.tapY < 44) Scenes.go('title'); return; } if (k !== this.sel) { this.sel = k; Sound.sfx('select'); return; } }
+      this.start(PLACES[this.sel]);
+    }
+  },
+  draw(c) { Vista.draw(c, this.t, false, 0); c.fillStyle = 'rgba(5,7,20,0.8)'; c.fillRect(0, 0, W, H); },
+  drawHi(u) {
+    const g = u.ctx, s = u.s, t = this.t, a = clamp(t / 30, 0, 1);
+    u.text('ANOTHER WAY IN', 192, 22, 12, { metal: true, title: true, ls: 6, alpha: a });
+    u.text(Game.saved ? 'Begin from any land. What you have found comes with you.' : 'Begin from any land.', 192, 37, 7.4, { color: '#a9b4d0', italic: true, alpha: a });
+    u.rule(192, 47, 110, '#c8a860', a);
+    PLACES.forEach((pl, i) => {
+      const on = i === this.sel, y = 62 + i * 14;
+      u.text(pl.name, 186, y, on ? 9.6 : 8.6, { color: on ? '#ffe9a8' : '#c3cdee', align: 'right', alpha: a * (on ? 1 : 0.85) });
+      u.text(pl.note, 198, y + 0.4, 7, { color: on ? '#e6dcc0' : '#8f9cc0', align: 'left', italic: true, alpha: a * (on ? 1 : 0.8) });
+      if (on) { const d = 1.7 + 0.3 * Math.sin(t * 0.12); g.save(); g.globalAlpha = a; g.fillStyle = '#f3d384'; g.translate(192 * s, y * s); g.rotate(Math.PI / 4); g.fillRect(-d * s / 2, -d * s / 2, d * s, d * s); g.restore(); }
+    });
+    u.text(Input.touch ? 'TAP A LAND, THEN TAP IT AGAIN   ·   TAP THE TITLE TO RETURN' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN THERE   ·   ESC  RETURN', 192, 204, 5, { color: '#98a6cc', ls: 1.2, title: true, alpha: a });
   }
 };
 

@@ -43,6 +43,10 @@ typefaces included. Copy it to any laptop and double-click it. Rebuild it with
 | Drop through a ledge | ↓ + leap |
 
 Esc pauses, M toggles sound, G toggles fullscreen, V opens the Windowsill from the title.
+
+**A hidden way in:** on the title screen press **T** (or tap the little stone above the name
+three times) to begin from any land: Sweden, Kiruna, the sea, America, Australia, the mesa, the
+Hoarder King's door, or past him. Whatever the current journey has found comes along.
 A gamepad works, and touch buttons appear on phones. The prologue and epilogue wait for you:
 Enter or a tap turns the page, ← goes back.
 

@@ -43,7 +43,7 @@ const Input = (() => {
     ArrowLeft: 'left2', ArrowRight: 'right2', ArrowUp: 'jump2', ArrowDown: 'down2',
     KeyK: 'fire2', KeyJ: 'fire2', Slash: 'fire2', KeyL: 'light2', Period: 'light2', ShiftRight: 'light2',
     Enter: 'enter', NumpadEnter: 'enter',
-    Escape: 'pause', KeyP: 'pause', KeyM: 'mute', KeyR: 'restart', KeyQ: 'quit', KeyG: 'full', KeyV: 'vault'
+    Escape: 'pause', KeyP: 'pause', KeyM: 'mute', KeyR: 'restart', KeyQ: 'quit', KeyG: 'full', KeyV: 'vault', KeyT: 'travel'
   };
   const MENU_ALIAS = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'dn', KeyS: 'dn', Space: 'enter', KeyZ: 'enter', KeyX: 'enter' };
   const held = {}, queued = {}, sources = {};
