@@ -684,7 +684,7 @@ ENT.boy = {
     e.dir = p.x < e.x ? -1 : 1;
     if (near) {
       if (!Game.metBoy) { Game.metBoy = true; Sound.sfx('oneup'); World.sparkle(e.x + 5, e.y + 6, '#ffd070', 14); Game.save(); }
-      w.signText = 'Mayank: “A dream promised me an elf queen, in a distant land.|I have walked from India to find her. May I walk with you?”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
+      w.signText = 'Mayank: “A dream promised me an elf queen in a distant land. I walked|from India to find her. You are not what I pictured. Good.”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
     }
   },
   draw(c, w, e, ox, oy) {

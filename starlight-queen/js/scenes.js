@@ -207,12 +207,12 @@ Scenes.list.title = {
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  'Ana loves adventure more than anything in the world.',
-  'But Kaamos is a small town at the top of Finland, where the winter night lasts more than fifty days, every road leads back to the square, and nothing has ever happened.',
-  'She has read every tale of quests in the little library — twice. She knows there are mountains beyond the last lane. She has never once been past the gate.',
-  'Then, one long night, the Tonttu brings news. Far to the west a Hoarder King is gathering the great diamonds of the world, so that their light is his alone. The greatest of them is the Koh-i-Noor — the Mountain of Light.',
-  'Somebody small will have to go and fetch it back. Ana has already laced her boots.',
-  'Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a faraway world called America. The road goes west.'
+  'The winter they turned eleven, every child in Kaamos waited for something to come for them — a letter, a wardrobe, a wizard at the door. Ana waited hardest. Nothing came.',
+  'Kaamos is a small town at the top of Finland. The winter night lasts fifty days. Every road leads back to the square. The people are kind, and that is the worst of it: there is nothing to run from, only somewhere she is not.',
+  'So she read her way out. And then she grew up, the way one does — sensibly, and all at once — and put the books on a high shelf, where they could keep an eye on her.',
+  'It was the Tonttu who came in the end: the house-spirit, who had been there all along. Far to the west, he said, a king is gathering the great diamonds of the world, so that their light is his alone. The greatest is the Koh-i-Noor — the Mountain of Light.',
+  '“Nobody is coming for you, Ana,” he said. “Nobody ever was. That is not the sad part. That is the door.”',
+  'So she laces her boots. Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a far country called America. The road goes west. It was always going to.'
 ];
 Scenes.list.intro = {
   enter() { this.t = 0; this.i = 0; this.pt = 0; Sound.music('title'); },
@@ -220,7 +220,7 @@ Scenes.list.intro = {
     this.t++; this.pt++;
     if (busy) return;
     if (Input.hit('pause')) { Sound.sfx('confirm'); Scenes.go('map'); return; }
-    if (Input.hit('enter') && this.pt > 25 || this.pt > 420) {
+    if (Input.hit('enter') && this.pt > 25 || this.pt > 660) {
       if (this.i >= PROLOGUE.length - 1) { Scenes.go('map'); return; }
       this.i++; this.pt = 0;
     }
@@ -464,33 +464,34 @@ Scenes.list.vault = {
 
 /* ---------- Ending ---------- */
 const EPILOGUE = [
-  'The Hoarder King is fallen, and the Mountain of Light shines for everyone again.',
-  'Ana does not keep it. Great diamonds, she has learned, are only ever borrowed — from the deep earth, and from everyone who comes after.',
-  'In Kaamos the long night ends. The Tonttu sets a lantern in the window, in case she should come home.',
-  'She does come home — for a week, with Mayank, who has never seen snow. He had walked from India after a dream of an elf queen in a distant land. He says he knew her at once, by her ears.',
-  'Then the road calls again. And in Kaamos they tell it still: the girl who walked out past the last gate, and came back queen of nothing but starlight.'
+  'The Hoarder King is fallen. The Mountain of Light, it turns out, is heavy, and cold, and not hers.',
+  'She does not keep it. Diamonds are only ever borrowed — from the deep earth, and from everyone who comes after. So, she begins to suspect, is everything worth having.',
+  'What she keeps is smaller. A quiver. A song with one verse still missing. A man from India who dreamed of an elf queen and found, instead, someone who argues about maps — and stayed, and stays.',
+  'In Kaamos the long night ends, as it always did, without her. The Tonttu sets a lantern in the window. She comes home for a week and sees, for the first time, that it is beautiful. Both things are true.',
+  'They tell it there still: the girl who walked out past the last gate, and came back queen of nothing but starlight. She never did get her letter. She became, instead, the sort of person who sends them.'
 ];
+const EP = 520;
 Scenes.list.ending = {
   enter() { this.t = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
   update(busy) {
     this.t++;
     if (busy) return;
     if (Input.hit('enter') && this.t > 120) {
-      if (this.t < EPILOGUE.length * 330) this.t = (Math.floor(this.t / 330) + 1) * 330;
-      else if (this.t > EPILOGUE.length * 330 + 120) Scenes.go('title');
+      if (this.t < EPILOGUE.length * EP) this.t = (Math.floor(this.t / EP) + 1) * EP;
+      else if (this.t > EPILOGUE.length * EP + 120) Scenes.go('title');
     }
   },
   draw(c) { Vista.draw(c, this.t, true, 0); },
   drawHi(u) {
-    const i = Math.floor(this.t / 330), pt = this.t % 330;
+    const i = Math.floor(this.t / EP), pt = this.t % EP;
     if (i < EPILOGUE.length) {
-      const a = clamp(pt / 50, 0, 1) * clamp((330 - pt) / 40, 0, 1);
-      const lines = u.wrap(EPILOGUE[i], 200, 10, { italic: true });
-      u.panel(160, 172 - lines.length * 7 - 8, 216, lines.length * 14 + 14, 0.5 * a, '#1a1030');
-      lines.forEach((ln, k) => u.text(ln, 268, 172 + k * 14 - lines.length * 7 + 6, 10, { color: '#fffbe8', italic: true, alpha: a }));
+      const a = clamp(pt / 50, 0, 1) * clamp((EP - pt) / 40, 0, 1);
+      const lines = u.wrap(EPILOGUE[i], 204, 9.6, { italic: true }), y0 = 200 - lines.length * 13;
+      u.panel(156, y0 - 10, 222, lines.length * 13 + 14, 0.62 * a, '#1a1030');
+      lines.forEach((ln, k) => u.text(ln, 267, y0 + k * 13, 9.6, { color: '#fffbe8', italic: true, alpha: a }));
       return;
     }
-    const tt = this.t - EPILOGUE.length * 330, a = clamp(tt / 60, 0, 1), G = this.g;
+    const tt = this.t - EPILOGUE.length * EP, a = clamp(tt / 60, 0, 1), G = this.g;
     u.panel(164, 26, 208, 178, 0.86 * a, '#140c28');
     u.text('YOUR JOURNEY, GRADED', 268, 40, 8.5, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 2.4 });
     u.rule(268, 51, 120, '#f6e2a0', a);
