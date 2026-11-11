@@ -28,6 +28,10 @@ cd starlight-queen
 python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
+**Playing with no internet:** `offline/Starlight Queen.html` is the whole game in one file,
+typefaces included. Copy it to any laptop and double-click it. Rebuild it with
+`python3 build-offline.py` after changing the game.
+
 | Action | Keys |
 | --- | --- |
 | Walk | ← → or A D |
