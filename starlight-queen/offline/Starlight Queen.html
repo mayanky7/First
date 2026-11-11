@@ -4053,8 +4053,9 @@ Scenes.list.title = {
     this.items = (Game.saved ? ['continue'] : []).concat(['new', 'vault']);
     // On a web page that is the whole game in one file, offer that file to keep: it plays on a laptop with no internet.
     // (Tested by whether the game's own code is inline, not by whether the page has any outside script: hosts add their own.)
-    this.canSave = /^https?:$/.test(location.protocol) && !document.querySelector('script[src$="js/main.js"]') && !Input.touch;
-    if (this.canSave) this.items.push('download');
+    this.canSave = /^https?:$/.test(location.protocol) && !document.querySelector('script[src$="js/main.js"]');
+    if (this.canSave) this.items.push('download'); // last in the list for the arrow keys, but drawn as a button of its own
+    this.rows = this.items.filter(it => it !== 'download').length;
     this.saveNote = ''; this.saveT = 0;
     Sound.music('title'); Sound.duck(false); Sound.setRate(1);
   },
@@ -4069,7 +4070,11 @@ Scenes.list.title = {
     if (Input.hit('tap') && Math.abs(Input.tapX - 192) < 16 && Math.abs(Input.tapY - 19) < 14) { this.knock = (this.knock || 0) + 1; if (this.knock < 3) return; }
     if (Input.hit('travel') || this.knock >= 3) { this.knock = 0; Sound.sfx('lantern'); Scenes.go('places'); return; }
     if (Input.hit('enter') && this.t > 20) {
-      if (Input.hit('tap')) { const k = Math.round((Input.tapY - 122) / 13); if (k < 0 || k >= this.items.length || Math.abs(Input.tapX - 192) > 110) return; this.sel = k; }
+      if (Input.hit('tap')) {
+        const k = Math.round((Input.tapY - 122) / 13);
+        if (this.canSave && Math.abs(Input.tapX - 192) < 94 && Math.abs(Input.tapY - 184) < 14) this.sel = this.items.length - 1;
+        else if (k < 0 || k >= this.rows || Math.abs(Input.tapX - 192) > 110) return; else this.sel = k;
+      }
       Sound.sfx('confirm');
       const it = this.items[this.sel];
       if (it === 'continue') { Game.resume(); Scenes.go('map'); }
@@ -4099,17 +4104,33 @@ Scenes.list.title = {
     { const hw = u.width('Ana & the Mountain of Light', 9.5, { italic: true }) / 2 + 7, th = Math.max(1, s * 0.35); g.fillRect((192 - hw - 40) * s, 97 * s, 40 * s, th); g.fillRect((192 + hw) * s, 97 * s, 40 * s, th); } g.restore();
     u.text('Ana & the Mountain of Light', 192, 96.5, 9.5, { color: '#eef2ff', italic: true, alpha: a });
     const b = clamp((t - 60) / 40, 0, 1), vn = Object.keys(Game.vault).length;
-    { const cy = (118 + this.items.length * 6.5) * s, gr = g.createRadialGradient(192 * s, cy, 0, 192 * s, cy, 96 * s); gr.addColorStop(0, 'rgba(6,9,25,0.72)'); gr.addColorStop(0.55, 'rgba(6,9,25,0.5)'); gr.addColorStop(1, 'rgba(6,9,25,0)'); g.save(); g.globalAlpha = b; g.translate(0, cy); g.scale(1, 0.34); g.translate(0, -cy); g.fillStyle = gr; g.fillRect(0, cy - 110 * s, W * s, 220 * s); g.restore();
+    { const cy = (118 + this.rows * 6.5) * s, gr = g.createRadialGradient(192 * s, cy, 0, 192 * s, cy, 96 * s); gr.addColorStop(0, 'rgba(6,9,25,0.72)'); gr.addColorStop(0.55, 'rgba(6,9,25,0.5)'); gr.addColorStop(1, 'rgba(6,9,25,0)'); g.save(); g.globalAlpha = b; g.translate(0, cy); g.scale(1, 0.34); g.translate(0, -cy); g.fillStyle = gr; g.fillRect(0, cy - 110 * s, W * s, 220 * s); g.restore();
       const bg = g.createLinearGradient(0, (H - 30) * s, 0, H * s); bg.addColorStop(0, 'rgba(4,6,26,0)'); bg.addColorStop(0.6, 'rgba(4,6,26,0.8)'); bg.addColorStop(1, 'rgba(4,6,26,0.92)'); g.save(); g.globalAlpha = b; g.fillStyle = bg; g.fillRect(0, (H - 30) * s, W * s, 30 * s); g.restore(); }
     this.items.forEach((it, i) => {
       const on = i === this.sel, y = 122 + i * 13;
-      const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${Game.saved.oz ? 'Australia' : MAP_NAMES[Game.saved.region || 0]}` : it === 'download' ? 'Download for a laptop  ·  plays offline' : `The windowsill  ·  ${vn} of ${GEMS.length} diamonds`;
+      if (it === 'download') return;
+      const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${Game.saved.oz ? 'Australia' : MAP_NAMES[Game.saved.region || 0]}` : `The windowsill  ·  ${vn} of ${GEMS.length} diamonds`;
       u.text(label, 192, y, on ? 10 : 8.4, { color: on ? '#ffe9a8' : '#aab3d4', alpha: b * (on ? 1 : 0.8) });
       if (on) { const hw = u.width(label, 10) / 2 + 8, d = 1.7 + 0.3 * Math.sin(t * 0.12); g.save(); g.globalAlpha = b; g.fillStyle = '#f3d384'; for (const sx of [-1, 1]) { g.save(); g.translate((192 + sx * hw) * s, y * s); g.rotate(Math.PI / 4); g.fillRect(-d * s / 2, -d * s / 2, d * s, d * s); g.restore(); } g.restore(); }
     });
-    if (this.saveNote && t - this.saveT < 600) u.text(this.saveNote, 192, 122 + this.items.length * 13 + 4, 7, { color: '#fff3c4', halo: 'rgba(6,9,25,0.85)', alpha: b * clamp((600 - (t - this.saveT)) / 60, 0, 1), italic: true });
-    else if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.items.length * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
-    u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, Input.touch ? 6.2 : 5, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.4, title: true });
+    if (this.canSave) { // the game to keep: a button of its own, the brightest thing under the name
+      const on = this.items[this.sel] === 'download', bw = 180, bh = 25, bx = 192 - bw / 2, by = 171.5, pulse = 0.5 + 0.5 * Math.sin(t * 0.07), cx = bx + 15, cy = by + bh / 2;
+      g.save(); g.globalAlpha = b; const r = 5 * s;
+      g.beginPath(); if (g.roundRect) g.roundRect(bx * s, by * s, bw * s, bh * s, r); else g.rect(bx * s, by * s, bw * s, bh * s);
+      g.shadowColor = `rgba(255,214,120,${0.35 + 0.3 * pulse + (on ? 0.3 : 0)})`; g.shadowBlur = (7 + 5 * pulse) * s;
+      const bg = g.createLinearGradient(0, by * s, 0, (by + bh) * s); bg.addColorStop(0, on ? '#fff0b8' : '#f3d384'); bg.addColorStop(1, on ? '#eec25e' : '#d9a94e'); g.fillStyle = bg; g.fill();
+      g.shadowColor = 'transparent'; g.strokeStyle = on ? '#ffffff' : 'rgba(255,246,214,0.8)'; g.lineWidth = Math.max(1, s * (on ? 0.7 : 0.4)); g.stroke();
+      // the arrow coming down into a tray
+      g.strokeStyle = '#1a1430'; g.lineWidth = 1.5 * s; g.lineCap = 'round'; g.lineJoin = 'round'; const dy = 1.2 * Math.sin(t * 0.07);
+      g.beginPath(); g.moveTo(cx * s, (cy - 6.5 + dy) * s); g.lineTo(cx * s, (cy + 1.6 + dy) * s); g.moveTo((cx - 3.6) * s, (cy - 2 + dy) * s); g.lineTo(cx * s, (cy + 1.8 + dy) * s); g.lineTo((cx + 3.6) * s, (cy - 2 + dy) * s);
+      g.moveTo((cx - 6) * s, (cy + 3.4) * s); g.lineTo((cx - 6) * s, (cy + 6.4) * s); g.lineTo((cx + 6) * s, (cy + 6.4) * s); g.lineTo((cx + 6) * s, (cy + 3.4) * s); g.stroke();
+      g.restore();
+      u.text('DOWNLOAD THE GAME', 192 + 12, by + 9.4, 8.6, { color: '#1a1430', ls: 1.6, title: true, alpha: b, shadow: false });
+      u.text('one file  ·  plays on a laptop with no internet', 192 + 12, by + 18.6, 6.4, { color: '#3a2c48', italic: true, alpha: b, shadow: false });
+    }
+    if (this.saveNote && t - this.saveT < 600) u.text(this.saveNote, 192, 122 + this.rows * 13 + 4, 7, { color: '#fff3c4', halo: 'rgba(6,9,25,0.85)', alpha: b * clamp((600 - (t - this.saveT)) / 60, 0, 1), italic: true });
+    else if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.rows * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
+    u.text(Input.touch ? 'TAP TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, Input.touch ? 6.2 : 5, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.4, title: true });
   }
 };
 

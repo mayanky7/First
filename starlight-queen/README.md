@@ -38,6 +38,9 @@ the game keeps a copy of itself on the device after the first visit (`sw.js`,
 `manifest.webmanifest`) and plays offline from then on. On an iPhone or iPad: open the address
 in Safari, Share, Add to Home Screen.
 
+**Download button:** when the one-file build is served from a web address (`build-offline.py --site`),
+the title screen shows a gold **Download the game** button that saves that same file.
+
 **Playing with no internet:** `offline/Starlight Queen.html` is the whole game in one file,
 typefaces included. Copy it to any laptop and double-click it. Rebuild it with
 `python3 build-offline.py` after changing the game.
