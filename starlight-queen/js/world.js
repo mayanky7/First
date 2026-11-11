@@ -23,49 +23,52 @@ const World = (() => {
     const L = buildWorld();
     Object.assign(w, {
       t: 0, state: 'play', grid: L.grid, rows: L.rows, cols: L.cols, parts: [], bumps: [], torches: L.torches, zones: L.zones,
-      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, hitstop: 0, combo: 0, comboT: 0, hudPop: 0, rings: [], slow: 0, hurtFx: 0,
+      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, signHold: null, wonderCard: null, warpFx: null, litHold: 0, marks: L.marks, moon: {}, doors: L.doors, doorP: {}, gaze: null, gazeT: 200, lit: 0, hitstop: 0, combo: 0, comboT: 0, hudPop: 0, rings: [], slow: 0, hurtFx: 0,
       gemBlocks: L.gemBlocks, popN: L.popN, gemQ: [], arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
     });
     w.colTheme = new Array(w.cols);
     for (let cx = 0; cx < w.cols; cx++) w.colTheme[cx] = THEMES[zoneAt(cx * T + 8).theme];
     for (const k in L.gemBlocks) if (Game.gems[L.gemBlocks[k]]) { const [gx, gy] = k.split(',').map(Number); w.grid[gy][gx] = 'U'; }
+    for (const d of L.doors) if (Game.doors[d.id]) for (let i = 0; i < d.h; i++) w.grid[d.cy - i][d.cx] = '.';
     for (const k in L.popN) if (Game.meleeGot[L.popN[k]]) { const [gx, gy] = k.split(',').map(Number); w.grid[gy][gx] = 'U'; }
-    w.ents = L.ents.filter(s => !(s.t === 'shard' && Game.meleeGot[s.n]) && !(s.t === 'gem' && Game.gems[s.gem]) && !(s.t === 'boss' && Game.bossDown)).map(makeEnt);
+    w.ents = L.ents.filter(s => !(s.t === 'keep' && Game.keeps[s.keep]) && !(s.t === 'shard' && Game.meleeGot[s.n]) && !(s.t === 'gem' && Game.gems[s.gem]) && !(s.t === 'boss' && Game.bossDown)).map(makeEnt);
     if (Game.bossDown) { setGate(w.arena.gr, '.'); if (!Game.gems.kohinoor) w.ents.push(makeEnt({ t: 'gem', x: (w.arena.x0 + w.arena.x1) / 2, y: w.arena.floor - 30, gem: 'kohinoor' })); }
     w.plats = w.ents.filter(e => e.type === 'plat');
     w.boss = w.ents.find(e => e.type === 'boss') || null;
     const sp = cp || L.start;
+    w.spawn = sp;
+    w.mainEnd = (w.zones.find(z => z.warp) || { x0: L.cols * T }).x0; // the road proper ends where the lands reached only through the tear begin
     w.players = [makePlayer(sp.x, sp.y, 0)];
-    if (Game.coop) w.players.push(makePlayer(sp.x - 14, sp.y, 1));
     w.player = w.players[0];
     if (cp) { for (const p of w.players) p.sq = 1.3; for (let i = 0; i < 18; i++) { const a = i / 18 * TAU; w.parts.push({ x: sp.x + Math.cos(a) * 26, y: sp.y - 11 + Math.sin(a) * 26, vx: -Math.cos(a) * 2, vy: -Math.sin(a) * 2, life: 13, col: i % 2 ? '#bff4ff' : '#ffffff', glow: 1, sz: 2 }); } }
-    for (const e of w.ents) if ((e.type === 'lantern' || (e.type === 'beacon' && !e.final)) && e.x + e.w / 2 <= sp.x + 1) { e.on = true; e.fire = 1; }
-    w.cam.x = clamp(w.player.x - W / 2, 0, w.cols * T - W);
+    { // lanterns already passed are burning; a side-road's lanterns only count while she is on it
+      const side = zoneAt(sp.x).warp, back = L.marks.canyonBack;
+      for (const e of w.ents) if (e.type === 'lantern' || (e.type === 'beacon' && !e.final)) {
+        const ex = e.x + e.w / 2, es = zoneAt(ex).warp;
+        if (es === side ? ex <= sp.x + 1 : (side && back && ex <= back.x + 1)) { e.on = true; e.fire = 1; }
+      }
+    }
+    w.zone = null; enterZone(zoneAt(w.player.x + 5));
+    w.cam.x = clamp(w.player.x - W / 2, w.bx0, w.bx1 - W);
     w.cam.y = clamp(w.player.y - H * 0.66, 0, w.rows * T - H + 18);
     lastCamX = w.cam.x;
-    w.zone = null; enterZone(zoneAt(w.player.x + 5));
     scatter();
     Sound.duck(false);
   }
   function enterZone(z) {
     w.zone = z; w.theme = THEMES[z.theme];
+    w.bx0 = z.warp ? z.x0 : 0; w.bx1 = z.warp ? z.x1 : (w.mainEnd || w.cols * T);
+    if (!w.fight) { w.minX = w.bx0; w.maxX = w.bx1; }
     w.amb = Backdrop.makeAmbient(w.theme.amb);
     if (!w.fight) { Sound.music(Game.bossDown && z.theme === 'gloam' ? 'dawn' : w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
     Game.region = z.map;
     const key = z.title + '|' + z.sub;
     if (!Game.seen[key]) { Game.seen[key] = 1; w.introT = 180; w.introZone = z; }
   }
-  function addPlayer2() {
-    if (w.players.length > 1) return;
-    const p = w.player, q = makePlayer(p.x + 5, p.y + p.h, 1);
-    q.inv = 90; w.players.push(q); sparkle(q.x + 5, q.y + 10, '#ffd070', 20); Sound.sfx('oneup');
-  }
-  function dropPlayer2() { if (w.players.length > 1) { w.players.length = 1; w.player = w.players[0]; } }
-
   function scatter() {
     w.decor = []; w.back = [];
     const keep = new Set();
-    for (const e of w.ents) if (e.type === 'beacon' || e.type === 'lantern' || e.type === 'sign' || e.type === 'boy') for (let i = -2; i <= 2; i++) keep.add(Math.floor((e.x + e.w / 2) / T) + i);
+    for (const e of w.ents) if (e.type === 'beacon' || e.type === 'lantern' || e.type === 'sign' || e.type === 'boy' || e.type === 'warp' || e.type === 'wonder') { const r = e.type === 'wonder' ? (e.def.id === 'kings' ? 8 : e.def.id === 'undersky' || e.def.id === 'cross' || e.def.id === 'fox' ? 0 : 5) : 2; for (let i = -r; i <= r; i++) keep.add(Math.floor((e.x + e.w / 2) / T) + i); }
     let lastTree = -20;
     for (let x = 0; x < w.cols; x++) {
       const th = w.colTheme[x];
@@ -85,6 +88,8 @@ const World = (() => {
     const gy = (w.rows - 3) * T + 1; // Kaamos: the last few houses, and the gate Ana has never passed
     [[2, 0], [13, 1], [21, 2], [30, 0]].forEach(([cx, v]) => w.back.push({ img: Backdrop.prop('cottage', v), x: cx * T, y: gy }));
     w.back.push({ img: Backdrop.prop('gate', 0), x: 39 * T, y: gy });
+    // stone watchers stand at every border, left by whoever walked this road first
+    w.zones.forEach((z, i) => { if (!i || z.warp || z.theme === 'gloam') return; for (const dx of [-3, 4]) { const cx = Math.round(z.x0 / T) + dx; for (let cy = 4; cy < w.rows; cy++) if (w.grid[cy][cx] === '#' && w.grid[cy - 1][cx] === '.' && w.grid[cy - 4][cx] !== '#') { w.back.push({ img: Backdrop.prop('watcher', i), x: cx * T + 8, y: cy * T + 1 }); break; } } });
     w.back.push({ img: Backdrop.prop('throne', 0), x: A.x1 - 26, y: A.floor });
     for (let i = 0; i < 5; i++) w.back.push({ img: Backdrop.prop('banner', 0), x: A.x0 + 40 + i * 76, y: A.floor - 62, hang: true });
     for (let i = 0; i < 4; i++) w.torches.push({ x: A.x0 + 78 + i * 76, y: A.floor - 40 });
@@ -128,7 +133,12 @@ const World = (() => {
     else if (ch === '?') { w.ents.push(makeEnt({ t: 'pop', x, y: y - 12 })); gainShard(x, y - 8, false, w.popN[cx + ',' + cy]); Sound.sfx('bump'); }
     else { w.ents.push(makeEnt({ t: ch === 'H' ? 'cake' : 'bloom', x, y })); Sound.sfx('item'); }
   }
-  function checkpoint(x, y) { Game.cp = { x, y }; Game.save(); for (const p of w.players) if (!p.dead) p.hp = 3; }
+  function checkpoint(x, y) { Game.cp = { x, y }; Game.save(); for (const p of w.players) if (!p.dead) p.hp = MAXHP; }
+  function wonder(def, x, y) { // a thing seen: nothing gained but the having seen it
+    Game.wonders[def.id] = 1; Game.save(); w.wonderCard = { def, t: 0 }; Sound.sfx('wonder'); Sound.duck(true); setTimeout(() => { if (!w.card && !w.gemFx) Sound.duck(false); }, 1600);
+    ring(x, y, 6, 170, 46, '#fff3c4'); ring(x, y, 4, 100, 34, '#ffffff'); sparkle(x, y, '#fff3c4', 30);
+  }
+  function warp(to) { if (!w.marks[to] || w.warpFx) return; w.warpFx = { t: 0, to }; Sound.sfx('warp'); for (const p of w.players) { p.control = false; p.vx = 0; p.lit = false; } }
   function lightBeacon(e) {
     Sound.sfx('beacon'); w.flash = 0.6; w.shake = 6; ring(e.x + 20, e.y, 4, 210, 34, '#ffb040'); ring(e.x + 20, e.y, 4, 120, 26, '#fff6b0');
     if (!e.final) { checkpoint(e.x + 20, e.y + 56); toast(e.text); setTimeout(() => Sound.sfx('fanfare'), 500); return; }
@@ -146,11 +156,59 @@ const World = (() => {
   }
   function clearHazards() { for (const e of w.ents) if (e.type === 'wave' || e.type === 'fall') e.dead = true; }
   function bossDefeated(x) {
-    w.fight = false; setGate(w.arena.gr, '.'); setGate(w.arena.gl, '.'); w.minX = 0; w.maxX = w.cols * T;
+    w.fight = false; setGate(w.arena.gr, '.'); setGate(w.arena.gl, '.'); w.minX = w.bx0; w.maxX = w.bx1;
     w.dawning = true; Sound.music('dawn'); toast('The Hoarder King is fallen. The Mountain of Light is waiting.');
     Game.stats.foes++; Game.bossDown = true;
     w.ents.push(makeEnt({ t: 'gem', x: clamp(x, w.arena.x0 + 40, w.arena.x1 - 40), y: w.arena.floor - 30, gem: 'kohinoor' }));
     Game.save();
+  }
+
+  /* ---------- starlight: bridges that are only there in it, doors that only show in it ---------- */
+  function starlight() {
+    for (const k in w.moon) if (--w.moon[k] <= 0) delete w.moon[k];
+    let any = 0;
+    for (const p of w.players) {
+      if (!p.lit || p.dead) continue;
+      any = 1;
+      const pcx = Math.floor((p.x + 5) / T), pcy = Math.floor((p.y + 10) / T);
+      for (let cy = Math.max(0, pcy - 6); cy <= Math.min(w.rows - 1, pcy + 6); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) {
+        const ch = w.grid[cy][cx];
+        if (ch !== 'M' && ch !== 'D') continue;
+        if (Math.hypot(cx * T + 8 - (p.x + 5), cy * T + 8 - (p.y + 10)) > 92) continue;
+        if (ch === 'M') { const k = cx + cy * w.cols; if (!w.moon[k]) { sparkle(cx * T + 8, cy * T + 3, '#dff2ff', 6); if (w.t - (w.bridgeS || 0) > 12) { Sound.sfx('bridge'); w.bridgeS = w.t; } } w.moon[k] = 170; }
+        else { const d = w.doors.find(q => q.cx === cx && cy <= q.cy && cy > q.cy - q.h); if (d) d.seen = w.t; }
+      }
+    }
+    if (w.litHold) { any = 1; w.litHold = 0; }
+    w.lit += (any - w.lit) * 0.08;
+    for (const d of w.doors) {
+      if (Game.doors[d.id]) continue;
+      const k = d.id;
+      if (d.seen === w.t) { w.doorP[k] = (w.doorP[k] || 0) + 1; if (w.doorP[k] % 6 === 0) sparkle(d.cx * T + rand(16), (d.cy - rand(d.h)) * T + 8, '#dff2ff', 2); }
+      else if (w.doorP[k] > 0) w.doorP[k] -= 0.5;
+      if (w.doorP[k] >= 70) {
+        Game.doors[k] = 1; Sound.sfx('door'); w.shake = 6; w.flash = 0.35;
+        for (let i = 0; i < d.h; i++) { w.grid[d.cy - i][d.cx] = '.'; for (let j = 0; j < 6; j++) w.parts.push({ x: d.cx * T + rand(16), y: (d.cy - i) * T + rand(16), vx: rand(-1, 1), vy: rand(-1.6, 0.4), life: rand(30, 60), col: j % 2 ? '#dff2ff' : '#8fb4ff', glow: 1, sz: 1 + (j % 2) }); }
+        ring(d.cx * T + 8, (d.cy - d.h / 2) * T + 8, 6, 120, 28, '#dff2ff');
+        if (d.text) toast(d.text);
+        Game.save();
+      }
+    }
+  }
+  /* ---------- the Hoarder's gaze: on his own ground he looks for her; a stone by the road is not looked at ---------- */
+  function hoarderGaze() {
+    const on = w.theme.gaze && w.bossAlive && !w.fight && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
+    if (!on) { w.gaze = null; return; }
+    if (!w.gaze) { if (--w.gazeT <= 0) { w.gaze = { t: 0, caught: false }; Sound.sfx('gaze'); } return; }
+    const g = w.gaze; g.t++;
+    if (g.t > 100 && !g.caught) { // the sweep
+      const bx = w.cam.x + W + 40 - (g.t - 100) * 3.4;
+      for (const p of w.players) if (!p.dead && !p.cloak && p.radiant <= 0 && Math.abs(p.x + 5 - bx) < 22) {
+        g.caught = true; Sound.sfx('seen'); toast('He has seen you. Next time: be a stone.'); w.shake = 8;
+        hurtPlayer(w, p, bx + 40);
+      }
+      if (bx < w.cam.x - 60 || g.caught) { if (g.t > 100 + (W + 100) / 3.4 || g.caught) { w.gaze = null; w.gazeT = 760 + rand(260) | 0; } }
+    }
   }
 
   /* ---------- simulation ---------- */
@@ -165,6 +223,22 @@ const World = (() => {
       if (w.flash > 0) w.flash = Math.max(0, w.flash - 0.03);
       if (fx.t > 44) w.flash = Math.min(1, (fx.t - 44) / 10);
       if (fx.t >= 55) { w.card = { gem: fx.gem, t: 0 }; w.gemFx = null; w.flash = 0; }
+      return;
+    }
+    if (w.warpFx) { // through the tear: the afternoon folds, and opens somewhere else
+      const fx = w.warpFx; fx.t++;
+      for (const q of w.parts) { q.x += q.vx; q.y += q.vy; q.life--; }
+      w.parts = w.parts.filter(q => q.life > 0);
+      if (fx.t === 46) {
+        const m = w.marks[fx.to], p = w.player;
+        p.x = m.x - 5; p.y = m.y - p.h; p.vx = p.vy = 0; p.safe = { x: p.x, y: p.y }; p.face = 1; p.hp = MAXHP; p.gliding = false; p.ride = null;
+        w.parts = []; w.rings = []; w.signHold = null; w.signText = null; w.gaze = null;
+        Game.cp = { x: m.x, y: m.y }; w.spawn = Game.cp;
+        enterZone(zoneAt(p.x + 5));
+        w.cam.x = clamp(p.x - W / 2 + 24, w.bx0, w.bx1 - W); w.cam.y = clamp(p.y + 11 - H * 0.66, 0, w.rows * T - H + 18); lastCamX = w.cam.x;
+        Game.save();
+      }
+      if (fx.t >= 96) { w.warpFx = null; for (const p of w.players) p.control = true; sparkle(w.player.x + 5, w.player.y + 10, '#dff2ff', 20); }
       return;
     }
     if (w.hitstop > 0) { // a held frame: presses made during it are kept, not lost
@@ -186,12 +260,15 @@ const World = (() => {
     if (w.introT > 0) w.introT--;
     if (w.comboT > 0) w.comboT--; if (w.hudPop > 0) w.hudPop--;
     if (w.toastT > 0) w.toastT--;
+    if (w.wonderCard && ++w.wonderCard.t > 600) w.wonderCard = null;
     if (w.shake > 0) w.shake *= 0.86;
     if (w.flash > 0) w.flash = w.flash > 0.6 ? w.flash * 0.8 : Math.max(0, w.flash - 0.03);
     if (w.dawning && w.dawn < 1) w.dawn = Math.min(1, w.dawn + 0.004);
     w.signText = null; w.signNear = null;
     for (const pl of w.plats) ENT.plat.pre(w, pl);
     for (const p of w.players) updatePlayer(w, p);
+    starlight();
+    hoarderGaze();
     const alive = w.players.filter(p => !p.dead);
     w.player = alive[0] || w.players[0];
     for (const p of w.players) if (p.dead > 170 && alive.length && w.state === 'play') { // a fallen companion returns
@@ -213,6 +290,9 @@ const World = (() => {
       d.update(w, e);
       if (e.flash > 0) e.flash--;
     }
+    // words stay up long enough to be read, even if the walker has moved on
+    if (w.signText) { if (!w.signHold || w.signHold.text !== w.signText) w.signHold = { text: w.signText, e: w.signNear, t0: w.t }; }
+    else if (w.signHold) { const h = w.signHold; if (w.t - h.t0 < Math.max(210, h.text.length * 4.4)) { w.signText = h.text; w.signNear = h.e; } else w.signHold = null; }
     // foes vs the travellers
     if (w.state === 'play') for (const p of alive) for (const e of w.ents) {
       const d = ENT[e.type];
@@ -224,6 +304,7 @@ const World = (() => {
         continue;
       }
       if (d.harmless && d.harmless(e)) continue;
+      if (p.cloak && d.arrow) continue; // what the cloak covers, hungry things walk past
       if (p.radiant > 0 && d.arrow) { slay(w, e, 'radiant'); Sound.sfx('stomp'); continue; }
       if (d.stomp && above) {
         damageFoe(w, e, 1, 'stomp');
@@ -242,7 +323,7 @@ const World = (() => {
     if (w.bumps.length) w.bumps = w.bumps.filter(b => b.t > 0);
 
     const lead = w.player;
-    if (w.bossAlive && w.boss && !w.fight && alive.length && Math.max(...alive.map(p => p.x)) > w.arena.x0 + 44) startFight();
+    if (w.bossAlive && w.boss && !w.fight && alive.length && lead.x > w.arena.x0 + 44 && lead.x < w.arena.x1) startFight();
     const z = zoneAt(lead.x + 5);
     if (z !== w.zone && !lead.dead) enterZone(z);
 
@@ -252,7 +333,7 @@ const World = (() => {
     if (alive.length > 1) ty = (alive[0].y + alive[1].y) / 2 + 11 - H * 0.6;
     if (w.fight) tx = w.arena.x0;
     if (w.state === 'clear') tx = lead.x + 5 - W / 2 + 30;
-    w.cam.x += (clamp(tx, 0, w.cols * T - W) - w.cam.x) * (w.fight ? 0.06 : 0.1);
+    w.cam.x += (clamp(tx, w.bx0, w.bx1 - W) - w.cam.x) * (w.fight ? 0.06 : 0.1);
     if (lead.onGround || Math.abs(ty - w.cam.y) > 46) w.cam.y += (clamp(ty, 0, w.rows * T - H + 18) - w.cam.y) * 0.08; // show less dead ground
     w.cam.y = clamp(w.cam.y, 0, w.rows * T - H + 18);
 
@@ -288,6 +369,20 @@ const World = (() => {
         else if (ch === 'U') c.drawImage(ts.used, x, y);
         else if (ch === '^') c.drawImage(ts.spike, x, y);
         else if (ch === 'X') { R(c, x, y, T, T, '#16131a'); R(c, x + 2, y, 3, T, '#3a3440'); R(c, x + 10, y, 3, T, '#3a3440'); R(c, x, y + 6, T, 2, '#2a2530'); R(c, x + 3, y + 6, 1, 2, '#ff6a20'); }
+        else if (ch === 'M') { // a bridge of light: a rumour until starlight finds it
+          const m = w.moon[cx + cy * w.cols] || 0;
+          if (m > 0) { c.globalAlpha = Math.min(1, m / 40); c.drawImage(Art.S.moon[(w.t >> 3) % 2], x, y); c.globalAlpha = 1; }
+          else if (((w.t + cx * 23) >> 3) % 9 === 0) R(c, x + (cx * 7 + (w.t >> 5)) % 14, y + 2 + (cx % 3), 1, 1, 'rgba(223,242,255,0.7)');
+        }
+        else if (ch === 'D') { // a door that shows itself only to starlight
+          const d = w.doors.find(q => q.cx === cx), k = d ? clamp((w.doorP[d.id] || 0) / 70, 0, 1) : 0, row = d ? d.cy - cy : 0;
+          R(c, x, y, T, T, '#2a2f44'); R(c, x, y, 2, T, '#3a4160'); R(c, x + 14, y, 2, T, '#1c2032'); if (cy % 2) R(c, x + 2, y + 7, 12, 1, '#222638');
+          const a = 0.1 + 0.9 * k + (k > 0 ? 0.1 * Math.sin(w.t * 0.3) : 0), col = `rgba(223,242,255,${clamp(a, 0, 1)})`;
+          R(c, x + 3, y, 1, T, col); R(c, x + 12, y, 1, T, col);
+          if (d && row === d.h - 1) { R(c, x + 4, y + 2, 8, 1, col); R(c, x + 5, y + 1, 6, 1, col); }
+          if (d && row === (d.h >> 1)) { R(c, x + 7, y + 3, 2, 10, col); R(c, x + 3, y + 7, 10, 2, col); R(c, x + 5, y + 5, 1, 1, col); R(c, x + 10, y + 5, 1, 1, col); R(c, x + 5, y + 10, 1, 1, col); R(c, x + 10, y + 10, 1, 1, col); }
+          if (k > 0) Art.glow(c, x + 8, y + 8, 14, '#bfe4ff', 0.35 * k);
+        }
         else c.drawImage(ts.rune[(w.t >> 3) % 4], x, y);
       }
     }
@@ -320,8 +415,9 @@ const World = (() => {
   // blend factor toward the neighbouring zone when the camera is near a border
   function blend() {
     const cx = w.cam.x + W / 2, z = zoneAt(cx), i = w.zones.indexOf(z), R0 = 150;
+    if (z.warp) return { a: z, b: null, k: 0 };
     if (cx - z.x0 < R0 && i > 0 && w.zones[i - 1].theme !== z.theme) return { a: z, b: w.zones[i - 1], k: 0.5 - (cx - z.x0) / (R0 * 2) };
-    if (z.x1 - cx < R0 && i < w.zones.length - 1 && w.zones[i + 1].theme !== z.theme) return { a: z, b: w.zones[i + 1], k: 0.5 - (z.x1 - cx) / (R0 * 2) };
+    if (z.x1 - cx < R0 && i < w.zones.length - 1 && !w.zones[i + 1].warp && w.zones[i + 1].theme !== z.theme) return { a: z, b: w.zones[i + 1], k: 0.5 - (z.x1 - cx) / (R0 * 2) };
     return { a: z, b: null, k: 0 };
   }
   function darkness(c, ox, oy, bl) {
@@ -336,7 +432,7 @@ const World = (() => {
       if (x < -r || x > W + r || y < -r || y > H + r) return;
       lg.globalAlpha = k || 1; lg.drawImage(holeImg, x - r, y - r, r * 2, r * 2); lg.globalAlpha = 1;
     };
-    for (const p of w.players) if (!p.dead) hole(p.x - ox + 5, p.y - oy + 10, p.radiant > 0 ? 120 : 84 + Math.sin(w.t * 0.05) * 3, 1);
+    for (const p of w.players) if (!p.dead) hole(p.x - ox + 5, p.y - oy + 10, p.lit ? 132 : p.radiant > 0 ? 120 : p.cloak ? 30 : 84 + Math.sin(w.t * 0.05) * 3, 1);
     for (const tq of w.torches) { hole(tq.x - ox, tq.y - oy, 60 + Math.sin(w.t * 0.3 + tq.x) * 3, 0.95); hole(tq.x - ox, tq.y - oy + 22, 34, 0.5); }
     for (const e of w.ents) {
       const d = ENT[e.type];
@@ -395,6 +491,7 @@ const World = (() => {
       if (x > W || x + d.img.width < 0) continue;
       c.drawImage(d.img, Math.round(x), Math.round(d.hang ? d.y - oy : d.y - oy - d.img.height));
     }
+    for (const e of w.ents) { const d = ENT[e.type]; if (d.back) d.back(c, w, e, ox, oy); }
     for (const tq of w.torches) Backdrop.torch(c, tq.x - ox, tq.y - oy + 14, w.t);
     for (const d of w.decor) { const x = d.x - ox - d.img.width / 2; if (x > W || x < -30) continue; c.drawImage(d.img, Math.round(x), Math.round(d.y - oy - d.img.height)); }
     const yb = w.rows * T - oy - 64;
@@ -427,34 +524,28 @@ const World = (() => {
       Art.glow(c, x, y, 30 + 20 * k, '#ffffff', 0.6);
       const im = Art.gemSprite(fx.gem), sc = 1 + k * 0.8; c.drawImage(im, Math.round(x - im.width * sc / 2), Math.round(y - im.height * sc / 2), Math.round(im.width * sc), Math.round(im.height * sc));
     }
+    if (w.gaze) { // the sky reddens; then the look itself crosses the road
+      const g = w.gaze, warn = clamp(g.t / 60, 0, 1) * (0.14 + 0.06 * Math.sin(w.t * 0.25));
+      c.fillStyle = `rgba(255,30,10,${warn})`; c.fillRect(0, 0, W, H);
+      if (g.t > 100) {
+        const bx = W + 40 - (g.t - 100) * 3.4;
+        c.save(); c.globalCompositeOperation = 'lighter';
+        for (const [wd, a] of [[60, 0.1], [40, 0.14], [20, 0.22], [6, 0.4]]) { c.fillStyle = `rgba(255,70,30,${a})`; c.beginPath(); c.moveTo(bx - wd * 0.25, 0); c.lineTo(bx + wd * 0.25, 0); c.lineTo(bx + wd, H); c.lineTo(bx - wd, H); c.fill(); }
+        c.restore();
+      }
+    }
+    if (w.warpFx) { // the afternoon, folding
+      const t = w.warpFx.t, k = t < 46 ? t / 46 : 1 - (t - 46) / 50, p = w.player, px = p.x - ox + 5, py = p.y - oy + 10;
+      c.save(); c.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 5; i++) { const r = t < 46 ? (1 - k) * 220 * (1 - i * 0.16) + 6 : (1 - k) * 260 * (1 - i * 0.16) + 6; c.globalAlpha = 0.5 * k; c.strokeStyle = i % 2 ? '#ffe6a8' : '#bfe4ff'; c.lineWidth = 2; c.beginPath(); c.ellipse(px, py, r * 0.7, r, 0, 0, TAU); c.stroke(); }
+      c.restore();
+      c.fillStyle = World.calm ? `rgba(10,14,36,${k * k})` : `rgba(255,250,236,${k * k})`; c.fillRect(0, 0, W, H);
+    }
     if (w.hurtFx > 0) { c.globalAlpha = (w.hurtFx / 16) * (w.hurtFx / 16); c.drawImage(hurtImg, 0, 0); c.globalAlpha = 1; }
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
     // the interface is drawn crisp, above the pixels (scenes.js)
     // embers about to leap from lava below the screen are announced at its edge
     for (const e of w.ents) if (e.type === 'ember' && e.warn > 0 && e.x - ox > -10 && e.x - ox < W + 10) { const yy = Math.min(e.by - oy, H - 4); Art.glow(c, e.x - ox + 4, yy, 8 + (40 - e.warn) * 0.3, '#ff7a20', 0.5 + 0.3 * Math.sin(w.t * 0.6)); R(c, e.x - ox + 3, yy - 6 - (w.t >> 2) % 3, 2, 3, '#ffd070'); }
   }
-  function hud(c) {
-    const S = Art.S, two = w.players.length > 1;
-    c.fillStyle = 'rgba(8,10,20,0.5)'; c.fillRect(3, 3, two ? 68 : 40, two ? 49 : 25); c.fillRect(W - 53, 3, 50, 25);
-    if (two) R(c, 6, 28, 62, 1, 'rgba(214,186,120,0.4)');
-    w.players.forEach((p, k) => {
-      const y = 6 + k * 24;
-      for (let i = 0; i < 3; i++) c.drawImage(i < p.hp ? S.heart : S.heartEmpty, 6 + i * 11, y);
-      for (let i = 0; i < 3; i++) c.drawImage(i < p.arrows ? S.quiver : S.quiverEmpty, 8 + i * 6, y + 11);
-      if (p.arrows < 3) R(c, 27, y + 17, Math.round(p.arrowT / 48 * 10), 1, '#9fe8ff');
-      if (p.radiant > 0) R(c, 6, y + 20, Math.round(32 * p.radiant / 600), 1, (w.t >> 2) % 2 ? '#fff6b0' : '#9ff4ff');
-    });
-    c.drawImage(S.shard[0], W - 50, 5, 7, 9);
-    Art.digits(c, String(Game.melee), W - 40, 7 - (w.hudPop > 4 ? 1 : 0), w.hudPop > 0 ? '#ffffff' : '#dffbff');
-    c.drawImage(S.gemIcon, W - 51, 17);
-    Art.digits(c, Object.keys(Game.gems).length + '/' + GEMS.length, W - 40, 19, '#fff2b0');
-    if (w.fight && w.boss && !w.boss.dead && w.boss.st !== 'intro') {
-      const bw = 140, x = (W - bw) / 2, k = w.boss.hp / w.boss.max;
-      R(c, x - 2, H - 14, bw + 4, 7, 'rgba(8,4,6,0.8)'); R(c, x, H - 12, bw, 3, '#3a1010');
-      R(c, x, H - 12, Math.round(bw * k), 3, ENT.boss.vulnerable(w.boss) ? '#fff0a0' : '#ff5a1a'); R(c, x, H - 12, Math.round(bw * k), 1, '#ffb070');
-      R(c, x + bw / 2, H - 13, 1, 5, 'rgba(8,4,6,0.8)');
-    }
-  }
-
-  return Object.assign(w, { load, update, draw, ring, dust, spark, sparkle, toast, gainShard, gainGem, bump, lightBeacon, checkpoint, bossDefeated, clearHazards, addPlayer2, dropPlayer2, zoneAt });
+  return Object.assign(w, { load, update, draw, ring, dust, spark, sparkle, toast, gainShard, gainGem, bump, lightBeacon, checkpoint, bossDefeated, clearHazards, wonder, warp, zoneAt });
 })();

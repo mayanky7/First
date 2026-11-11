@@ -407,6 +407,10 @@ const Art = (() => {
       R(g, 2, 11, 1, 4, '#6a7488'); R(g, 11, 11, 1, 4, '#6a7488'); R(g, 1, 12 + f, 1, 2, '#f2c9a2'); R(g, 12, 12, 1, 2, '#f2c9a2');
       R(g, 3, 15, 3, 1, '#3a2a20'); R(g, 8, 15, 3, 1, '#3a2a20');
     });
+    S.moon = frames(2, T, 8, (g, f) => { // a span of a starlight bridge
+      R(g, 0, 0, T, 5, 'rgba(160,200,255,0.55)'); R(g, 0, 0, T, 1, '#ffffff'); R(g, 0, 1, T, 1, '#dff2ff'); R(g, 0, 5, T, 1, 'rgba(120,160,255,0.35)');
+      for (let x = f * 2; x < T; x += 4) R(g, x, 2, 2, 1, '#ffffff'); R(g, 7, 3, 2, 1, '#bfe4ff'); R(g, 3 + f * 8, 6, 1, 2, 'rgba(223,242,255,0.6)');
+    });
     S.gemIcon = spr(7, 7, g => { const c1 = '#fff2b0', c2 = '#c8a040'; R(g, 1, 0, 5, 1, '#ffffff'); R(g, 0, 1, 7, 2, c1); R(g, 1, 3, 5, 1, c1); R(g, 2, 4, 3, 1, c2); R(g, 3, 5, 1, 2, c2); R(g, 3, 1, 1, 3, '#ffffff'); });
     S.rune = spr(14, 16, g => {
       R(g, 2, 2, 10, 14, '#767c8c'); R(g, 3, 1, 8, 1, '#767c8c'); R(g, 4, 0, 6, 1, '#8d93a3'); R(g, 2, 2, 1, 14, '#9aa0b0'); R(g, 11, 3, 1, 13, '#565b69');
@@ -473,16 +477,17 @@ const Art = (() => {
       R(g, 8, 1, 6, 1, P.brickHi); R(g, 4, 9, 6, 1, P.brickHi);
     });
     set.rune = frames(4, T, T, (g, f) => {
-      R(g, 0, 0, T, T, '#c9a44a'); R(g, 0, 0, T, 1, '#f4dc8a'); R(g, 0, 0, 1, T, '#f4dc8a'); R(g, 0, 15, T, 1, '#7a5c1e'); R(g, 15, 0, 1, T, '#7a5c1e');
-      R(g, 1, 1, 1, 1, '#7a5c1e'); R(g, 14, 1, 1, 1, '#7a5c1e'); R(g, 1, 14, 1, 1, '#7a5c1e'); R(g, 14, 14, 1, 1, '#7a5c1e');
-      const c = ['#fffbe0', '#bff4ff', '#7fe0ff', '#bff4ff'][f];
+      // a sleeping runestone, old and carved; it wakes to an arrow, a knock, or a light
+      R(g, 0, 0, T, T, '#69728c'); R(g, 0, 0, T, 2, '#8b95b0'); R(g, 0, 0, 1, T, '#8b95b0'); R(g, 0, 14, T, 2, '#454c62'); R(g, 15, 0, 1, T, '#454c62');
+      R(g, 0, 0, 1, 1, '#454c62'); R(g, 15, 0, 1, 1, '#454c62'); R(g, 2, 12, 3, 1, '#5f8a5a'); R(g, 11, 2, 3, 1, '#5f8a5a'); R(g, 1, 6, 1, 4, '#565e76'); R(g, 13, 9, 2, 1, '#565e76');
+      const c = ['#9fd8ff', '#bfe8ff', '#e8f8ff', '#bfe8ff'][f];
       // eight-pointed star rune
       R(g, 7, 3, 2, 10, c); R(g, 3, 7, 10, 2, c); R(g, 5, 5, 1, 1, c); R(g, 10, 5, 1, 1, c); R(g, 5, 10, 1, 1, c); R(g, 10, 10, 1, 1, c);
-      R(g, 6, 6, 4, 4, c); R(g, 7, 7, 2, 2, '#fff');
+      R(g, 6, 6, 4, 4, c); R(g, 7, 7, 2, 2, f === 2 ? '#ffffff' : c);
     });
     set.used = spr(T, T, g => {
-      R(g, 0, 0, T, T, '#6c6252'); R(g, 0, 0, T, 1, '#8a7e6a'); R(g, 0, 0, 1, T, '#8a7e6a'); R(g, 0, 15, T, 1, '#463e32'); R(g, 15, 0, 1, T, '#463e32');
-      R(g, 7, 5, 2, 6, '#544a3c'); R(g, 5, 7, 6, 2, '#544a3c');
+      R(g, 0, 0, T, T, '#565d72'); R(g, 0, 0, T, 2, '#6f7890'); R(g, 0, 0, 1, T, '#6f7890'); R(g, 0, 14, T, 2, '#3a4054'); R(g, 15, 0, 1, T, '#3a4054');
+      R(g, 7, 4, 2, 8, '#454c62'); R(g, 4, 7, 8, 2, '#454c62'); R(g, 2, 12, 3, 1, '#4f6e4c');
     });
     set.spike = spr(T, T, g => {
       for (let i = 0; i < 4; i++) for (let y = 0; y < 10; y++) {
@@ -508,9 +513,98 @@ const Art = (() => {
   }
 
   function padded(img, col) { const o = outlined(spr(img.width + 2, img.height + 2, g => g.drawImage(img, 1, 1)), col); o.pad = 1; return o; }
+  /* ---------- each land's own creatures, foods and keepsakes ---------- */
+  const SKN = {};
+  function recolor(img, map, extra, f) {
+    return spr(img.width, img.height, g => {
+      g.drawImage(img, 0, 0);
+      const d = g.getImageData(0, 0, img.width, img.height), px = d.data, tbl = {};
+      for (const k in map) { const a = parseInt(k.slice(1), 16), b = parseInt(map[k].slice(1), 16); tbl[a] = [b >> 16, b >> 8 & 255, b & 255]; }
+      for (let i = 0; i < px.length; i += 4) { if (!px[i + 3]) continue; const t = tbl[px[i] << 16 | px[i + 1] << 8 | px[i + 2]]; if (t) { px[i] = t[0]; px[i + 1] = t[1]; px[i + 2] = t[2]; } }
+      g.putImageData(d, 0, 0);
+      if (extra) extra(g, f);
+    });
+  }
+  const re = (base, map, extra) => base.map((im, f) => recolor(im, map, extra, f));
+  function buildRegional() {
+    const G = S.goblin, Wf = S.wolf, Bt = S.bat, Tr = S.troll;
+    const white = { '#6a4fa0': '#f2f5ff', '#8e72c8': '#c9d4ee', '#ff4040': '#20222c' }, beak = g => { R(g, 8, 9, 2, 1, '#f0a030'); };
+    SKN.north = { bat: re(Bt, white, beak) }; // snowy owls over the gulf
+    SKN.meads = { // midsummer småtroll in flower crowns
+      goblin: re(G, { '#6fa044': '#c08a5a', '#4c7a30': '#93623a', '#3e5e28': '#6f4a2a', '#6b6258': '#4ea848', '#4a433c': '#3a8a3a' }, g => { R(g, 5, 0, 1, 1, '#ff6a8a'); R(g, 8, 0, 1, 1, '#ffe060'); R(g, 11, 1, 1, 1, '#ffffff'); R(g, 6, 1, 1, 1, '#ffffff'); })
+    };
+    SKN.halls = { // knockers of the deep, in miners' lamps
+      goblin: re(G, { '#6fa044': '#9aa0b6', '#4c7a30': '#6e748c', '#3e5e28': '#4c526a', '#6b6258': '#e8b830', '#4a433c': '#a8801c' }, g => { R(g, 7, 1, 3, 1, '#fffbe0'); })
+    };
+    SKN.canyon = {
+      goblin: frames(2, 16, 16, (g, f) => { // jackalope: a hare with antlers, as sworn to by every bar in the West
+        const t = '#c9a070', d = '#9a7448', h = f ? 1 : 0;
+        R(g, 3, 8 - h, 9, 6, t); R(g, 3, 13 - h, 9, 1, d); R(g, 1, 9 - h, 2, 2, '#f4f0e6');
+        R(g, 9, 4 - h, 6, 6, t); R(g, 14, 7 - h, 2, 2, t); R(g, 15, 7 - h, 1, 1, '#d87a8a'); R(g, 12, 6 - h, 1, 1, '#201410');
+        R(g, 10, 0 - h + 1, 1, 4, t); R(g, 12, 0 - h + 1, 1, 4, d);
+        R(g, 9, 1, 1, 3, '#5a3c20'); R(g, 8, 0, 1, 2, '#5a3c20'); R(g, 7, 1, 1, 1, '#5a3c20'); R(g, 14, 1, 1, 3, '#5a3c20'); R(g, 15, 0, 1, 2, '#5a3c20');
+        if (f) { R(g, 3, 13, 3, 2, d); R(g, 10, 13, 3, 2, d); } else { R(g, 2, 14, 4, 2, d); R(g, 9, 14, 3, 2, d); }
+      }),
+      wolf: re(Wf, { '#4b4a5c': '#b58c5c', '#33323f': '#80603a', '#6a697c': '#d6b480' }), // coyotes
+      bat: re(Bt, white, beak), // gulls, out at sea
+      troll: re(Tr, { '#7d8291': '#7c5436', '#5b5f6d': '#573a22', '#9aa0b0': '#9c7048', '#5a3d28': '#573a22', '#6f8f52': '#9c7048' }) // sasquatch
+    };
+    SKN.gloam = { // the Hoarder's own: cinder-things
+      goblin: re(G, { '#6fa044': '#3c2c32', '#4c7a30': '#2a1c22', '#3e5e28': '#1e1418', '#ffe14a': '#ff7a20', '#6b6258': '#5a2018', '#4a433c': '#3a1410' }),
+      wolf: re(Wf, { '#4b4a5c': '#2c2228', '#33323f': '#190f16', '#6a697c': '#4c2a2a' }),
+      troll: re(Tr, { '#7d8291': '#4c4860', '#5b5f6d': '#2e2a3c', '#9aa0b0': '#6c6884', '#ffd040': '#ff5a1a', '#6f8f52': '#6c6884' })
+    };
+    SKN.oz = {
+      goblin: frames(2, 16, 16, (g, f) => { // cane toad
+        const t = '#8a8648', d = '#646030', b = '#d8cc88', h = f ? 2 : 0;
+        R(g, 2, 9 - h, 12, 6, t); R(g, 3, 8 - h, 10, 1, t); R(g, 3, 13 - h, 10, 2, b); R(g, 2, 14 - h, 12, 1, d);
+        R(g, 3, 6 - h, 3, 3, t); R(g, 10, 6 - h, 3, 3, t); R(g, 4, 7 - h, 1, 1, '#201a08'); R(g, 11, 7 - h, 1, 1, '#201a08');
+        R(g, 6, 10 - h, 1, 1, d); R(g, 9, 9 - h, 1, 1, d); R(g, 12, 11 - h, 1, 1, d); R(g, 5, 12 - h, 6, 1, d);
+        if (f) { R(g, 0, 12, 3, 2, d); R(g, 13, 12, 3, 2, d); } else { R(g, 1, 14, 3, 2, d); R(g, 12, 14, 3, 2, d); }
+      }),
+      wolf: re(Wf, { '#4b4a5c': '#dca858', '#33323f': '#a87630', '#6a697c': '#f2cc88', '#ff4030': '#2a1808' }), // dingo
+      bat: re(Bt, { '#6a4fa0': '#16161c', '#8e72c8': '#f2f2f2', '#ff4040': '#c84a30' }, beak), // magpie, in swooping season
+      spider: frames(2, 18, 13, (g, f) => { // drop bear
+        const c1 = '#8a8e9a', c2 = '#666a78', c3 = '#b4b8c4';
+        R(g, 4, 3, 10, 9, c1); R(g, 5, 2, 8, 1, c1); R(g, 4, 3, 10, 1, c3); R(g, 4, 10, 10, 2, c2);
+        R(g, 1, 1, 4, 4, c1); R(g, 13, 1, 4, 4, c1); R(g, 2, 2, 2, 2, c3); R(g, 14, 2, 2, 2, c3);
+        R(g, 6, 5, 2, 1, '#201410'); R(g, 10, 5, 2, 1, '#201410'); R(g, 5, 4, 3, 1, c2); R(g, 10, 4, 3, 1, c2);
+        R(g, 8, 6, 2, 3, '#201410'); R(g, 7, 10, 4, 1, '#f4f0e6'); R(g, 7, 9, 1, 1, '#f4f0e6'); R(g, 10, 9, 1, 1, '#f4f0e6');
+        R(g, 2, 9 + f, 2, 3, c2); R(g, 14, 9 + (1 - f), 2, 3, c2); R(g, 2, 12, 1, 1, '#f4f0e6'); R(g, 15, 12, 1, 1, '#f4f0e6');
+      })
+    };
+    // what there is to eat, in each place
+    const food = fn => spr(12, 10, fn);
+    S.food = {
+      north: food(g => { R(g, 1, 3, 10, 6, '#c8843c'); R(g, 2, 2, 8, 1, '#c8843c'); R(g, 1, 8, 10, 1, '#8e5a22'); R(g, 3, 4, 6, 1, '#7a4a1c'); R(g, 3, 4, 1, 3, '#7a4a1c'); R(g, 3, 6, 5, 1, '#7a4a1c'); R(g, 7, 5, 1, 2, '#7a4a1c'); R(g, 5, 5, 1, 1, '#e8b068'); for (const [x, y] of [[2, 3], [6, 2], [9, 4], [4, 7], [8, 7]]) R(g, x, y, 1, 1, '#ffffff'); }), // korvapuusti
+      meads: food(g => { R(g, 1, 6, 10, 3, '#ffffff'); R(g, 2, 5, 8, 1, '#fff4e0'); R(g, 0, 8, 12, 2, '#9cc8e8'); R(g, 0, 9, 12, 1, '#6a9ac8'); R(g, 3, 2, 3, 4, '#e03a4a'); R(g, 7, 3, 3, 3, '#e03a4a'); R(g, 4, 1, 1, 1, '#4ea848'); R(g, 8, 2, 1, 1, '#4ea848'); R(g, 3, 3, 1, 1, '#ff8a94'); R(g, 7, 4, 1, 1, '#ff8a94'); }), // strawberries and cream
+      halls: food(g => { R(g, 2, 4, 7, 5, '#b07a44'); R(g, 2, 4, 7, 1, '#d8a468'); R(g, 3, 5, 5, 1, '#3a2010'); R(g, 9, 5, 2, 3, '#b07a44'); R(g, 10, 6, 1, 1, '#7a5028'); R(g, 2, 9, 7, 1, '#7a5028'); R(g, 5, 5, 2, 1, '#fff4c8'); R(g, 4, 1, 1, 2, '#c8d2ea'); R(g, 6, 0, 1, 3, '#c8d2ea'); }), // boiled coffee in a kuksa, cheese in it
+      canyon: food(g => { for (let i = 0; i < 8; i++) R(g, 1 + i, 8 - i, 10 - i, 1, i < 2 ? '#c8843c' : '#e8b860'); R(g, 1, 9, 10, 1, '#8e5a22'); R(g, 3, 6, 5, 1, '#c8502c'); R(g, 4, 5, 3, 1, '#c8502c'); R(g, 2, 8, 1, 1, '#f4d088'); R(g, 6, 7, 1, 1, '#f4d088'); }), // apple pie
+      gloam: food(g => { R(g, 1, 4, 10, 5, '#e8c048'); R(g, 1, 4, 10, 1, '#f8e080'); R(g, 1, 8, 10, 1, '#b08a20'); R(g, 3, 6, 1, 1, '#b08a20'); R(g, 7, 5, 1, 1, '#b08a20'); R(g, 9, 7, 1, 1, '#b08a20'); R(g, 5, 2, 1, 2, '#c8d2ea'); }), // cornbread
+      oz: food(g => { R(g, 2, 3, 8, 6, '#4a2a18'); R(g, 2, 3, 8, 1, '#6a4028'); R(g, 2, 8, 8, 1, '#2a160c'); R(g, 2, 5, 8, 1, '#fff4e0'); for (const [x, y] of [[3, 3], [6, 4], [8, 3], [4, 7], [7, 6], [9, 7], [2, 6]]) R(g, x, y, 1, 1, '#ffffff'); }) // lamington
+    };
+    S.keep = [
+      spr(12, 12, g => { const c = '#f0d878', d = '#b89a3c'; for (let i = 0; i < 6; i++) { R(g, 5 - i, i, 1, 1, c); R(g, 6 + i, i, 1, 1, c); R(g, 5 - i, 11 - i, 1, 1, d); R(g, 6 + i, 11 - i, 1, 1, d); } R(g, 0, 5, 12, 1, c); R(g, 5, 0, 2, 12, d); R(g, 5, 5, 2, 2, '#ffffff'); }), // himmeli
+      spr(12, 12, g => { const r = '#d83a2c', d = '#9c2420'; R(g, 2, 4, 8, 4, r); R(g, 8, 1, 3, 4, r); R(g, 10, 2, 2, 2, r); R(g, 9, 0, 1, 1, r); R(g, 2, 8, 2, 4, r); R(g, 7, 8, 2, 4, r); R(g, 1, 3, 2, 2, d); R(g, 2, 7, 8, 1, d); R(g, 4, 4, 3, 2, '#ffffff'); R(g, 5, 5, 1, 1, '#3a6ab0'); R(g, 8, 3, 2, 1, '#f0d040'); R(g, 10, 2, 1, 1, '#201410'); }), // Dala horse
+      spr(12, 12, g => { const c = '#3a3e4c', l = '#6a7088'; R(g, 2, 4, 8, 6, c); R(g, 3, 2, 6, 2, c); R(g, 1, 6, 1, 3, c); R(g, 10, 5, 1, 4, c); R(g, 3, 2, 4, 1, l); R(g, 2, 4, 2, 1, l); R(g, 6, 6, 3, 1, l); R(g, 4, 8, 1, 1, '#c8703a'); R(g, 8, 4, 1, 1, '#c8703a'); }), // magnetite
+      spr(12, 12, g => { const b = '#d8a848', d = '#96701c'; g.fillStyle = b; g.beginPath(); g.arc(6, 6.5, 5, 0, TAU); g.fill(); g.fillStyle = '#f4f0e0'; g.beginPath(); g.arc(6, 6.5, 3.4, 0, TAU); g.fill(); R(g, 6, 3, 1, 4, '#c8362c'); R(g, 6, 7, 1, 3, '#3a4a6a'); R(g, 5, 0, 2, 2, d); R(g, 2, 10, 8, 1, d); }), // compass
+      spr(12, 12, g => { const c = '#eaf4ff', d = '#a8bcdc'; for (let y = 0; y < 11; y++) { const w = y < 3 ? y + 1 : 4; R(g, 4 - (w >> 1) + 1, y, w, 1, c); R(g, 5, y, w >> 1, 1, d); } for (let y = 5; y < 11; y++) { const w = y < 7 ? y - 4 : 3; R(g, 8, y, w, 1, c); R(g, 9, y, 1, 1, d); } R(g, 1, 11, 10, 1, '#8a8496'); R(g, 4, 2, 1, 5, '#ffffff'); }), // quartz
+      spr(12, 12, g => { const c = '#5a5e70', l = '#8a90a8'; g.strokeStyle = c; g.lineWidth = 2; g.beginPath(); g.arc(3.5, 3.5, 2.2, 0, TAU); g.stroke(); R(g, 5, 4, 6, 2, c); R(g, 5, 4, 6, 1, l); R(g, 8, 6, 1, 3, c); R(g, 10, 6, 1, 2, c); }), // key
+      spr(12, 12, g => { g.fillStyle = '#e8f0ff'; g.beginPath(); g.ellipse(6, 6.5, 5, 4, 0, 0, TAU); g.fill(); for (const [x, y, col] of [[3, 5, '#ff6a8a'], [5, 4, '#6af0c0'], [7, 6, '#6aa8ff'], [5, 8, '#ffe060'], [8, 4, '#c88aff'], [4, 7, '#6af0c0'], [8, 8, '#ff6a8a']]) R(g, x, y, 2, 1, col); R(g, 4, 3, 2, 1, '#ffffff'); }) // opal
+    ];
+    S.waystone = padded(spr(14, 16, g => { // a road marker, older than the road
+      R(g, 3, 3, 8, 13, '#737b92'); R(g, 4, 2, 6, 1, '#737b92'); R(g, 5, 1, 4, 1, '#8e97b0'); R(g, 3, 3, 1, 13, '#98a2bc'); R(g, 10, 4, 1, 12, '#525a70');
+      R(g, 6, 5, 2, 7, '#bfe4ff'); R(g, 5, 7, 4, 1, '#bfe4ff'); R(g, 5, 10, 1, 1, '#bfe4ff'); R(g, 8, 5, 1, 1, '#bfe4ff'); R(g, 2, 15, 10, 1, '#525a70'); R(g, 3, 13, 2, 1, '#5f8a5a');
+    }), '#0e0c1c');
+  }
+
   function init() { buildQueen(); buildFoes(); buildItems();
+    buildRegional();
     for (const k of ['goblin', 'wolf', 'spider', 'bat', 'troll', 'tonttu', 'bloom']) S[k] = S[k].map(im => padded(im, '#0e0c1c'));
+    for (const th in SKN) for (const k in SKN[th]) SKN[th][k] = SKN[th][k].map(im => padded(im, '#0e0c1c'));
+    for (const th in S.food) S.food[th] = padded(S.food[th], '#3a2410');
+    S.keep = S.keep.map(im => padded(im, '#2a1c08'));
     S.cake = padded(S.cake, '#3a2410'); S.shard = S.shard.map(im => { const o = spr(11, 13, g => g.drawImage(im, 1, 1)); return outlined(o, '#1c3a6a'); }); }
 
-  return { S, init, spr, blit, glow, flashOf, tileSet, digits, drawQueen, Q, gemSprite, outlined };
+  return { S, SK: SKN, init, spr, blit, glow, flashOf, tileSet, digits, drawQueen, Q, gemSprite, outlined };
 })();

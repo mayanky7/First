@@ -7,7 +7,7 @@
 <title>Starlight Queen — Ana &amp; the Mountain of Light</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap">
-<meta name="description" content="A classic 2D fantasy platformer. For anyone who waited at eleven for a letter that never came. Ana walks out of a small Finnish town and west across the world, after the Mountain of Light.">
+<meta name="description" content="A side-scrolling story. For anyone who waited at eleven for a letter that never came. Ana walks out of a small Finnish town and west across the world, after the Mountain of Light, and towards somebody carrying a lantern.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%2305060c'/%3E%3Cpath d='M8 1l1.6 4.6L14 8l-4.4 1.4L8 15l-1.6-5.6L2 8l4.4-2.4z' fill='%23bdf4ff'/%3E%3C/svg%3E">
 <style>
   html,body{margin:0;height:100%;background:#05060c;overflow:hidden;touch-action:none;
@@ -27,6 +27,9 @@
   #bR{left:calc(24vmin + env(safe-area-inset-left))}
   #bJ{right:calc(4vmin + env(safe-area-inset-right))}
   #bF{right:calc(24vmin + env(safe-area-inset-right));bottom:calc(11vmin + env(safe-area-inset-bottom))}
+  .tb.sm{width:13vmin;height:13vmin;max-width:70px;max-height:70px;font-size:5vmin}
+  #bS{right:calc(6vmin + env(safe-area-inset-right));bottom:calc(25vmin + env(safe-area-inset-bottom))}
+  #bC{right:calc(41vmin + env(safe-area-inset-right));bottom:calc(5vmin + env(safe-area-inset-bottom))}
   #bP{top:calc(22vmin + env(safe-area-inset-top));bottom:auto;right:calc(3vmin + env(safe-area-inset-right));width:13vmin;height:13vmin;min-width:48px;min-height:48px;font-size:4.5vmin;opacity:.65}
   body.menu .tb:not(#bP){display:none}
   body.menu #bP{opacity:.35}
@@ -42,6 +45,8 @@
   <div class="tb" id="bR" data-a="right">&#9654;</div>
   <div class="tb" id="bF" data-a="fire">&#10022;</div>
   <div class="tb" id="bJ" data-a="jump">&#9650;</div>
+  <div class="tb sm" id="bS" data-a="light">&#9788;</div>
+  <div class="tb sm" id="bC" data-a="down">&#9660;</div>
   <div class="tb" id="bP" data-a="pause">II</div>
 </div>
 <div id="turn">Turn your phone sideways<br>to walk the road west.</div>
@@ -53,6 +58,7 @@
 <script src="js/backdrops.js"></script>
 <script src="js/levels.js"></script>
 <script src="js/entities.js"></script>
+<script src="js/wonders.js"></script>
 <script src="js/world.js"></script>
 <script src="js/scenes.js"></script>
 <script src="js/main.js"></script>

@@ -192,7 +192,7 @@
 
   const q = new URLSearchParams(location.search);
   if (document.fonts && document.fonts.load) ['600 20px Cinzel', '20px "EB Garamond"', 'italic 20px "EB Garamond"'].forEach(f => document.fonts.load(f).catch(() => { }));
-  if (q.has('at')) { Game.newGame(); Game.cp = { x: (+q.get('at') || 3) * T + 8, y: (ROWS - (+q.get('alt') || 3)) * T }; if (q.has('met')) Game.metBoy = true; if (q.has('coop')) Game.coop = Game.metBoy = true; Scenes.go('play', { resume: true, god: q.has('god') }); }
+  if (q.has('at')) { Game.newGame(); Game.cp = { x: (+q.get('at') || 3) * T + 8, y: (ROWS - (+q.get('alt') || 3)) * T }; if (q.has('down')) { Game.bossDown = true; Game.gems.kohinoor = 1; } Scenes.go('play', { resume: true, god: q.has('god') }); }
   else Scenes.go(q.get('scene') || 'title');
   window.__sq = { Game, World, Scenes, Input, Sound, step, frame };
   requestAnimationFrame(loop);

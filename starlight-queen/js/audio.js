@@ -122,6 +122,16 @@ const Sound = (() => {
       [1047, 1319, 1568, 2093, 2637, 3136].forEach((f, i) => { tone({ type: 'triangle', f, dur: 0.5, vol: 0.2, delay: i * 0.085, vib: i > 3 }); tone({ type: 'sine', f: f / 2, dur: 0.6, vol: 0.12, delay: i * 0.085 }); });
       noise({ freq: 6000, freq2: 9000, dur: 0.9, vol: 0.06 });
     },
+    light() { [660, 990, 1320, 1980].forEach((f, i) => tone({ type: 'sine', f, dur: 0.9, vol: 0.07 - i * 0.012, attack: 0.12, sustain: true, vib: i === 2 })); },
+    bridge() { tone({ type: 'triangle', f: 1568, dur: 0.5, vol: 0.12 }); tone({ type: 'sine', f: 2349, dur: 0.7, vol: 0.07, delay: 0.05 }); },
+    door() { [392, 587, 784, 1175, 1568].forEach((f, i) => { tone({ type: 'triangle', f, dur: 0.9, vol: 0.16, delay: i * 0.11, vib: true }); tone({ type: 'sine', f: f / 2, dur: 1.0, vol: 0.1, delay: i * 0.11 }); }); noise({ ftype: 'lowpass', freq: 240, freq2: 90, dur: 1.2, vol: 0.2, delay: 0.3 }); },
+    cloak() { noise({ ftype: 'bandpass', freq: 500, freq2: 900, dur: 0.18, vol: 0.09 }); },
+    gaze() { tone({ type: 'sawtooth', f: 73, f2: 69, dur: 1.5, vol: 0.2, attack: 0.3, sustain: true }); tone({ type: 'sawtooth', f: 110, f2: 104, dur: 1.5, vol: 0.12, attack: 0.3, sustain: true }); noise({ ftype: 'lowpass', freq: 300, dur: 1.4, vol: 0.1 }); },
+    seen() { tone({ type: 'sawtooth', f: 440, f2: 110, dur: 0.6, vol: 0.2 }); noise({ ftype: 'bandpass', freq: 2000, freq2: 400, dur: 0.5, vol: 0.14 }); },
+    wonder() { [392, 494, 587, 784, 988, 1175, 1568].forEach((f, i) => { tone({ type: 'sine', f, dur: 1.4, vol: 0.13, delay: i * 0.12, attack: 0.02 }); tone({ type: 'triangle', f: f * 2, dur: 0.5, vol: 0.05, delay: i * 0.12 }); }); },
+    warp() { tone({ type: 'sine', f: 180, f2: 1800, dur: 0.7, vol: 0.2, attack: 0.1, sustain: true }); tone({ type: 'triangle', f: 1800, f2: 240, dur: 0.9, vol: 0.14, delay: 0.66 }); noise({ ftype: 'bandpass', freq: 400, freq2: 5000, dur: 0.7, vol: 0.12 }); noise({ ftype: 'bandpass', freq: 5000, freq2: 500, dur: 0.8, vol: 0.1, delay: 0.66 }); },
+    lift() { [523, 784, 1047, 1568].forEach((f, i) => tone({ type: 'sine', f, dur: 0.5, vol: 0.14, delay: i * 0.06, attack: 0.02 })); },
+    hum() { [440, 494, 554, 659, 554].forEach((f, i) => tone({ type: 'sine', f, dur: 0.42, vol: 0.1, delay: i * 0.3, attack: 0.05, sustain: true, vib: true })); },
     star() { tone({ type: 'triangle', f: 1568, f2: 2093, dur: 0.6, vol: 0.16, vib: true }); }
   };
   function sfx(name, arg) { if (ac && FX[name]) FX[name](arg); }
@@ -177,6 +187,12 @@ const Sound = (() => {
       chords: ['Em', 'G', 'D', 'Em', 'C', 'G', 'D', 'Em', 'G', 'D', 'Am', 'Em', 'C', 'G', 'B', 'Em'],
       mel: ['E5.2 G5 A5 B5.2 A5 G5', 'B5.3 A5 G5.2 D5.2', 'F#5.2 A5 D6 A5.2 F#5.2', 'E5.4 B4.4', 'E5.2 G5 C6 B5.2 G5 E5', 'D5.2 G5.2 B5.4', 'A5.2 F#5 D5 F#5.2 A5.2', 'E5.8',
         'G5.2 B5 D6 B5.2 G5.2', 'A5.3 F#5 D5.4', 'E5.2 A5 C6 A5.2 E5.2', 'G5.3 E5 B4.4', 'E5 G5 C6 G5 E6.2 C6.2', 'D6.3 B5 G5.4', 'F#5.2 B5.2 D#6.2 B5.2', 'E6.8']
+    },
+    oz: { // a bush ballad for a morning that has not happened yet
+      step: 0.2, bar: 6, lead: 'whistle', arp: [0, 2, 3, 2, 4, 2], bass: 'jig', drums: 'jig', vary: true,
+      chords: ['A', 'D', 'A', 'E', 'A', 'D', 'E', 'A', 'F#m', 'D', 'A', 'E', 'D', 'A', 'E', 'A'],
+      mel: ['E5 A5 C#6 A5.2 E5', 'F#5 A5 D6 A5.2 F#5', 'E5.2 C#5 E5 A5.2', 'B4.2 E5 G#5 B5.2', 'C#6.2 A5 E5 A5 C#6', 'D6.2 A5 F#5.3', 'E5 G#5 B5 G#5 E5 B4', 'A4.3 A5.3',
+        'F#5.2 A5 C#6.2 A5', 'D5 F#5 A5 D6.3', 'C#6 A5 E5 C#5.2 E5', 'E5.3 B4.3', 'F#5 A5 D6 F#6.2 D6', 'E6.2 C#6 A5.2 E5', 'G#5 B5 E6 B5 G#5 E5', 'A5.6']
     },
     dawn: {
       step: 0.33, bar: 6, lead: 'flute', arp: [0, 1, 2, 3, 2, 1], bass: 'long',

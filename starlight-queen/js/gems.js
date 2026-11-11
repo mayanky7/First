@@ -1,6 +1,6 @@
 'use strict';
-/* Starlight Queen — the twelve diamonds. The first six are teaching stones invented for the game;
-   the last six are real, famous diamonds described with their real figures. */
+/* Starlight Queen — the thirteen diamonds. The first six are teaching stones invented for the game;
+   the last seven are real, famous diamonds described with their real figures. */
 const GEMS = [
   {
     id: 'first', name: 'The First Light', real: false, carat: 0.30, cut: 'Round brilliant', shape: 'round',
@@ -55,6 +55,12 @@ const GEMS = [
     color: 'Fancy deep greyish blue', tint: '#6f9ae8', clarity: 'VS1', origin: 'Kollur mine, Golconda, India',
     lesson: 'Blue from boron',
     text: '45.52 carats. A trace of boron makes it blue; after ultraviolet light it glows red for a while, like an ember. Cut from a larger French crown jewel, it now rests in the Smithsonian in Washington — one of the most visited objects in any museum.'
+  },
+  {
+    id: 'argyle', name: 'The Argyle Alpha', real: true, carat: 3.14, cut: 'Emerald shape', shape: 'emerald',
+    color: 'Fancy vivid purplish pink', tint: '#ff7ab8', clarity: 'Not published', origin: 'Argyle mine, East Kimberley, Western Australia',
+    lesson: 'Rarity',
+    text: 'Only 3.14 carats, and the largest vivid pink the Argyle mine ever offered at its yearly tender, in 2018. Argyle gave the world about nine in every ten of its pink diamonds; they were less than a thousandth of what it dug. The mine closed in November 2020. There will be no more. Small is not the same as slight.'
   },
   {
     id: 'tiffany', name: 'The Tiffany Yellow', real: true, carat: 128.54, cut: 'Cushion brilliant, 82 facets', shape: 'cushion',

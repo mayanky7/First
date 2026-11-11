@@ -39,10 +39,10 @@ function mix(c1, c2, t) {
 const Input = (() => {
   const KEYMAP = {
     KeyA: 'left', KeyD: 'right', KeyW: 'jump', Space: 'jump', KeyZ: 'jump', KeyS: 'down',
-    KeyX: 'fire', KeyF: 'fire', KeyC: 'fire', ShiftLeft: 'fire', ControlLeft: 'fire',
+    KeyX: 'fire', KeyF: 'fire', ControlLeft: 'fire', KeyE: 'light', KeyC: 'light', ShiftLeft: 'light',
     ArrowLeft: 'left2', ArrowRight: 'right2', ArrowUp: 'jump2', ArrowDown: 'down2',
-    KeyK: 'fire2', KeyL: 'fire2', KeyJ: 'fire2', Slash: 'fire2', ShiftRight: 'fire2', Period: 'fire2',
-    Enter: 'enter', NumpadEnter: 'enter', Digit2: 'join',
+    KeyK: 'fire2', KeyJ: 'fire2', Slash: 'fire2', KeyL: 'light2', Period: 'light2', ShiftRight: 'light2',
+    Enter: 'enter', NumpadEnter: 'enter',
     Escape: 'pause', KeyP: 'pause', KeyM: 'mute', KeyR: 'restart', KeyQ: 'quit', KeyG: 'full', KeyV: 'vault'
   };
   const MENU_ALIAS = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'dn', KeyS: 'dn', Space: 'enter', KeyZ: 'enter', KeyX: 'enter' };
@@ -105,14 +105,14 @@ const Input = (() => {
   function pollPad() {
     const pads = (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter(q => q && q.connected);
     pads.slice(0, 2).forEach((p, idx) => {
-      const sfx = (idx === 1 || (pads.length === 1 && typeof Game !== 'undefined' && Game.coop)) ? '2' : '';
+      const sfx = idx === 1 ? '2' : '';
       if (padSfx[idx] !== sfx) { for (const a in sources) { delete sources[a]['pad' + idx]; held[a] = Object.keys(sources[a]).length > 0; } padPrev[idx] = {}; padSfx[idx] = sfx; }
       const b = i => !!(p.buttons[i] && p.buttons[i].pressed);
       const ax = p.axes[0] || 0, ay = p.axes[1] || 0;
       const st = {
         ['left' + sfx]: ax < -0.35 || b(14), ['right' + sfx]: ax > 0.35 || b(15), ['down' + sfx]: ay > 0.5 || b(13),
-        ['jump' + sfx]: b(0) || b(1), ['fire' + sfx]: b(2) || b(3) || b(5) || b(7),
-        up: ay < -0.5 || b(12), dn: ay > 0.5 || b(13), enter: b(0), pause: idx === 0 && b(9), join: idx === 1 && b(9)
+        ['jump' + sfx]: b(0) || b(1), ['fire' + sfx]: b(2) || b(5) || b(7), ['light' + sfx]: b(3) || b(4) || b(6),
+        up: ay < -0.5 || b(12), dn: ay > 0.5 || b(13), enter: b(0), pause: idx === 0 && b(9)
       };
       const prev = padPrev[idx] || (padPrev[idx] = {});
       for (const a in st) if (st[a] !== !!prev[a]) { if (st[a]) first(); set(a, 'pad' + idx, st[a]); prev[a] = st[a]; }

@@ -1,16 +1,17 @@
 # Starlight Queen — Ana & the Mountain of Light
 
-A classic side-scrolling 2D platformer for the browser, written for grown-ups who were once
-children waiting for a letter, a wardrobe, or a wizard at the door.
+A side-scrolling story for the browser, written for grown-ups who were once children waiting
+for a letter, a wardrobe, or a wizard at the door.
 
-**Ana** waited hardest, in Kaamos, a small town at the top of Finland where the people are
-kind and every road leads back to the square. Nothing came. So, years later, she laces her
-boots and goes herself: across the frozen gulf to the manic midsummer lands of Sweden, down
-through the iron deeps of Kiruna, over the sea to a far country called America, where she
-meets **Mayank**, who has walked from India after a dream of an elf queen. Ahead is a Hoarder
-King, and the Koh-i-Noor, the Mountain of Light.
+**Ana** waited hardest, in Kaamos, a small town at the top of Finland named for the dark, where
+every child wears a reflector on the coat: a plastic snowflake that makes no light of its own.
+It waits for yours, and hands it back. Nothing came for her. So, years later, she goes herself:
+across the frozen gulf to the manic midsummer lands of Sweden, down through the iron deeps of
+Kiruna, over the sea to a far country called America, and, through a tear in the afternoon,
+to an Australia where it is already tomorrow. At the end of the road is a Hoarder King, the
+Koh-i-Noor, and **Mayank**, who has walked from India on the word of a dream, carrying a lantern.
 
-On the surface it is a quest. Underneath it is the shape of a life.
+It is a walk more than a fight. There are things to find and things to simply stand and look at.
 
 One long, continuous road. No build step, no dependencies, no asset files: every sprite,
 backdrop, sound and tune is generated in code.
@@ -24,38 +25,48 @@ cd starlight-queen
 python3 -m http.server 8000   # then visit http://localhost:8000
 ```
 
-| Action | One player | Two players: Ana | Two players: Mayank |
-| --- | --- | --- | --- |
-| Walk | ← → or A D | A D | ← → |
-| Leap (hold for height) | Space, W or ↑ | W or Space | ↑ |
-| Glide | leap again in the air and hold | same | same |
-| Arrow / sling | X, F or K | X or F | K or / |
-| Drop through a ledge | ↓ + leap | S + leap | ↓ + leap |
+| Action | Keys |
+| --- | --- |
+| Walk | ← → or A D |
+| Leap (hold for height) | Space, W or ↑ |
+| Glide | leap again in the air and hold |
+| Starlight arrow | X, F or K |
+| Hold up the reflector | E, C or Shift (L on the right hand) |
+| Cloak: be a stone by the road | hold ↓ or S, standing still |
+| Drop through a ledge | ↓ + leap |
 
 Esc pauses, M toggles sound, G toggles fullscreen, V opens the Vault from the title.
-Gamepads work (first pad is Ana, second is Mayank), and touch buttons appear on phones.
+A gamepad works, and touch buttons appear on phones. The prologue and epilogue wait for you:
+Enter or a tap turns the page, ← goes back.
 
-**Co-op:** once Ana meets Mayank in America, a second player presses **2** to join or leave.
+## A gentle road
 
-## The diamonds
+- **Five hearts**, refilled at every lantern, and the local food heals.
+- **Falling costs nothing.** Starlight lifts Ana out of any pit, sea or lava and sets her back
+  where she last stood.
+- **The reflector** borrows starlight: it wakes bridges that are only there in it, opens doors
+  that only show in it, undoes dust-wraiths, and opens the tear to Australia.
+- **The cloak** hides her from wolves and from the Hoarder King's gaze.
+- Nothing is timed, and nothing counts your mistakes.
 
-Twelve diamonds lie along the road, growing grander as it goes, each in a spot that takes
-some finding. Collecting one opens a card with its carat, cut, colour, clarity and origin, and
-a short lesson. The first six are teaching stones invented for the game (carat, cut, clarity,
-colour, fancy colour, where diamonds come from). The last six are real: Uncle Sam (buried — bump
-the right block), the Dresden
-Green, the Hope, the Tiffany Yellow, Cullinan I and the Koh-i-Noor, described with their real
-figures. The small sparkles are *melee* — the trade's word for diamonds under a fifth of a carat.
+## What there is to find
 
-Every diamond you have ever found stays in the **Vault**. At the end, the journey itself is
-graded on the four Cs: **carat** (diamonds found), **colour** (melee gathered), **clarity**
-(hits taken) and **cut** (time). Your finest grade is kept on the title screen.
+**Thirteen diamonds**, growing grander as the road goes on. Each opens a card with its carat,
+cut, colour, clarity and origin, and a short lesson. Six are teaching stones invented for the
+game; seven are real — Uncle Sam, the Dresden Green, the Hope, the Argyle Alpha, the Tiffany
+Yellow, Cullinan I and the Koh-i-Noor — described with their real figures. The small sparkles
+are *melee*, the trade's word for diamonds under a fifth of a carat.
 
-## The road
+**Seven wonders**, which give you nothing but the having seen them: the Fox Fires over Finland,
+a midsummer dance in Sweden, the Under-Sky in the Kiruna mine, a whale at sea, a stone window
+in the red rock, the Stone Kings, and the Southern Cross.
 
-Finland (Kaamos, the frozen Gulf of Bothnia) → Sweden (the midsummer lands, the iron deeps of
-Kiruna) → the western sea → the United States (red rock country, the Hoarder King's mesa).
-Lanterns and beacons are checkpoints; there are no lives, only flaws on your final grade.
+**Seven keepsakes**, one small true thing from each land, and each land's own food and
+creatures: småtroll and knockers, coyotes and jackalopes, cane toads, magpies and one drop bear.
+
+Everything found stays in the **Vault**. At the end the journey is graded like a stone on its
+four Cs: **carat** (diamonds carried), **colour** (melee gathered), **clarity** (wonders seen)
+and **cut** (keepsakes brought home).
 
 ## Code map
 
@@ -63,14 +74,15 @@ Lanterns and beacons are checkpoints; there are no lives, only flaws on your fin
 | --- | --- |
 | `js/core.js` | constants, helpers, keyboard / gamepad / touch input |
 | `js/audio.js` | WebAudio sequencer, songs and sound effects |
-| `js/gems.js` | the twelve diamonds and the faceted gem renderer |
-| `js/art.js` | sprites, tiles, glow, HUD digits |
+| `js/gems.js` | the thirteen diamonds and the faceted gem renderer |
+| `js/art.js` | sprites, regional creatures, foods, keepsakes, tiles |
 | `js/backdrops.js` | themes, parallax backdrops, scenery, ambient particles |
 | `js/levels.js` | the road, region by region, written with a small builder API |
-| `js/entities.js` | Ana, Mayank, foes, pickups, diamonds, the boss |
-| `js/world.js` | simulation step, camera, region blending, lighting, rendering |
+| `js/entities.js` | Ana, creatures, pickups, diamonds, keepsakes, the boss, Mayank |
+| `js/wonders.js` | the seven wonders and the tear in the afternoon |
+| `js/world.js` | simulation step, camera, starlight, region blending, rendering |
 | `js/scenes.js` | title, prologue, map, play, diamond cards, vault, graded ending |
 | `js/main.js` | boot, fixed-timestep loop, presentation |
 
 For testing, `index.html?at=300&alt=3` starts at a tile column and height; `&god` ignores
-enemy damage, `&coop` starts with both players.
+enemy damage, `&down` starts with the Hoarder King already fallen.

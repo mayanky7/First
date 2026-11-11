@@ -1,10 +1,11 @@
 'use strict';
-/* Starlight Queen — Ana and Mayank, their foes, items, diamonds, and the Hoarder King */
+/* Starlight Queen — Ana, the creatures of the road, items, diamonds, the Hoarder King, and Mayank at the end of it */
 
-const SOLID = { '#': 1, 'B': 1, '?': 1, 'H': 1, 'S': 1, 'G': 1, 'U': 1, 'X': 1 };
+const SOLID = { '#': 1, 'B': 1, '?': 1, 'H': 1, 'S': 1, 'G': 1, 'U': 1, 'X': 1, 'D': 1 };
+function moonOn(w, cx, cy) { return w.moon[cx + cy * w.cols] > 0; } // a bridge of light, there only while starlight has touched it
 function tileAt(w, cx, cy) { if (cy < 0 || cy >= w.rows || cx < 0 || cx >= w.cols) return '.'; return w.grid[cy][cx]; }
 function solidAt(w, cx, cy) { if (cx < 0 || cx >= w.cols) return true; return !!SOLID[tileAt(w, cx, cy)]; }
-function standable(w, cx, cy) { const ch = tileAt(w, cx, cy); return !!SOLID[ch] || ch === '='; }
+function standable(w, cx, cy) { const ch = tileAt(w, cx, cy); return !!SOLID[ch] || ch === '=' || (ch === 'M' && moonOn(w, cx, cy)); }
 function overlap(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 
 function moveBody(w, e) {
@@ -21,7 +22,7 @@ function moveBody(w, e) {
   if (e.vy >= 0) {
     for (let cx = x0; cx <= x1; cx++) {
       const ch = tileAt(w, cx, y1);
-      if (SOLID[ch] || (ch === '=' && oldBottom <= y1 * T + 0.01 && !(e.drop > 0))) { e.y = y1 * T - e.h; e.vy = 0; e.onGround = true; break; }
+      if (SOLID[ch] || ((ch === '=' || (ch === 'M' && moonOn(w, cx, y1))) && oldBottom <= y1 * T + 0.01 && !(e.drop > 0))) { e.y = y1 * T - e.h; e.vy = 0; e.onGround = true; break; }
     }
   } else {
     const mid = Math.floor((e.x + e.w / 2) / T);
@@ -34,8 +35,7 @@ function moveBody(w, e) {
 /* ============ Players ============ */
 function act(p, n, hit) {
   const f = hit ? Input.hit : Input.held;
-  if (!Game.coop) return f(n) || f(n + '2');
-  return f(p.id ? n + '2' : n);
+  return f(n) || f(n + '2'); // either hand may steer her
 }
 function nearP(w, e) {
   let best = w.player, bd = 1e9;
@@ -43,12 +43,13 @@ function nearP(w, e) {
   return best;
 }
 function touch(w, e) { for (const p of w.players) if (!p.dead && overlap(e, p)) return p; return null; }
+const MAXHP = 5;
 function makePlayer(x, y, id) {
   return {
     id: id || 0,
     x: x - 5, y: y - 22, w: 10, h: 22, vx: 0, vy: 0, face: 1, onGround: false, coy: 0, jbuf: 0, jumping: false,
-    gliding: false, glide: 0, drop: 0, hp: 3, inv: 0, hurtT: 0, radiant: 0, arrows: 3, arrowT: 0, shootT: 0,
-    anim: 0, dead: 0, ride: null, control: true, stepT: 0
+    gliding: false, glide: 0, drop: 0, hp: MAXHP, inv: 0, hurtT: 0, radiant: 0, arrows: 3, arrowT: 0, shootT: 0,
+    anim: 0, dead: 0, ride: null, control: true, stepT: 0, lum: 100, lit: false, lumOut: false, cloak: false, cloakT: 0
   };
 }
 const GLIDE_MAX = 44;
@@ -58,6 +59,18 @@ function updatePlayer(w, p) {
   const ctl = p.control && p.hurtT <= 0;
   const ax = ctl ? (act(p, 'right') ? 1 : 0) - (act(p, 'left') ? 1 : 0) : (p.auto || 0);
   const maxv = p.radiant > 0 ? 2.35 : 2.0;
+  // the cloak: held still and low, she is a stone by the road, and unseeing things pass her by
+  p.cloakT = ctl && act(p, 'down') && p.onGround && !ax && !act(p, 'jump') ? p.cloakT + 1 : 0;
+  const wasCloak = p.cloak; p.cloak = p.cloakT > 7;
+  if (p.cloak && !wasCloak) { Sound.sfx('cloak'); World.dust(p.x + 5, p.y + p.h, 5, true); }
+  if (p.cloak) p.vx = 0;
+  // the lantern: starlight, raised
+  if (p.lumOut && p.lum > 30) p.lumOut = false;
+  const lightNow = ctl && act(p, 'light') && !p.lumOut && !p.cloak;
+  if (lightNow && !p.lit) Sound.sfx('light');
+  p.lit = lightNow;
+  if (p.lit) { p.lum -= 0.4; if (p.lum <= 0) { p.lum = 0; p.lit = false; p.lumOut = true; Sound.sfx('empty'); } if (w.t % 3 === 0) World.spark(p.x + 5 + rand(-14, 14), p.y - 6 + rand(-10, 10), w.t % 2 ? '#ffffff' : '#bff4ff', 1); }
+  else p.lum = Math.min(100, p.lum + 0.17);
   if (ax) { p.vx += ax * (p.onGround ? 0.2 : 0.15); p.face = ax; }
   else if (p.hurtT <= 0) p.vx *= p.onGround ? 0.76 : 0.95;
   p.vx = clamp(p.vx, -maxv, maxv);
@@ -97,7 +110,7 @@ function updatePlayer(w, p) {
 
   // shoot
   if (p.arrows < 3) { p.arrowT++; if (p.arrowT >= 48) { p.arrows++; p.arrowT = 0; } }
-  const fireNow = ctl && (act(p, 'fire', true) || p.fireBuf); p.fireBuf = false;
+  const fireNow = ctl && !p.cloak && (act(p, 'fire', true) || p.fireBuf); p.fireBuf = false;
   if (fireNow) {
     if (p.arrows > 0) {
       p.arrows--; p.shootT = 14;
@@ -121,10 +134,24 @@ function updatePlayer(w, p) {
   const cy0 = Math.floor((p.y + 4) / T), cy1 = Math.floor((p.y + p.h - 1) / T);
   for (let cy = cy0; cy <= cy1; cy++) for (let cx = cx0; cx <= cx1; cx++) {
     const ch = tileAt(w, cx, cy);
-    if (ch === '~' && p.y + p.h > cy * T + 7) { killPlayer(w, p, true); return; }
+    if (ch === '~' && p.y + p.h > cy * T + 7) { liftPlayer(w, p); return; }
     if (ch === '^' && p.y + p.h > cy * T + 8) { if (hurtPlayer(w, p, 0)) p.vy = -4.2; }
   }
-  if (p.y > w.rows * T + 24) killPlayer(w, p, true);
+  if (p.y > w.rows * T + 24) { liftPlayer(w, p); return; }
+  // the last sure footing: where starlight will set her down again if she falls
+  if (p.onGround && !p.ride && p.hurtT <= 0 && w.t % 3 === 0) {
+    const cy = Math.floor((p.y + p.h + 1) / T), a = Math.floor((p.x + 1) / T), b = Math.floor((p.x + p.w - 1) / T);
+    if (tileAt(w, a, cy) === '#' && tileAt(w, b, cy) === '#' && tileAt(w, a, cy - 1) !== '^' && tileAt(w, b, cy - 1) !== '^') p.safe = { x: p.x, y: p.y };
+  }
+}
+// A fall is not a death on this road: the light lifts her out and sets her back where she last stood.
+function liftPlayer(w, p) {
+  if (p.dead || w.state !== 'play') return;
+  const s = p.safe || { x: w.spawn.x - 5, y: w.spawn.y - p.h };
+  for (let i = 0; i < 12; i++) w.parts.push({ x: p.x + 5 + rand(-6, 6), y: Math.min(p.y + 10, w.cam.y + H + 4), vx: rand(-0.6, 0.6), vy: rand(-3.4, -1.2), life: rand(24, 44), col: i % 2 ? '#bff4ff' : '#ffffff', glow: 1, sz: 1 + (i % 2) });
+  p.x = s.x; p.y = s.y; p.vx = p.vy = 0; p.gliding = false; p.ride = null; p.drop = 0; p.inv = Math.max(p.inv, 100); p.sq = 1.3; p.onGround = true;
+  Sound.sfx('lift'); World.ring(p.x + 5, p.y + 11, 34, 5, 16, '#bff4ff'); World.sparkle(p.x + 5, p.y + 8, '#bff4ff', 18);
+  if (!Game.seen.lift) { Game.seen.lift = 1; World.toast('Starlight sets her back on the road. Nothing is lost.'); }
 }
 function standingOnPlat(w, p) {
   if (p.ride) return false;
@@ -136,7 +163,7 @@ function hurtPlayer(w, p, fromX) {
   if (p.inv > 0 || p.dead || p.radiant > 0 || w.state !== 'play' || w.god) return false;
   p.hp--; Game.stats.hits++;
   if (p.hp <= 0) { killPlayer(w, p); return true; }
-  w.hitstop = 7; w.hurtFx = 16; p.inv = 110; p.hurtT = 22;
+  w.hitstop = 7; w.hurtFx = 16; p.inv = 130; p.hurtT = 22;
   for (let i = 0; i < 8; i++) { const a = rand(TAU); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * 2, vy: Math.sin(a) * 2 - 0.5, life: 18, col: i % 2 ? '#ff5a6a' : '#ffffff', sz: 2, g: 0.1 }); } p.vy = -3.2; p.vx = (fromX ? Math.sign(p.x + 5 - fromX) || -p.face : -p.face) * 2.2;
   p.gliding = false; p.ride = null;
   Sound.sfx('hurt'); w.shake = 8;
@@ -153,7 +180,23 @@ function killPlayer(w, p, pit) {
 function drawPlayer(c, w, p, ox, oy) {
   if (p.dead) return;
   if (p.inv > 0 && p.hurtT <= 0 && (p.inv >> 3) % 2) return;
-  const set = p.id ? (p.shootT > 0 ? Art.S.boyShoot : Art.S.boy) : (p.shootT > 0 ? Art.S.queenShoot : Art.S.queen);
+  if (p.cloak) { // under the cloak she takes the colours of the ground she kneels on
+    const P = w.theme.tiles, x = Math.round(p.x - ox - 3), y = Math.round(p.y - oy + p.h);
+    R(c, x + 2, y - 10, 12, 10, P.body); R(c, x, y - 7, 16, 7, P.body); R(c, x + 4, y - 12, 8, 2, P.body);
+    R(c, x + 4, y - 12, 8, 1, P.cap); R(c, x + 2, y - 10, 12, 1, P.cap); R(c, x, y - 7, 2, 1, P.cap); R(c, x + 14, y - 7, 2, 1, P.cap);
+    R(c, x + 5, y - 6, 1, 4, P.dark); R(c, x + 10, y - 8, 1, 5, P.dark); R(c, x, y - 1, 16, 1, P.dark);
+    if ((w.t >> 4) % 4 === 0) R(c, x + 7 + ((w.t >> 6) % 3), y - 9, 1, 1, '#ffffff');
+    return;
+  }
+  if (p.lit) { // the star in her raised hand
+    const sx = Math.round(p.x - ox + 5 + p.face * 5), sy = Math.round(p.y - oy - 7 + Math.sin(w.t * 0.12) * 1.5), k = 0.75 + 0.25 * Math.sin(w.t * 0.2);
+    c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = '#bfe4ff';
+    for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + w.t * 0.012, len = 46 + (i % 3) * 22, wd = 0.035 + (i % 2) * 0.03; c.globalAlpha = 0.1 * k; c.beginPath(); c.moveTo(sx, sy); c.lineTo(sx + Math.cos(a - wd) * len, sy + Math.sin(a - wd) * len); c.lineTo(sx + Math.cos(a + wd) * len, sy + Math.sin(a + wd) * len); c.fill(); }
+    c.restore();
+    Art.glow(c, sx, sy, 20 + k * 6, '#dff2ff', 0.8);
+    R(c, sx - 1, sy - 5, 2, 10, '#ffffff'); R(c, sx - 5, sy - 1, 10, 2, '#ffffff'); R(c, sx - 2, sy - 2, 4, 4, '#ffffff'); R(c, sx - 3, sy - 3, 1, 1, '#bff4ff'); R(c, sx + 2, sy - 3, 1, 1, '#bff4ff'); R(c, sx - 3, sy + 2, 1, 1, '#bff4ff'); R(c, sx + 2, sy + 2, 1, 1, '#bff4ff');
+  }
+  const set = p.shootT > 0 ? Art.S.queenShoot : Art.S.queen;
   let img;
   if (p.hurtT > 0) img = set.hurt[0];
   else if (!p.onGround) img = p.gliding ? set.glide[(w.t >> 3) % 2] : p.vy < 0 ? set.jump[0] : set.fall[(w.t >> 3) % 2];
@@ -182,6 +225,8 @@ function makeEnt(s) {
   if (d.init) d.init(e);
   return e;
 }
+// each land has its own creatures: the same habits, a different animal
+function SK(e, kind) { const k = Art.SK[e.sk]; return (k && k[kind]) || Art.S[kind]; }
 function walker(w, e, speed, hold) {
   let ledge = false;
   if (e.onGround) {
@@ -216,33 +261,33 @@ function damageFoe(w, e, n, how) {
 
 ENT.goblin = {
   foe: true, stomp: true, arrow: true,
-  init(e) { e.w = 12; e.h = 13; e.x -= 6; e.y -= 13; e.img = Art.S.goblin[0]; },
-  update(w, e) { walker(w, e, 0.45 * e.manic); e.img = Art.S.goblin[(w.t >> (e.manic > 1 ? 2 : 3)) % 2]; },
+  init(e) { e.w = 12; e.h = 13; e.x -= 6; e.y -= 13; e.img = SK(e, 'goblin')[0]; },
+  update(w, e) { walker(w, e, 0.45 * e.manic); e.img = SK(e, 'goblin')[(w.t >> (e.manic > 1 ? 2 : 3)) % 2]; },
   draw(c, w, e, ox, oy) { Art.blit(c, e.flash > 0 ? Art.flashOf(e.img) : e.img, e.x - ox - 2, e.y - oy - 3, e.dir < 0); }
 };
 ENT.wolf = {
   foe: true, stomp: true, arrow: true,
-  init(e) { e.w = 20; e.h = 12; e.x -= 10; e.y -= 12; e.charge = 0; e.img = Art.S.wolf[0]; },
+  init(e) { e.w = 20; e.h = 12; e.x -= 10; e.y -= 12; e.charge = 0; e.img = SK(e, 'wolf')[0]; },
   update(w, e) {
-    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 120 && Math.abs(p.y + p.h - e.y - e.h) < 30 && !p.dead;
+    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 120 && Math.abs(p.y + p.h - e.y - e.h) < 30 && !p.dead && !p.cloak;
     if (near) { if (!e.charge) { Sound.sfx('growl'); e.wait = 18; } e.charge = 50; e.dir = dx > 0 ? 1 : -1; }
     else if (e.charge > 0) e.charge--;
     if (e.wait > 0) { e.wait--; walker(w, e, 0, true); }
     else walker(w, e, (e.charge ? 1.75 : 0.5) * (e.manic > 1 ? 1.12 : 1), e.charge > 0);
-    e.img = Art.S.wolf[e.wait > 0 ? 0 : (w.t >> (e.charge ? 2 : 3)) % 2];
+    e.img = SK(e, 'wolf')[e.wait > 0 ? 0 : (w.t >> (e.charge ? 2 : 3)) % 2];
   },
   draw(c, w, e, ox, oy) { Art.blit(c, e.flash > 0 ? Art.flashOf(e.img) : e.img, e.x - ox - 3, e.y - oy - 4, e.dir < 0); }
 };
 ENT.spider = {
   foe: true, stomp: true, arrow: true,
-  init(e) { e.w = 14; e.h = 11; e.ax = e.x; e.ay = e.y; e.x -= 7; e.off = 4; e.st = 0; e.max = (e.len || 4) * T - 14; e.img = Art.S.spider[0]; },
+  init(e) { e.w = 14; e.h = 11; e.ax = e.x; e.ay = e.y; e.x -= 7; e.off = 4; e.st = 0; e.max = (e.len || 4) * T - 14; e.img = SK(e, 'spider')[0]; },
   update(w, e) {
     const p = nearP(w, e);
-    if (e.st === 0) { e.off = Math.max(4, e.off - 0.6); if (e.off <= 4 && Math.abs(p.x + 5 - e.ax) < 46 && p.y > e.ay - 8) e.st = 1; }
+    if (e.st === 0) { e.off = Math.max(4, e.off - 0.6); if (e.off <= 4 && Math.abs(p.x + 5 - e.ax) < 46 && p.y > e.ay - 8 && !p.cloak) e.st = 1; }
     else if (e.st === 1) { e.off += 2.4; if (e.off >= e.max) { e.off = e.max; e.st = 2; e.hold = 50; } }
     else if (--e.hold <= 0) e.st = 0;
     e.y = e.ay + e.off;
-    e.img = Art.S.spider[(w.t >> 3) % 2];
+    e.img = SK(e, 'spider')[(w.t >> 3) % 2];
   },
   draw(c, w, e, ox, oy) {
     R(c, e.ax - ox, e.ay - oy, 1, e.off + 2, 'rgba(230,230,255,0.55)');
@@ -251,7 +296,7 @@ ENT.spider = {
 };
 ENT.bat = {
   foe: true, stomp: true, arrow: true,
-  init(e) { e.w = 12; e.h = 9; e.x -= 6; e.st = 0; e.img = Art.S.bat[2]; e.needAttach = true; },
+  init(e) { e.w = 12; e.h = 9; e.x -= 6; e.st = 0; e.img = SK(e, 'bat')[2]; e.needAttach = true; },
   update(w, e) {
     if (e.needAttach && e.free) { e.needAttach = false; e.y -= 20; e.st = 1; }
     if (e.needAttach) {
@@ -261,13 +306,13 @@ ENT.bat = {
       e.y = (cy + 1) * T;
     }
     const p = nearP(w, e), dx = p.x + 5 - (e.x + 6), dy = p.y + 6 - e.y;
-    if (e.st === 0) { if (Math.abs(dx) < 110 && dy > -10 && dy < 240) { e.st = 1; e.t0 = 0; } e.img = Art.S.bat[2]; return; }
+    if (e.st === 0) { if (Math.abs(dx) < 110 && dy > -10 && dy < 240 && !p.cloak) { e.st = 1; e.t0 = 0; } e.img = SK(e, 'bat')[2]; return; }
     e.t0++;
     e.vx = clamp(e.vx + Math.sign(dx) * 0.05, -1.25, 1.25);
     const ty = p.y + 2 + Math.sin(e.t0 * 0.08) * 16;
     e.vy = clamp(e.vy + Math.sign(ty - e.y) * 0.06, -1.2, 1.5);
     e.x += e.vx; e.y += e.vy; e.dir = e.vx > 0 ? 1 : -1;
-    e.img = Art.S.bat[(w.t >> 2) % 2];
+    e.img = SK(e, 'bat')[(w.t >> 2) % 2];
   },
   draw(c, w, e, ox, oy) { Art.blit(c, e.img, e.x - ox - 3, e.y - oy - 2); }
 };
@@ -279,8 +324,13 @@ ENT.wraith = {
     if (e.invT > 0) e.invT--;
     if (e.st === 0) {
       e.y = e.by + Math.sin(w.t * 0.05 + e.x) * 3;
-      if (Math.abs(dx) < 74 && Math.abs(dy) < 80) { e.st = 1; Sound.sfx('wraith'); }
+      if (Math.abs(dx) < 74 && Math.abs(dy) < 80 && !p.cloak) { e.st = 1; Sound.sfx('wraith'); }
       return;
+    }
+    if (e.st > 0) { // raised starlight undoes them
+      let lit = false; for (const q of w.players) if (q.lit && !q.dead && Math.hypot(q.x + 5 - (e.x + 6), q.y + 8 - (e.y + 10)) < 78) { lit = true; e.vx = Math.sign(e.x - q.x) * 0.9; e.vy = -0.2; }
+      if (lit) { e.burn = (e.burn || 0) + 1; e.flash = 2; if (w.t % 2 === 0) w.parts.push({ x: e.x + rand(12), y: e.y + rand(20), vx: rand(-0.4, 0.4), vy: rand(-1.2, -0.3), life: 20, col: '#dff2ff', glow: 1, sz: 1 }); if (e.burn > 34) { slay(w, e, 'radiant'); Sound.sfx('wraith'); World.ring(e.x + 6, e.y + 10, 4, 40, 16, '#dff2ff'); return; } }
+      else if (e.burn > 0) e.burn--;
     }
     if (e.fade < 1) { e.fade = Math.min(1, e.fade + 0.025); return; }
     const d = Math.hypot(dx, dy) || 1;
@@ -307,13 +357,13 @@ ENT.wraith = {
 };
 ENT.troll = {
   foe: true, stomp: true, arrow: true,
-  init(e) { e.w = 20; e.h = 30; e.x -= 10; e.y -= 30; e.hp = 3; e.img = Art.S.troll[0]; },
+  init(e) { e.w = 20; e.h = 30; e.x -= 10; e.y -= 30; e.hp = 3; e.img = SK(e, 'troll')[0]; },
   update(w, e) {
     if (e.invT > 0) e.invT--;
-    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 90 && Math.abs(p.y + p.h - e.y - e.h) < 40;
+    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 90 && Math.abs(p.y + p.h - e.y - e.h) < 40 && !p.cloak;
     if (near && e.onGround && w.t % 30 === 0) e.dir = dx > 0 ? 1 : -1;
     walker(w, e, near ? 0.6 : 0.3, near);
-    e.img = Art.S.troll[(w.t >> 4) % 2];
+    e.img = SK(e, 'troll')[(w.t >> 4) % 2];
   },
   draw(c, w, e, ox, oy) { Art.blit(c, e.flash > 0 ? Art.flashOf(e.img) : e.img, e.x - ox - 5, e.y - oy - 4, e.dir < 0); }
 };
@@ -359,7 +409,7 @@ ENT.pop = { // shard popping out of a rune block
 function pickup(kind) {
   return {
     lit: true,
-    init(e) { const im = Art.S[kind]; e.img = im.length ? im[0] : im; e.w = e.img.width; e.h = e.img.height; e.x -= e.w / 2; e.rise = 16; e.ty = e.y - e.h; e.y = e.ty + 16; },
+    init(e) { const th = World.colTheme ? World.colTheme[clamp(Math.floor(e.x / T), 0, World.cols - 1)] : null; e.food = kind === 'cake' && th ? th.food : null; const im = e.food ? Art.S.food[th.id] : Art.S[kind]; e.img = im.length ? im[0] : im; e.w = e.img.width; e.h = e.img.height; e.x -= e.w / 2; e.rise = 16; e.ty = e.y - e.h; e.y = e.ty + 16; },
     update(w, e) {
       if (e.rise > 0) { e.rise -= 0.5; e.y = e.ty + e.rise; return; }
       e.y = e.ty + Math.sin(w.t * 0.08) * 1.2 - 1;
@@ -367,7 +417,7 @@ function pickup(kind) {
       const p = touch(w, e);
       if (p) {
         e.dead = true;
-        if (kind === 'cake') { if (p.hp < 3) { p.hp++; Sound.sfx('heal'); } else { Sound.sfx('item'); p.arrows = 3; p.radiant = Math.max(p.radiant, 150); } World.sparkle(e.x + 6, e.y + 5, '#7af0c0', 10); }
+        if (kind === 'cake') { if (p.hp < MAXHP) { p.hp++; Sound.sfx('heal'); } else { Sound.sfx('item'); p.arrows = 3; p.radiant = Math.max(p.radiant, 150); } p.lum = 100; p.lumOut = false; if (e.food) World.toast(e.food); World.sparkle(e.x + 6, e.y + 5, '#7af0c0', 10); }
         if (kind === 'bloom') { p.radiant = 600; Sound.sfx('power'); World.sparkle(e.x + 7, e.y + 6, '#fff6b0', 18); w.flash = 0.4; }
       }
     },
@@ -389,7 +439,7 @@ ENT.arrow = {
     e.x += e.vx; e.life--;
     if (w.t % 2 === 0) w.parts.push({ x: e.x + 5, y: e.y + 1, vx: 0, vy: rand(-0.2, 0.2), life: 12, col: '#9fe8ff', glow: 1, sz: 1 });
     const cx = Math.floor((e.x + (e.dir > 0 ? 10 : 0)) / T), cy = Math.floor((e.y + 1) / T);
-    if (e.life <= 0 || solidAt(w, cx, cy)) { e.dead = true; World.sparkle(e.x + 5, e.y + 1, '#bff4ff', 5); return; }
+    if (e.life <= 0 || solidAt(w, cx, cy)) { e.dead = true; World.sparkle(e.x + 5, e.y + 1, '#bff4ff', 5); if ('?HSG'.includes(tileAt(w, cx, cy))) World.bump(cx, cy); return; } // an arrow wakes a runestone
     for (const f of w.ents) {
       const d = ENT[f.type];
       if (!d.foe || f.dead || !overlap(e, f)) continue;
@@ -421,23 +471,24 @@ ENT.plat = {
 };
 ENT.lantern = {
   lit: true,
-  init(e) { e.w = 12; e.h = 26; e.x -= 6; e.y -= 26; e.on = false; },
+  init(e) { e.w = 12; e.h = 26; e.x -= 6; e.y -= 26; e.warm = !!e.on; e.on = false; },
   update(w, e) {
     if (!e.on && touch(w, e)) {
-      e.on = true; World.checkpoint(e.x + 6, e.y + 26); World.ring(e.x + 6, e.y + 5, 3, 44, 18, '#bff4ff'); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, '#bff4ff', 16); World.toast('Lantern kindled — you will return here if you fall');
+      e.on = true; World.checkpoint(e.x + 6, e.y + 26); World.ring(e.x + 6, e.y + 5, 3, 44, 18, e.warm ? '#ffd070' : '#bff4ff'); Sound.sfx('lantern'); World.sparkle(e.x + 6, e.y + 4, e.warm ? '#ffd070' : '#bff4ff', 16);
+      World.toast(e.warm ? 'This one was already burning. Somebody has kept it for her.' : 'Lantern kindled. The road will remember you here.');
     }
   },
   draw(c, w, e, ox, oy) {
-    if (e.on) Art.glow(c, e.x - ox + 6, e.y - oy + 5, 13 + Math.sin(w.t * 0.1) * 1.5, '#bff4ff', 0.5);
-    Art.blit(c, Art.S.lantern[e.on ? 1 : 0], e.x - ox, e.y - oy);
+    if (e.on || e.warm) Art.glow(c, e.x - ox + 6, e.y - oy + 5, 13 + Math.sin(w.t * 0.1) * 1.5, e.warm ? '#ffc060' : '#bff4ff', 0.5);
+    Art.blit(c, Art.S.lantern[e.on || e.warm ? 1 : 0], e.x - ox, e.y - oy);
   },
-  light(e) { return e.on ? 62 : 0; }
+  light(e) { return e.on || e.warm ? 62 : 0; }
 };
 ENT.sign = {
   init(e) { e.w = 14; e.h = 16; e.x -= 7; e.y -= 16; },
-  update(w, e) { const p = nearP(w, e); if (Math.abs(p.x + 5 - (e.x + 7)) < 22 && Math.abs(p.y + p.h - (e.y + 16)) < 26) { w.signText = e.text; w.signNear = e; } },
+  update(w, e) { const p = nearP(w, e); if (Math.abs(p.x + 5 - (e.x + 7)) < 30 && Math.abs(p.y + p.h - (e.y + 16)) < 30) { w.signText = e.text; w.signNear = e; } },
   draw(c, w, e, ox, oy) {
-    Art.blit(c, Art.S.tonttu[(w.t >> 5) % 2], e.x - ox, e.y - oy);
+    if (e.text.startsWith('Tonttu:')) Art.blit(c, Art.S.tonttu[(w.t >> 5) % 2], e.x - ox, e.y - oy); else c.drawImage(Art.S.waystone, Math.round(e.x - ox), Math.round(e.y - oy));
     if (w.signNear === e) Art.glow(c, e.x - ox + 7, e.y - oy + 8, 12, '#9ff4ff', 0.5);
   },
   light() { return 22; }
@@ -465,7 +516,7 @@ ENT.beacon = {
 /* ============ The Hoarder King ============ */
 ENT.boss = {
   foe: true, stomp: false, arrow: false,
-  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.hp = 12; e.max = 12; e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
+  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.hp = 10; e.max = 10; e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
   update(w, e) {
     const A = w.arena, p = nearP(w, e);
     e.t0++;
@@ -482,10 +533,10 @@ ENT.boss = {
         break;
       case 'idle': {
         face();
-        e.vx = e.dir * (p2 ? 0.6 : 0.4);
+        e.vx = e.dir * (p2 ? 0.5 : 0.35);
         if (Math.abs(p.x - e.x) < 64) e.vx = 0;
         e.x = clamp(e.x + e.vx, A.x0 + 4, A.x1 - e.w - 4);
-        if (e.t0 > (p2 ? 46 : 74)) {
+        if (e.t0 > (p2 ? 70 : 96)) {
           const opts = ['slam', 'embers', 'charge'].filter(o => o !== e.last);
           const pick = opts[Math.floor(rand(opts.length))];
           e.last = pick; e.slams = p2 ? 2 : 1; go('tele_' + pick);
@@ -493,41 +544,41 @@ ENT.boss = {
         }
         break;
       }
-      case 'tele_slam': if (e.t0 > (p2 ? 30 : 42)) go('slam'); break;
+      case 'tele_slam': if (e.t0 > (p2 ? 44 : 54)) go('slam'); break;
       case 'slam':
         if (e.t0 === 1) {
           Sound.sfx('slam'); w.shake = 14;
           const fx = e.x + 11 + e.dir * 18;
-          for (const d of [-1, 1]) w.ents.push(makeEnt({ t: 'wave', x: fx, y: A.floor, dir: d, sp: p2 ? 2.7 : 2.2 }));
+          for (const d of [-1, 1]) w.ents.push(makeEnt({ t: 'wave', x: fx, y: A.floor, dir: d, sp: p2 ? 2.1 : 1.8 }));
           for (let i = 0; i < 12; i++) w.parts.push({ x: fx + rand(-8, 8), y: A.floor, vx: rand(-2, 2), vy: rand(-3, -1), life: 30, col: i % 2 ? '#ff7a20' : '#5a5058', g: 0.15, sz: 2, glow: i % 2 });
         }
-        if (e.t0 > 34) { if (--e.slams > 0) { face(); go('tele_slam'); e.t0 = 14; } else { e.stunLen = 105; go('stun'); } }
+        if (e.t0 > 34) { if (--e.slams > 0) { face(); go('tele_slam'); e.t0 = 10; } else { e.stunLen = 150; go('stun'); } }
         break;
-      case 'tele_embers': if (e.t0 > (p2 ? 34 : 46)) go('embers'); break;
+      case 'tele_embers': if (e.t0 > (p2 ? 46 : 56)) go('embers'); break;
       case 'embers':
         if (e.t0 === 1) {
-          const n = p2 ? 8 : 5, span = A.x1 - A.x0 - 40;
+          const n = p2 ? 5 : 4, span = A.x1 - A.x0 - 40;
           for (let i = 0; i < n; i++) {
             const tx = i === 0 ? p.x + 5 : i === 1 ? p.x + 5 + p.face * 40 : A.x0 + 20 + rand(span);
-            w.ents.push(makeEnt({ t: 'fall', x: clamp(tx, A.x0 + 10, A.x1 - 10), y: A.floor, delay: 20 + i * (p2 ? 11 : 15) }));
+            w.ents.push(makeEnt({ t: 'fall', x: clamp(tx, A.x0 + 10, A.x1 - 10), y: A.floor, delay: 30 + i * (p2 ? 16 : 20) }));
           }
         }
-        if (e.t0 > 50) { e.stunLen = 80; go('stun'); }
+        if (e.t0 > 50) { e.stunLen = 130; go('stun'); }
         break;
-      case 'tele_charge': face(); if (e.t0 > (p2 ? 32 : 44)) { go('charge'); Sound.sfx('roar'); } break;
+      case 'tele_charge': face(); if (e.t0 > (p2 ? 48 : 58)) { go('charge'); Sound.sfx('roar'); } break;
       case 'charge': {
-        e.x += e.dir * (p2 ? 3.7 : 3.1);
+        e.x += e.dir * (p2 ? 3.0 : 2.6);
         if (w.t % 3 === 0) w.parts.push({ x: e.x + 11 - e.dir * 10, y: A.floor - 2, vx: -e.dir * rand(1), vy: rand(-1.5, -0.3), life: 24, col: '#ff7a20', g: 0.05, sz: 2, glow: 1 });
         if (e.x <= A.x0 + 2 || e.x + e.w >= A.x1 - 2) {
           e.x = clamp(e.x, A.x0 + 2, A.x1 - e.w - 2);
-          Sound.sfx('slam'); w.shake = 18; e.stunLen = 125; go('stun');
-          for (let i = 0; i < 3; i++) w.ents.push(makeEnt({ t: 'fall', x: A.x0 + 30 + rand(A.x1 - A.x0 - 60), y: A.floor, delay: 16 + i * 14 }));
+          Sound.sfx('slam'); w.shake = 18; e.stunLen = 170; go('stun');
+          for (let i = 0; i < 2; i++) w.ents.push(makeEnt({ t: 'fall', x: A.x0 + 30 + rand(A.x1 - A.x0 - 60), y: A.floor, delay: 30 + i * 22 }));
         }
         break;
       }
       case 'stun':
         if (e.t0 === 1) e.stunDmg = 0;
-        if (e.t0 > e.stunLen || e.stunDmg >= 3) go('recover');
+        if (e.t0 > e.stunLen || e.stunDmg >= 4) go('recover');
         break;
       case 'recover':
         if (e.t0 === 1 && !e.p2 && e.hp <= e.max / 2) {
@@ -656,7 +707,7 @@ ENT.star = { // the seven stars, freed
   }
 };
 
-/* ----- the twelve diamonds ----- */
+/* ----- the diamonds ----- */
 ENT.gem = {
   lit: true,
   init(e) { e.def = GEM_BY_ID[e.gem]; e.img = Art.gemSprite(e.def); e.w = e.img.width; e.h = e.img.height; e.x -= e.w / 2; e.y -= e.h + 4; e.by = e.y; },
@@ -675,22 +726,64 @@ ENT.gem = {
   },
   light(e) { return 34 + e.def.n * 2; }
 };
-/* ----- Mayank, met in America: he has walked from India, following a dream ----- */
+/* ----- Mayank: he walked from India on the word of a dream, and waits past the mesa with a lantern ----- */
+const MAYANK_LINES = [
+  'Mayank: “A dream promised me an elf queen in a distant land. I walked|from India to find her. You are not what I pictured. Good.”',
+  'He holds out the lantern. On her coat, the reflector|does the one thing it was made to do.'
+];
 ENT.boy = {
-  init(e) { e.w = 10; e.h = 22; e.x -= 5; e.y -= 22; },
+  init(e) { e.w = 10; e.h = 22; e.x -= 5; e.y -= 22; e.dir = -1; e.anim = 0; e.met = false; e.metT = 0; e.walk = false; },
   update(w, e) {
-    if (Game.coop) return;
-    const p = nearP(w, e), near = Math.abs(p.x - e.x) < 34 && Math.abs(p.y - e.y) < 30;
-    e.dir = p.x < e.x ? -1 : 1;
-    if (near) {
-      if (!Game.metBoy) { Game.metBoy = true; Sound.sfx('oneup'); World.sparkle(e.x + 5, e.y + 6, '#ffd070', 14); Game.save(); }
-      w.signText = 'Mayank: “A dream promised me an elf queen in a distant land. I walked|from India to find her. You are not what I pictured. Good.”' + (Input.touch ? '' : '   ·   Player 2 — press [2] to join'); w.signNear = e;
+    if (w.bossAlive) return; // he is past the mesa. She has to get there.
+    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 42 && Math.abs(p.y - e.y) < 30 && !p.dead;
+    if (!e.met) {
+      e.dir = dx < 0 ? -1 : 1;
+      if (Math.abs(dx) < 300 && w.t % 64 === 0) { w.parts.push({ x: e.x + 5 + e.dir * 6, y: e.y - 4, vx: e.dir * 0.25, vy: -0.4, life: 80, max: 80, img: WonderArt.A.note }); if (w.t % 256 === 0) Sound.sfx('hum'); }
+      if (near && w.state === 'play') { e.met = true; e.metT = w.t; Game.metBoy = true; Game.save(); Sound.sfx('wonder'); World.ring(p.x + 5, p.y + 9, 4, 120, 40, '#fff3c4'); World.sparkle(p.x + 5, p.y + 9, '#fff3c4', 30); w.flash = 0.3; }
+      return;
     }
+    const age = w.t - e.metT;
+    if (w.state === 'play' && age < 760) { w.signText = MAYANK_LINES[age < 380 ? 0 : 1]; w.signNear = e; }
+    // from here he walks beside her
+    const tx = clamp(p.x - 18, w.arena.x0 + 8, w.maxX - 24), d = tx - e.x;
+    e.walk = Math.abs(d) > 5 && age > 60;
+    if (e.walk) { e.x += clamp(d * 0.12, -1.7, 1.7); e.dir = d < 0 ? -1 : 1; e.anim += 0.2; } else if (Math.abs(dx) > 4) e.dir = dx < 0 ? -1 : 1;
   },
   draw(c, w, e, ox, oy) {
-    if (Game.coop) return;
-    Art.blit(c, Art.S.boy.idle[(w.t >> 5) % 2], e.x - ox + 5 - 12, e.y - oy + 22 - 28, e.dir < 0);
-    if (!Game.metBoy && (w.t >> 4) % 2) { R(c, e.x - ox + 4, e.y - oy - 12, 2, 5, '#ffd070'); R(c, e.x - ox + 4, e.y - oy - 5, 2, 2, '#ffd070'); }
+    if (w.bossAlive) return;
+    const S = Art.S.boy, img = e.walk ? S.run[Math.floor(e.anim) % 6] : S.idle[(w.t >> 5) % 2], x = e.x - ox + 5, y = e.y - oy;
+    const lx = Math.round(x + e.dir * 8), ly = Math.round(y + 11);
+    Art.glow(c, lx, ly + 2, 16 + Math.sin(w.t * 0.13) * 2, '#ffc060', 0.6);
+    Art.blit(c, img, x - 12, y + 22 - 28, e.dir < 0);
+    R(c, lx - 1, ly - 2, 3, 1, '#6a4a30'); R(c, lx - 2, ly - 1, 5, 5, '#ffd070'); R(c, lx - 1, ly, 3, 3, '#fff6c8'); R(c, lx - 2, ly + 4, 5, 1, '#6a4a30');
+    if (e.met) { // lantern to reflector: it makes no light of its own; it waits for yours, and hands it back
+      const p = w.player, age = w.t - e.metT, k = clamp(age / 60, 0, 1) * (0.75 + 0.25 * Math.sin(w.t * 0.1)), px = Math.round(p.x - ox + 5 - p.face * 2), py = Math.round(p.y - oy + 9);
+      Art.glow(c, px, py, 9 + 5 * k, '#dff2ff', 0.75 * k);
+      R(c, px - 1, py, 3, 1, '#ffffff'); R(c, px, py - 1, 1, 3, '#ffffff');
+      if (age < 760) { c.save(); c.globalCompositeOperation = 'lighter'; c.strokeStyle = `rgba(255,236,190,${0.3 * k})`; c.lineWidth = 2; c.beginPath(); c.moveTo(lx, ly + 1); c.lineTo(px, py); c.stroke(); c.restore(); }
+    }
   },
-  light() { return 40; }
+  light(e) { return World.bossAlive ? 0 : 58; }
+};
+
+/* ----- keepsakes: one small true thing from each land ----- */
+const KEEPS = [
+  { id: 'himmeli', name: 'A himmeli', line: 'Straw, thread and geometry. It turns in the slightest breath.' },
+  { id: 'dala', name: 'A Dala horse', line: 'Carved in Dalarna, painted red. It has never run anywhere.' },
+  { id: 'ore', name: 'A lump of Kiruna magnetite', line: 'Iron ore. Hold a compass near and it changes its mind.' },
+  { id: 'compass', name: 'A ship’s compass', line: 'It points north, which is home, which is no help.' },
+  { id: 'quartz', name: 'An Arkansas quartz crystal', line: 'Not a diamond. Quite honest about it.' },
+  { id: 'key', name: 'A small iron key', line: 'It opens a room with no windows.' },
+  { id: 'opal', name: 'An opal', line: 'From Coober Pedy. Fire, kept in a stone, and nobody shut it in.' }
+];
+const KEEP_BY_ID = {}; KEEPS.forEach((k, i) => { k.n = i; KEEP_BY_ID[k.id] = k; });
+ENT.keep = {
+  lit: true,
+  init(e) { e.def = KEEP_BY_ID[e.keep]; e.img = Art.S.keep[e.def.n]; e.w = 12; e.h = 12; e.x -= 6; e.y -= 14; e.by = e.y; },
+  update(w, e) {
+    e.y = e.by + Math.sin(w.t * 0.06 + e.x) * 2;
+    if (touch(w, e)) { e.dead = true; Game.keeps[e.def.id] = 1; Sound.sfx('item'); World.sparkle(e.x + 6, e.y + 6, '#ffe9a8', 16); World.ring(e.x + 6, e.y + 6, 3, 30, 14, '#ffe9a8'); World.toast(e.def.name + '.|' + e.def.line, true); Game.save(); }
+  },
+  draw(c, w, e, ox, oy) { Art.glow(c, e.x - ox + 6, e.y - oy + 6, 11 + Math.sin(w.t * 0.1) * 2, '#ffe9a8', 0.4); c.drawImage(e.img, Math.round(e.x - ox), Math.round(e.y - oy)); },
+  light() { return 30; }
 };

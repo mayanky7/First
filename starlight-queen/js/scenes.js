@@ -1,42 +1,45 @@
 'use strict';
 /* Starlight Queen — game state and scenes (title, prologue, map, play, vault, ending) */
 const Game = {
-  cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, coop: false, metBoy: false, bossDown: false, region: 0,
-  stats: { foes: 0, deaths: 0, hits: 0, frames: 0 }, saved: null, vault: {}, best: null,
+  cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0,
+  stats: { foes: 0, deaths: 0, hits: 0, frames: 0 }, saved: null, vault: {}, shelf: {}, sights: {}, best: null,
   newGame() {
-    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, coop: false, metBoy: !!this.read('sq-met'), bossDown: false, region: 0, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
+    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
   },
   read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
   write(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
-  loadSave() { this.saved = this.read('sq-run'); this.vault = this.read('sq-vault') || {}; this.best = this.read('sq-best'); },
+  loadSave() { this.saved = this.read('sq-run'); this.vault = this.read('sq-vault') || {}; this.shelf = this.read('sq-shelf') || {}; this.sights = this.read('sq-sights') || {}; this.best = this.read('sq-best'); },
+  keepAll() { // what has been found stays found, whatever becomes of the journey it was found on
+    Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault); Object.assign(this.shelf, this.keeps); this.write('sq-shelf', this.shelf); Object.assign(this.sights, this.wonders); this.write('sq-sights', this.sights);
+  },
   save() {
-    Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault); if (this.metBoy) this.write('sq-met', 1);
-    this.saved = { cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, coop: this.coop, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
+    this.keepAll();
+    this.saved = { doors: this.doors, keeps: this.keeps, wonders: this.wonders, cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
     this.write('sq-run', this.saved);
   },
   resume() {
     const s = this.saved; this.newGame();
-    Object.assign(this, { cp: s.cp, melee: s.melee || 0, gems: s.gems || {}, seen: s.seen || {}, coop: !!s.coop, metBoy: !!s.metBoy, bossDown: !!s.bossDown, region: s.region || 0, stats: s.stats || this.stats });
+    Object.assign(this, { doors: s.doors || {}, keeps: s.keeps || {}, wonders: s.wonders || {}, cp: s.cp, melee: s.melee || 0, gems: s.gems || {}, seen: s.seen || {}, metBoy: !!s.metBoy, bossDown: !!s.bossDown, region: s.region || 0, stats: s.stats || this.stats });
     (s.meleeGot || []).forEach(n => { this.meleeGot[n] = 1; });
   },
   playerDied() { Scenes.go('play', { respawn: true }); },
   carats() { return GEMS.reduce((a, g) => a + (this.gems[g.id] ? g.carat : 0), 0); },
+  // The journey is graded like a stone, but on what was found and seen: nothing here counts falls, or the clock.
   grade() {
-    const st = this.stats, flaws = st.hits + st.deaths * 2, got = Object.keys(this.meleeGot).length, frac = got / Math.max(1, World.meleeTotal || got);
-    const min = st.frames / 3600;
-    const clarity = flaws === 0 ? ['FL', 'Flawless'] : flaws <= 3 ? ['IF', 'Internally flawless'] : flaws <= 8 ? ['VVS', 'Very, very slightly included'] : flaws <= 16 ? ['VS', 'Very slightly included'] : flaws <= 30 ? ['SI', 'Slightly included'] : ['I', 'Included'];
-    const ci = frac >= 0.95 ? 0 : frac >= 0.9 ? 1 : frac >= 0.84 ? 2 : frac >= 0.75 ? 3 : frac >= 0.65 ? 4 : frac >= 0.5 ? 5 : frac >= 0.35 ? 6 : 7;
-    const cut = min < 9 ? 'Excellent' : min < 12 ? 'Very good' : min < 16 ? 'Good' : min < 24 ? 'Fair' : 'Poor';
-    const sec = Math.floor(st.frames / 60);
+    const got = Object.keys(this.meleeGot).length, total = World.meleeTotal || got, frac = got / Math.max(1, total);
+    const seen = Object.keys(this.wonders).length, kept = Object.keys(this.keeps).length, n = Object.keys(this.gems).length;
+    const ci = frac >= 0.95 ? 0 : frac >= 0.88 ? 1 : frac >= 0.8 ? 2 : frac >= 0.7 ? 3 : frac >= 0.6 ? 4 : frac >= 0.45 ? 5 : frac >= 0.3 ? 6 : 7;
+    const cl = [['I', 'Included'], ['I', 'Included'], ['SI', 'Slightly included'], ['SI', 'Slightly included'], ['VS', 'Very slightly included'], ['VVS', 'Very, very slightly included'], ['IF', 'Internally flawless'], ['FL', 'Flawless']][Math.min(7, seen)];
+    const cut = ['Fair', 'Fair', 'Good', 'Good', 'Very good', 'Very good', 'Very good', 'Excellent'][Math.min(7, kept)];
     return {
-      carat: this.carats(), n: Object.keys(this.gems).length, clarity, colour: 'DEFGHIJK'[ci], cut, got, total: World.meleeTotal || got,
-      time: `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`, flaws, score: (7 - ci) + [0, 1, 2, 3, 4, 5][['I', 'SI', 'VS', 'VVS', 'IF', 'FL'].indexOf(clarity[0])] + ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'].indexOf(cut) + Object.keys(this.gems).length
+      carat: this.carats(), n, clarity: cl, colour: 'DEFGHIJK'[ci], cut, got, total, seen, kept,
+      score: n * 3 + (7 - ci) + seen + kept
     };
   },
   finish() {
     const g = this.grade(); this.lastGrade = g;
     if (!this.best || g.score > this.best.score) { this.best = g; this.write('sq-best', g); }
-    Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault);
+    this.keepAll();
     this.write('sq-run', null); this.saved = null;
     Scenes.go('ending');
   }
@@ -225,7 +228,7 @@ const Vista = (() => {
     cliff(c, dawn ? '#2a5a3c' : '#05080f', dawn ? '#6ab868' : '#1a2440');
     // the Queen
     const img = Art.S.anaBigCrown[(t >> 5) % 2];
-    if (dawn && Game.metBoy) c.drawImage(Art.S.boy.idle[(t >> 5) % 2], 36, 94, 48, 56);
+    if (dawn) c.drawImage(Art.S.boy.idle[(t >> 5) % 2], 36, 94, 48, 56);
     Art.glow(c, 104, 122, 44 + Math.sin(t * 0.05) * 4, dawn ? '#fff6d0' : '#9fd8ff', dawn ? 0.5 : 0.6);
     c.drawImage(img, 82, 82);
     for (let i = 0; i < 8; i++) {
@@ -286,53 +289,73 @@ Scenes.list.title = {
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  'The winter they turned eleven, every child in Kaamos waited for something to come for them — a letter, a wardrobe, a wizard at the door. Ana waited hardest. Nothing came.',
-  'Kaamos is a small town at the top of Finland. The winter night lasts fifty days. Every road leads back to the square. The people are kind, and that is the worst of it: there is nothing to run from, only somewhere she is not.',
-  'So she read her way out. And then she grew up, the way one does — sensibly, and all at once — and put the books on a high shelf, where they could keep an eye on her.',
-  'It was the Tonttu who came in the end: the house-spirit, who had been there all along. Far to the west, he said, a king is gathering the great diamonds of the world, so that their light is his alone. The greatest is the Koh-i-Noor — the Mountain of Light.',
-  '“Nobody is coming for you, Ana,” he said. “Nobody ever was. That is not the sad part. That is the door.”',
-  'So she laces her boots. Across the frozen gulf lie the manic midsummer lands of Sweden; beyond the sea, a far country called America. The road goes west. It was always going to.'
+  { s: 'Kaamos is at the top of Finland. After us there is Norway, and after Norway, weather.' },
+  { s: 'The town is named for the dark. The sun goes down in November and is not expected back until January. We don’t take it personally. We have stars.' },
+  { s: 'Every child here wears a reflector on the coat: a plastic snowflake. It makes no light of its own. It waits for yours, and hands it back.' },
+  { s: 'Ana wore hers and waited. Winters, she stood where the road leaves town and shone at every pair of headlamps. It was always the snowplough.' },
+  { s: 'At eleven she left her window open all night for an owl. We have owls. None had post. Towards morning, at thirty below, somebody quietly shut it.' },
+  { s: 'She tried the back of the wardrobe. It was the back of a wardrobe.' },
+  { s: 'What did come was the library bus, every second Thursday, engine running. Two weeks a book. She read the way other people pack.' },
+  { s: 'We were good to her; let that be written down. We knew her shoe size. We knew how she took her coffee before she had tasted any.' },
+  { s: 'She grew up, which here is done mostly in the dark, and kept the reflector on. For the traffic, she said.' },
+  { s: 'It was the one who had shut the window who spoke, in the end. The Tonttu: red cap, low opinion of everything. He cannot cross the threshold and has never seen the need. Somebody has to be in.' },
+  { s: 'News reaches a Tonttu by chimney. Far in the west a Hoarder King is shutting the world’s great diamonds in a room without windows. For every stone he shuts away, a star goes out. Up here, we notice.', fx: 'gems' },
+  { s: '“A diamond is a reflector with airs,” said the Tonttu. “Shut it in the dark and you have bought a pebble. Somebody should go and tell him.”' },
+  { s: 'The greatest is the Koh-i-Noor, the Mountain of Light. It ruins every king who holds it, the old story says. A woman may carry it unharmed. The Tonttu looked at Ana.' },
+  { s: 'Over the frozen gulf, then. Through the manic lands of Sweden, where at midsummer nobody, including the sun, goes to bed. Down the iron mines. Over the sea to a far country called America.' },
+  { s: 'He looked at her coat on its hook, and the snowflake pinned to it. “That only works,” he said, “on a road.”' },
+  { s: 'She goes this morning, in the dark, which narrows it down very little. We shall watch her reflector as far as the last street lamp. After that it wants somebody else’s light.' }
 ];
+// Shared by the prologue and the epilogue: one card at a time, and nothing moves on until the reader does.
+const Cards = {
+  step(sc, n) { // returns 'next' past the last card, 'skip', or null
+    sc.pt++;
+    if (Input.hit('pause')) return 'skip';
+    if (Input.touch && Input.hit('tap') && Input.tapX > 330 && Input.tapY < 26) return 'skip';
+    if ((Input.hit('left') || Input.hit('left2')) && sc.i > 0) { sc.i--; sc.pt = 12; Sound.sfx('select'); return null; }
+    if ((Input.hit('enter') || Input.hit('right') || Input.hit('right2')) && sc.pt > 18) {
+      if (sc.i >= n - 1) return 'next';
+      sc.i++; sc.pt = 0; Sound.sfx('select');
+    }
+    return null;
+  },
+  hint(u, sc, n, y) {
+    const g = u.ctx, s = u.s, a = clamp((sc.pt - 50) / 30, 0, 1);
+    for (let k = 0; k < n; k++) { g.save(); g.translate((192 - (n - 1) * 3.5 + k * 7) * s, y * s); g.rotate(Math.PI / 4); g.fillStyle = k === sc.i ? '#f3d384' : k < sc.i ? 'rgba(243,211,132,0.45)' : 'rgba(200,210,240,0.22)'; const d = (k === sc.i ? 2.2 : 1.5) * s; g.fillRect(-d / 2, -d / 2, d, d); g.restore(); }
+    if (Input.touch) { u.text('TAP TO GO ON', 192, y + 8, 4.4, { color: '#cfd5ea', alpha: a * (0.55 + 0.3 * Math.sin(sc.t * 0.08)), ls: 1.6, title: true }); u.text('SKIP', 366, 12, 4.4, { color: '#cfd5ea', alpha: 0.6, ls: 1.4, title: true }); }
+    else u.rich('[ENTER]  go on        [←]  back        [ESC]  skip', 192, y + 9, 5, { color: '#aeb9d6', alpha: 0.35 + 0.5 * a });
+  }
+};
 Scenes.list.intro = {
+  noBloom: true,
   enter() { this.t = 0; this.i = 0; this.pt = 0; Sound.music('title'); },
   update(busy) {
-    this.t++; this.pt++;
+    this.t++;
     if (busy) return;
-    if (Input.hit('pause')) { Sound.sfx('confirm'); Scenes.go('map'); return; }
-    if (Input.hit('enter') && this.pt > 25 || this.pt > 660) {
-      if (this.i >= PROLOGUE.length - 1) { Scenes.go('map'); return; }
-      this.i++; this.pt = 0;
-    }
+    const r = Cards.step(this, PROLOGUE.length);
+    if (r) { Sound.sfx('confirm'); Scenes.go('map'); }
   },
   draw(c) {
-    const t = this.t;
-    c.fillStyle = '#04050d'; c.fillRect(0, 0, W, H);
-    const r = rng(5);
-    for (let i = 0; i < 60; i++) R(c, r() * W, r() * H, 1, 1, r() < 0.3 ? '#55628e' : '#2a3458');
-    // the great diamonds, drawn west into the Hoarder's keeping during the third verse
-    const gone = this.i > 3 ? 1 : this.i === 3 ? clamp((this.pt - 60) / 200, 0, 1) : 0;
-    if (this.i >= 3) Vista.STARS.forEach(([x, y], i) => {
-      const k = clamp(gone * 7 - i, 0, 1);
-      if (k >= 1) return;
-      const sx = lerp(x, -20, k * k), sy = lerp(y + 18, 150, k), gem = GEMS[5 + i] || GEMS[11];
-      const tw = 0.7 + 0.3 * Math.sin(t * 0.07 + i * 1.9);
-      Art.glow(c, sx, sy, 11 + tw * 4, gem.tint, 0.7 * tw);
-      const img = Art.gemSprite(gem, 11); c.drawImage(img, Math.round(sx - 5), Math.round(sy - 5));
-    });
-    if (this.i >= 3) Art.glow(c, 0, 150, 60 * clamp(gone + (this.i > 3 ? 1 : 0), 0, 1), '#ff3a10', 0.6);
-    if (this.i !== 3) {
-      const a = this.i === 0 || this.i === 4 ? clamp(this.pt / 80, 0, 1) : 1;
-      c.globalAlpha = a;
-      Art.glow(c, 192, 66, 40 + Math.sin(t * 0.05) * 4, '#9fd8ff', 0.7 * a);
-      c.drawImage(Art.S.anaBig[(t >> 5) % 2], 169, 24);
-      c.globalAlpha = 1;
+    const t = this.t, card = PROLOGUE[this.i], fx = card.fx;
+    Vista.draw(c, t, false, 0); // the establishing shot: Kaamos under the aurora
+    c.fillStyle = 'rgba(3,5,16,0.42)'; c.fillRect(0, 0, W, H);
+    if (fx === 'gems') { // the great stones, drawn west across the sky
+      const k0 = clamp((this.pt - 20) / 260, 0, 1);
+      for (let i = 0; i < 7; i++) {
+        const k = clamp(k0 * 1.6 - i * 0.09, 0, 1); if (k <= 0 || k >= 1) continue;
+        const x = 400 - k * 440, y = 112 + i * 3 - Math.sin(k * Math.PI) * (22 + i * 3), gem = GEMS[5 + i] || GEMS[11];
+        for (let j = 1; j < 10; j++) R(c, x + j * 3, y + j * 0.3, 2, 1, `rgba(255,255,255,${0.5 - j * 0.05})`);
+        Art.glow(c, x, y, 9, gem.tint, 0.7); c.drawImage(Art.gemSprite(gem, 9), Math.round(x - 4), Math.round(y - 4));
+      }
+      Art.glow(c, 0, 120, 70 * k0, '#ff3a10', 0.45);
     }
   },
   drawHi(u) {
-    const a = clamp(this.pt / 40, 0, 1);
-    const lines = u.wrap(PROLOGUE[this.i], 290, 10.5, { italic: true });
-    lines.forEach((ln, k) => u.text(ln, 192, 144 + k * 14 - (lines.length - 1) * 7, 10.5, { color: '#e6ecff', alpha: a, italic: true }));
-    u.text(Input.touch ? 'TAP TO CONTINUE' : 'ENTER  CONTINUE   ·   ESC  SKIP', 192, 205, 5.6, { color: '#98a6cc', ls: 1.2, title: true });
+    const g = u.ctx, s = u.s, a = clamp(this.pt / 34, 0, 1), card = PROLOGUE[this.i];
+    const lines = u.wrap(card.s, 296, 11, { italic: true }), lh = 15.5, cy = 68;
+    { const gr = g.createRadialGradient(192 * s, cy * s, 0, 192 * s, cy * s, 190 * s); gr.addColorStop(0, 'rgba(3,5,18,0.78)'); gr.addColorStop(0.6, 'rgba(3,5,18,0.5)'); gr.addColorStop(1, 'rgba(3,5,18,0)'); g.save(); g.translate(0, cy * s); g.scale(1, 0.42); g.translate(0, -cy * s); g.fillStyle = gr; g.fillRect(0, (cy - 200) * s, W * s, 400 * s); g.restore(); }
+    lines.forEach((ln, k) => u.text(ln, 192, cy + (k - (lines.length - 1) / 2) * lh + (1 - a) * 3, 11, { color: '#f2f5ff', alpha: a, italic: true }));
+    Cards.hint(u, this, PROLOGUE.length, 197);
   }
 };
 
@@ -425,6 +448,10 @@ Scenes.list.map = {
   }
 };
 
+function touchKeys(t) { // on a phone the same hints name the on-screen buttons
+  if (!Input.touch) return t;
+  return t.replace(/\[←\] \[→\]/g, '◀ ▶').replace(/\[SPACE\]/g, '▲').replace(/\[X\]/g, '✦').replace(/— \[E\] —/g, '— ☼ —').replace(/\[E\]/g, '☼').replace(/\[↓\]/g, '▼');
+}
 /* ---------- Play ---------- */
 Scenes.list.play = {
   enter(a) { this.paused = false; World.load(a.respawn || a.resume ? Game.cp : (Game.cp = null)); if (a.god) World.god = true; },
@@ -443,25 +470,20 @@ Scenes.list.play = {
       else if (pick === 3) { Game.save(); Scenes.go('title'); }
       return;
     }
-    if (Input.hit('join') && Game.metBoy && w.state === 'play' && !w.card && w.players.every(p => !p.dead)) {
-      Game.coop = !Game.coop;
-      if (Game.coop) { w.addPlayer2(); w.toast('Ana    [A] [D]  walk     [W]  leap     [X]  arrow|Mayank    [←] [→]  walk     [↑]  leap     [K]  sling', true); } else { w.dropPlayer2(); w.toast('Mayank falls a step behind.  [2]  calls him back.'); }
-      Game.save();
-    }
-    if (!Game.seen.hello && w.state === 'play' && w.introT <= 0 && !w.fight) { Game.seen.hello = 1; w.toast(Input.touch ? '◀ ▶  walk      ▲  leap      ✦  arrow' : '[←] [→]  walk      [SPACE]  leap      [X]  arrow', true); }
+    if (!Game.seen.hello && w.state === 'play' && w.introT <= 0 && !w.fight) { Game.seen.hello = 1; w.toast(touchKeys('[←] [→]  walk      [SPACE]  leap      [X]  arrow      [E]  reflector'), true); }
     w.update();
   },
   draw(c) { World.draw(c); },
   drawHi(u) {
     const w = World, z = w.introZone;
-    if (w.introT > 0 && z && w.state === 'play' && !w.card && !w.gemFx && !w.signText) {
+    if (w.introT > 0 && z && w.state === 'play' && !w.card && !w.gemFx && !w.signText && !w.wonderCard && !w.warpFx) {
       const a = clamp(w.introT / 40, 0, 1) * clamp((180 - w.introT) / 30, 0, 1);
       u.panel(0, 46, W, 60, 0.3 * a, '#060814');
       u.text(z.title.toUpperCase(), 192, 66, 24, { metal: true, alpha: a, title: true, ls: 7 });
       u.rule(192, 84, 96, '#c8a860', a);
       u.text(z.sub, 192, 96, 9.5, { color: '#f0e8d0', alpha: a, italic: true });
     }
-    const g = u.ctx, s = u.s, showUI = !w.card && !w.gemFx && w.state !== 'clear';
+    const g = u.ctx, s = u.s, showUI = !w.card && !w.gemFx && w.state !== 'clear' && !(w.wonderCard && w.wonderCard.t < 590);
     if (showUI) { // ---- the interface: crisp, quiet, one visual language ----
       const top = g.createLinearGradient(0, 0, 0, 36 * s); top.addColorStop(0, 'rgba(10,14,36,0.62)'); top.addColorStop(1, 'rgba(10,14,36,0)');
       g.fillStyle = top; g.fillRect(0, 0, W * s, 36 * s);
@@ -474,11 +496,17 @@ Scenes.list.play = {
       };
       w.players.forEach((p, k) => {
         const y = 7 + k * 21;
-        for (let i = 0; i < 3; i++) heart(12 + i * 12, y, 8.4, i < p.hp, i === p.hp - 1 && p.inv > 96 ? 1 : 0);
+        for (let i = 0; i < MAXHP; i++) heart(12 + i * 11, y, 8, i < p.hp, i === p.hp - 1 && p.inv > 116 ? 1 : 0);
         for (let i = 0; i < 3; i++) { const on = i < p.arrows; g.save(); g.translate((10 + i * 7.5) * s, (y + 15.5) * s); g.rotate(Math.PI / 4); g.fillStyle = on ? '#dffbff' : 'rgba(223,251,255,0.22)'; if (on) { g.shadowColor = '#7fd8ff'; g.shadowBlur = 3 * s; } g.fillRect(-1.9 * s, -1.9 * s, 3.8 * s, 3.8 * s); g.restore(); }
         if (p.arrows < 3) { g.fillStyle = 'rgba(223,251,255,0.25)'; g.fillRect(31 * s, (y + 15) * s, 11 * s, s); g.fillStyle = '#dffbff'; g.fillRect(31 * s, (y + 15) * s, 11 * s * p.arrowT / 48, s); }
+        { // the lantern's starlight
+          const lx = 48, ly = y + 15.5, full = p.lum / 100;
+          g.save(); g.translate(lx * s, ly * s); g.fillStyle = p.lumOut ? 'rgba(223,242,255,0.3)' : '#ffffff'; if (p.lit) { g.shadowColor = '#bfe4ff'; g.shadowBlur = 5 * s; }
+          g.beginPath(); for (let i = 0; i < 8; i++) { const a = i / 8 * TAU - Math.PI / 2, r = (i % 2 ? 1 : 2.8) * s; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); g.fill(); g.restore();
+          g.fillStyle = 'rgba(223,242,255,0.22)'; g.fillRect((lx + 5) * s, (ly - 0.5) * s, 20 * s, s);
+          g.fillStyle = p.lumOut ? '#8a96b8' : '#dff2ff'; g.fillRect((lx + 5) * s, (ly - 0.5) * s, 20 * s * full, s);
+        }
         if (p.radiant > 0) { g.fillStyle = 'rgba(255,246,176,0.25)'; g.fillRect(6 * s, (y + 19.5) * s, 34 * s, s); g.fillStyle = '#fff6b0'; g.fillRect(6 * s, (y + 19.5) * s, 34 * s * p.radiant / 600, s); }
-        if (w.players.length > 1) u.text(k ? 'MAYANK' : 'ANA', 46, y + 4.2, 4.6, { color: '#d9c48a', align: 'left', ls: 0.8, title: true });
       });
       const pop = w.hudPop > 0 ? w.hudPop / 8 : 0;
       g.save(); g.scale(s, s); drawGemHi(g, W - 12, 9.5, 4.2, GEM_BY_ID.kohinoor, w.t); g.restore();
@@ -495,12 +523,23 @@ Scenes.list.play = {
       }
     }
     // dialogue: eases in and out, speaker set apart, keys shown as keycaps
-    const want = w.signText && w.state === 'play' && !this.paused && !w.card && !w.gemFx;
+    const wc = w.wonderCard && w.state === 'play' && !w.card && !w.gemFx && !this.paused ? w.wonderCard : null;
+    if (wc) { // a wonder: the frame narrows like a film's, it is named once in gold, and then it is left alone
+      const a = clamp(wc.t / 36, 0, 1) * clamp((600 - wc.t) / 50, 0, 1), ease = 1 - (1 - a) * (1 - a), lines = u.wrap(wc.def.line, 340, 8.4, { italic: true });
+      const th = 31 * ease, bh = (13 + lines.length * 11) * ease, hair = Math.max(1, s * 0.4);
+      u.panel(0, 0, W, th, 0.9, '#04050d'); u.panel(0, H - bh, W, bh + 1, 0.9, '#04050d');
+      g.fillStyle = `rgba(214,186,120,${0.55 * a})`; g.fillRect(0, th * s, W * s, hair); g.fillRect(0, (H - bh) * s - hair, W * s, hair);
+      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, th - 22.5, 4.6, { color: '#d9b566', ls: 2.2, title: true, alpha: a, shadow: false });
+      u.text(wc.def.name.toUpperCase(), 192, th - 10.5, 13, { metal: true, title: true, ls: 3, alpha: a });
+      lines.forEach((ln, i) => u.text(ln, 192, H - bh + 11.5 + i * 11, 8.4, { color: '#f4ecd6', italic: true, alpha: a, shadow: false }));
+    }
+    const want = w.signText && w.state === 'play' && !this.paused && !w.card && !w.gemFx && !wc;
+    if (wc || w.state === 'clear') this.signA = 0;
     if (want) { this.signTxt = w.signText; this.signLow = w.player.y - w.cam.y > 96; }
     this.signA = (this.signA || 0) + ((want ? 1 : 0) - (this.signA || 0)) * 0.22;
     if (this.signA > 0.02 && this.signTxt) {
       let txt = this.signTxt, who = null;
-      if (Input.touch) txt = txt.replace('[←] [→] to walk  ·  [SPACE] to leap — hold it to leap higher', '◀ ▶ to walk  ·  ▲ to leap — hold it to leap higher').replace('[X] looses', '✦ looses').replace('Press [SPACE] again', 'Press ▲ again');
+      if (Input.touch) txt = touchKeys(txt);
       const m = /^(Tonttu|Mayank): /.exec(txt); if (m) { who = m[1]; txt = txt.slice(m[0].length); }
       const lines = txt.split('|'), fs = 8.2, lh = 11.5, a = this.signA, ease = 1 - (1 - a) * (1 - a);
       const wd = Math.min(352, Math.max(...lines.map(l => u.width(l.replace(/[\[\]]/g, '  '), fs))) + 30), hgt = lines.length * lh + 11 + (who ? 5 : 0);
@@ -509,7 +548,7 @@ Scenes.list.play = {
       if (who) u.text(who.toUpperCase(), 192, y0 + 7, 4.6, { color: '#d9b566', ls: 2, title: true, alpha: a, shadow: false });
       lines.forEach((ln, i) => u.rich(ln, 192, y0 + (who ? 16.5 : 11) + i * lh, fs, { color: '#eef2ff', alpha: a, shadow: false }));
     }
-    if (w.toastT > 0 && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !(this.signA > 0.3 && /\[/.test(w.toastText))) {
+    if (w.toastT > 0 && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !wc && !(this.signA > 0.3 && /\[/.test(w.toastText))) {
       const tm = w.toastMax || 240, a = clamp(w.toastT / 24, 0, 1) * clamp((tm - w.toastT) / 12, 0, 1), tl = w.toastText.split('|'), ease = 1 - (1 - a) * (1 - a);
       const wd = Math.max(...tl.map(l => u.width(l, 8.4, { italic: tl.length === 1 }))) + 26, hgt = tl.length * 11.5 + 8;
       const ty = (this.signA > 0.3 && !this.signLow ? 34 : 190 - hgt / 2) + (1 - ease) * 5;
@@ -522,11 +561,12 @@ Scenes.list.play = {
       u.text('THE HOARDER KING', 192, 70, 22 * (1 + 0.4 * clamp(1 - (w.boss.t0 - 30) / 6, 0, 1)), { color: '#ffb070', glow: '#ff3a10', alpha: w.boss.t0 < 30 ? 0 : clamp((110 - w.boss.t0) / 20, 0, 1), title: true, ls: 4 });
       u.text('Thief of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     }
-    if (Game.metBoy && !Game.coop && showUI && !this.paused && !Input.touch) u.rich('Player two   [2]', W - 27, 37, 5.6, { color: '#d9c48a', italic: true });
     if (w.state === 'clear') {
       const a = clamp((w.clearT - 50) / 40, 0, 1);
-      u.text(w.clearText, 192, 56, 16, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 1 });
-      u.text(`${Game.carats().toFixed(2)} carats carried home`, 192, 78, 8.5, { color: '#dffbff', alpha: clamp((w.clearT - 120) / 40, 0, 1), italic: true });
+      u.text(w.clearText.toUpperCase(), 192, 52, 17, { metal: true, alpha: a, title: true, ls: 3 });
+      u.rule(192, 66, 90, '#c8a860', a);
+      u.text('Far off, one window in Kaamos answers.', 192, 77, 9, { color: '#fff3d8', alpha: clamp((w.clearT - 100) / 40, 0, 1), italic: true });
+      u.text(`${Game.carats().toFixed(2)} carats, two travellers, one lantern`, 192, 90, 7.4, { color: '#dffbff', alpha: clamp((w.clearT - 170) / 40, 0, 1), italic: true });
     }
     if (w.combo >= 2 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.comboX - w.cam.x, w.comboY - 12 - w.cam.y - (55 - w.comboT) * 0.15, Math.round((7 + Math.min(5, w.combo * 0.35)) * (1 + 0.6 * clamp((w.comboT - 47) / 8, 0, 1)) * 2) / 2, { color: w.combo >= 8 ? '#ffe9a0' : '#dffbff', glow: w.combo >= 8 ? '#ffb040' : '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
     if (w.card && w.card.t < 22) u.panel(0, 0, W, H, 1 - w.card.t / 22, '#ffffff');
@@ -535,7 +575,7 @@ Scenes.list.play = {
       u.panel(0, 0, W, H, 0.66, '#04050d');
       u.text('THE ROAD WAITS', 192, 60, 18, { metal: true, title: true, ls: 5 });
       u.rule(192, 76, 80, '#c8a860', 1);
-      const tt = Input.touch, rows = ['Resume', this.armR ? 'Again, to confirm' : 'Return to the last lantern', 'Sound  ·  ' + (Sound.muted ? 'off' : 'on'), 'Save and quit to title'];
+      const tt = Input.touch, rows = ['Walk on', this.armR ? 'Again, to confirm' : 'Return to the last lantern', 'Sound  ·  ' + (Sound.muted ? 'off' : 'on'), 'Save and quit to title'];
       rows.forEach((v, i) => {
         const on = i === (this.psel || 0) && !tt, y = 96 + i * 14;
         u.text(v, 192, y, 9.6, { color: on ? '#fff3c4' : '#c3cdee' });
@@ -545,83 +585,124 @@ Scenes.list.play = {
   }
 };
 
-/* ---------- The Vault ---------- */
+/* ---------- The Vault: the diamonds, and under them what else came home ---------- */
+const GEM_WHERE = ['Finland', 'Finland', 'the Gulf', 'Sweden', 'Sweden', 'Kiruna', 'America', 'America', 'America', 'Australia', 'the Mesa', 'the Mesa', 'the King'];
 Scenes.list.vault = {
-  enter() { this.t = 0; this.sel = 0; this.open = false; Game.loadSave(); },
+  enter() {
+    this.t = 0; this.sel = 0; this.open = false; Game.loadSave();
+    this.items = [];
+    GEMS.forEach((gem, i) => this.items.push({ kind: 'gem', def: gem, i, row: i < 7 ? 0 : 1, x: (i < 7 ? 36 : 62) + (i % 7) * 52, y: i < 7 ? 66 : 116 }));
+    KEEPS.forEach((k, i) => this.items.push({ kind: 'keep', def: k, i, row: 2, x: 32 + i * 22, y: 171 }));
+    WONDERS.forEach((q, i) => this.items.push({ kind: 'wonder', def: q, i, row: 2, x: 220 + i * 22, y: 171 }));
+  },
+  has(it) { return !!(it.kind === 'gem' ? Game.vault : it.kind === 'keep' ? Game.shelf : Game.sights)[it.def.id]; },
   update(busy) {
     this.t++;
     if (busy) return;
     if (this.open) { if (Input.hit('enter') || Input.hit('pause')) { this.open = false; Sound.sfx('select'); } return; }
-    const mv = (d) => { this.sel = (this.sel + d + GEMS.length) % GEMS.length; Sound.sfx('select'); };
+    const n = this.items.length, cur = this.items[this.sel];
+    const mv = (d) => { this.sel = (this.sel + d + n) % n; Sound.sfx('select'); };
+    const rowMove = (d) => { // to whatever sits nearest in the row above or below
+      const row = (cur.row + d + 3) % 3; let best = -1, bd = 1e9;
+      this.items.forEach((it, k) => { if (it.row === row && Math.abs(it.x - cur.x) < bd) { bd = Math.abs(it.x - cur.x); best = k; } });
+      this.sel = best; Sound.sfx('select');
+    };
     if (Input.hit('right') || Input.hit('right2')) mv(1);
     if (Input.hit('left') || Input.hit('left2')) mv(-1);
-    if (Input.hit('dn')) mv(6);
-    if (Input.hit('up')) mv(-6);
+    if (Input.hit('dn')) rowMove(1);
+    if (Input.hit('up')) rowMove(-1);
     if (Input.hit('pause') || Input.hit('vault') || Input.hit('quit')) { Scenes.go('title'); return; }
-    if (Input.hit('tap')) { const col = Math.round((Input.tapX - 42) / 60), rw = Math.round((Input.tapY - 80) / 68); if (col < 0 || col > 5 || rw < 0 || rw > 1 || Input.tapY < 46) { Scenes.go('title'); return; } this.sel = rw * 6 + col; }
-    if (Input.hit('enter') && this.t > 15) { if (Game.vault[GEMS[this.sel].id]) { this.open = true; this.ot = this.t; Sound.sfx('gem'); } else Sound.sfx('empty'); }
+    if (Input.hit('tap')) {
+      let best = -1, bd = 1e9; this.items.forEach((it, k) => { const d = Math.hypot(it.x - Input.tapX, (it.y - Input.tapY) * (it.kind === 'gem' ? 0.8 : 1)); if (d < bd) { bd = d; best = k; } });
+      if (bd > (this.items[best].kind === 'gem' ? 30 : 13)) { if (Input.tapY < 40) Scenes.go('title'); return; }
+      if (best !== this.sel) { this.sel = best; Sound.sfx('select'); return; }
+    }
+    if (Input.hit('enter') && this.t > 15) { const it = this.items[this.sel]; if (it.kind === 'gem' && this.has(it)) { this.open = true; this.ot = this.t; Sound.sfx('gem'); } else Sound.sfx(this.has(it) ? 'select' : 'empty'); }
   },
   draw(c) { c.fillStyle = '#05060f'; c.fillRect(0, 0, W, H); const r = rng(3); for (let i = 0; i < 40; i++) R(c, r() * W, r() * H, 1, 1, '#1c2440'); },
   drawHi(u) {
-    const g = u.ctx, s = u.s, t = this.t, n = Object.keys(Game.vault).length;
-    u.text('THE VAULT', 192, 22, 15, { metal: true, title: true, ls: 5 });
-    u.text(`${n} of ${GEMS.length} diamonds   ·   ${GEMS.reduce((a, q) => a + (Game.vault[q.id] ? q.carat : 0), 0).toFixed(2)} of ${GEM_TOTAL_CT.toFixed(2)} carats`, 192, 36, 7, { color: '#a9b4d0', italic: true });
-    GEMS.forEach((gem, i) => {
-      const x = 42 + (i % 6) * 60, y = 80 + Math.floor(i / 6) * 68, has = Game.vault[gem.id], on = i === this.sel;
-      if (on) { g.save(); g.strokeStyle = '#d6ba78'; g.lineWidth = Math.max(1, s * 0.5); g.strokeRect((x - 26) * s, (y - 30) * s, 52 * s, 62 * s); g.restore(); }
-      const r = 9 + 11 * Math.log10(gem.carat + 1) / Math.log10(531);
-      g.save(); g.scale(s, s);
-      if (has) drawGemHi(g, x, y - 4, r, gem, t + i * 20);
-      else { g.globalAlpha = 0.5; g.strokeStyle = '#3a4466'; g.lineWidth = 0.6; g.setLineDash([1.5, 1.5]); g.beginPath(); gemOutline(gem.shape, 32).forEach((p, k) => { const px = x + p[0] * r, py = y - 4 + p[1] * r; k ? g.lineTo(px, py) : g.moveTo(px, py); }); g.closePath(); g.stroke(); }
-      g.restore();
-      const where = ['Finland', 'Finland', 'the Gulf', 'Sweden', 'Sweden', 'Kiruna', 'America', 'America', 'America', 'the Mesa', 'the Mesa', 'the King'][i];
-      const nm = gem.name.replace('Cullinan I · ', '').replace('The Great Star of Africa', 'Cullinan I');
-      u.text(has ? `${gem.carat} ct` : '—', x, y + 20, 6.6, { color: has ? '#fff6dc' : '#6a76a0', title: true });
-      u.text(has ? nm : 'Found in ' + where, x, y + 28.5, u.width(has ? nm : '', 5.6, { italic: true }) > 56 ? 4.6 : 5.6, { color: has ? '#b4c0e0' : '#7884ac', italic: true });
-    });
-    u.text(Input.touch ? 'TAP A STONE TO STUDY IT   ·   TAP THE TITLE TO RETURN' : '← →  CHOOSE   ·   ENTER  STUDY   ·   ESC  RETURN', 192, 205, 5.6, { color: '#98a6cc', ls: 1.4, title: true });
-    if (this.open) drawGemCard(u, GEMS[this.sel], t, clamp((t - this.ot) / 20, 0, 1), Input.touch ? 'TAP TO CLOSE' : 'ENTER TO CLOSE');
+    const g = u.ctx, s = u.s, t = this.t, n = Object.keys(Game.vault).length, cur = this.items[this.sel];
+    u.text('THE VAULT', 192, 17, 13.5, { metal: true, title: true, ls: 5 });
+    u.text(`${n} of ${GEMS.length} diamonds   ·   ${GEMS.reduce((a, q) => a + (Game.vault[q.id] ? q.carat : 0), 0).toFixed(2)} of ${GEM_TOTAL_CT.toFixed(2)} carats`, 192, 29.5, 6.4, { color: '#a9b4d0', italic: true });
+    const frame = (x, y, wd, hg) => { g.save(); g.strokeStyle = '#d6ba78'; g.lineWidth = Math.max(1, s * 0.5); g.strokeRect(x * s, y * s, wd * s, hg * s); g.restore(); };
+    for (const it of this.items) {
+      const has = this.has(it), on = it === cur, x = it.x, y = it.y;
+      if (it.kind === 'gem') {
+        const gem = it.def, r = 8 + 9 * Math.log10(gem.carat + 1) / Math.log10(531);
+        if (on) frame(x - 24, y - 25, 48, 49);
+        g.save(); g.scale(s, s);
+        if (has) drawGemHi(g, x, y - 5, r, gem, t + it.i * 20);
+        else { g.globalAlpha = 0.5; g.strokeStyle = '#3a4466'; g.lineWidth = 0.6; g.setLineDash([1.5, 1.5]); g.beginPath(); gemOutline(gem.shape, 32).forEach((p, k) => { const px = x + p[0] * r, py = y - 5 + p[1] * r; k ? g.lineTo(px, py) : g.moveTo(px, py); }); g.closePath(); g.stroke(); }
+        g.restore();
+        u.text(has ? `${gem.carat} ct` : '—', x, y + 16, 6, { color: has ? '#fff6dc' : '#6a76a0', title: true });
+      } else if (it.kind === 'keep') {
+        if (on) frame(x - 9.5, y - 9.5, 19, 19);
+        g.save(); g.imageSmoothingEnabled = false; g.globalAlpha = has ? 1 : 0.16; g.drawImage(Art.S.keep[it.i], (x - 7.5) * s, (y - 7.5) * s, 15 * s, 15 * s); g.restore();
+      } else {
+        if (on) frame(x - 9.5, y - 9.5, 19, 19);
+        g.save(); g.translate(x * s, y * s); g.rotate(has ? Math.sin(t * 0.02 + it.i) * 0.12 : 0);
+        g.beginPath(); for (let k = 0; k < 8; k++) { const a = k / 8 * TAU - Math.PI / 2, rr = (k % 2 ? 2 : 6.5) * s; g.lineTo(Math.cos(a) * rr, Math.sin(a) * rr); } g.closePath();
+        if (has) { g.fillStyle = '#f3d384'; g.shadowColor = '#ffb040'; g.shadowBlur = 5 * s; g.fill(); } else { g.strokeStyle = 'rgba(120,132,172,0.6)'; g.lineWidth = Math.max(1, s * 0.4); g.stroke(); }
+        g.restore();
+      }
+    }
+    g.save(); g.fillStyle = 'rgba(214,186,120,0.35)'; g.fillRect(24 * s, 146 * s, 336 * s, Math.max(1, s * 0.4)); g.restore();
+    u.text(`KEEPSAKES   ·   ${Object.keys(Game.shelf).length} OF ${KEEPS.length}`, 24, 154.5, 4.6, { color: '#d6ba78', align: 'left', ls: 1.6, title: true });
+    u.text(`WONDERS SEEN   ·   ${Object.keys(Game.sights).length} OF ${WONDERS.length}`, 211, 154.5, 4.6, { color: '#d6ba78', align: 'left', ls: 1.6, title: true });
+    { // the one in hand
+      const has = this.has(cur), d = cur.def, where = cur.kind === 'gem' ? GEM_WHERE[cur.i] : WONDERS[cur.i].where;
+      const nm = cur.kind === 'gem' ? d.name : d.name, line = !has ? (cur.kind === 'wonder' ? `Not yet seen. It is out there, in ${where}.` : cur.kind === 'keep' ? `Not yet found. It is out there, in ${where}.` : where === 'the King' ? 'The Hoarder King has it.' : `Not yet found. It is out there, in ${where}.`)
+        : cur.kind === 'gem' ? `${d.cut}  ·  ${d.color}  ·  ${d.origin}` : d.line;
+      u.text(has ? nm : '—', 192, 187.5, 7.4, { color: has ? '#fff3c4' : '#7884ac', title: true, ls: 0.6 });
+      let fs = 6.2, lines = u.wrap(line, 350, fs, { italic: true }); if (lines.length > 2) { fs = 5.6; lines = u.wrap(line, 356, fs, { italic: true }); }
+      lines.slice(0, 2).forEach((ln, i) => u.text(ln, 192, 195.5 + i * 7, fs, { color: has ? '#c8d2ee' : '#7884ac', italic: true }));
+    }
+    u.text(Input.touch ? 'TAP TO CHOOSE   ·   TAP A DIAMOND TWICE TO STUDY IT   ·   TAP THE TITLE TO RETURN' : '← → ↑ ↓  CHOOSE   ·   ENTER  STUDY A DIAMOND   ·   ESC  RETURN', 192, 211, 4.4, { color: '#98a6cc', ls: 1.3, title: true });
+    if (this.open) drawGemCard(u, cur.def, t, clamp((t - this.ot) / 20, 0, 1), Input.touch ? 'TAP TO CLOSE' : 'ENTER TO CLOSE');
   }
 };
 
 /* ---------- Ending ---------- */
 const EPILOGUE = [
-  'The Hoarder King is fallen. The Mountain of Light, it turns out, is heavy, and cold, and not hers.',
-  'She does not keep it. It was never the Hoarder’s, nor hers to give; where it goes next is not her story to finish. Diamonds are only ever borrowed. She sets it where anyone may look.',
-  'What they keep is smaller. A quiver. A song with one verse still missing. And, not kept at all: Mayank, who dreamed of an elf queen and found someone who argues about maps. He stayed. So did she.',
-  'In Kaamos the long night ends without her. The Tonttu sets a lantern in the window. She comes home for a week. It is beautiful. It always was; she was the one in a hurry. She leaves on the Sunday.',
-  'It is not much of a legend: a girl walked out past the last gate, and came back queen of nothing but starlight. She never did get her letter. She became, instead, the sort of person who sends them.'
+  { s: 'The Hoarder King fell as such kings do: all at once, and surprised. His room had no windows. It was full of pebbles. He had guarded them for years.' },
+  { s: 'Beyond the mesa, on the red rock, in the dark: a lantern, and somebody singing the verse she had lost under the mountain. She has never asked where he learned it.' },
+  { s: 'His name was Mayank. He had walked from India on the word of a dream, which had promised him an elf queen in a distant land. He considers the dream broadly accurate.' },
+  { s: 'He says his lantern found her reflector first. She says she saw his lantern. We have stopped asking. They have gone everywhere since side by side, each quite sure of the way.' },
+  { s: 'In the sun the largest pebble was the Mountain of Light again. Ana kept it a fortnight, the usual loan. Then, there being no desk, she returned it upward, where every star can get at it.' },
+  { s: 'Then the long road home. At the top of Finland, Mayank asked what time the sun came up. “January,” said Ana.' },
+  { s: 'They came up our road at four in the afternoon, which in December is night. The last street lamp found her reflector first. Then a lantern, walking beside it.' },
+  { s: 'The Tonttu had kept her porridge warm the whole time. It was terrible. He found a second spoon without being asked. They ate all of it.' },
+  { s: '“An elf queen,” said the Tonttu. “Queen of what?” Mayank pointed up.' },
+  { s: 'It is on the sign at the gate now: STARLIGHT QUEEN. We used ink. The population above it we keep in pencil. She comes and goes.' }
 ];
-const EP = 520;
 Scenes.list.ending = {
-  enter() { this.t = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
+  enter() { this.t = 0; this.i = 0; this.pt = 0; this.gt = -1; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
   update(busy) {
     this.t++;
     if (busy) return;
-    if (Input.hit('enter') && this.t > 120) {
-      if (this.t < EPILOGUE.length * EP) this.t = (Math.floor(this.t / EP) + 1) * EP;
-      else if (this.t > EPILOGUE.length * EP + 120) Scenes.go('title');
-    }
+    if (this.gt >= 0) { this.gt++; if (Input.hit('enter') && this.gt > 150) Scenes.go('title'); return; }
+    const r = Cards.step(this, EPILOGUE.length);
+    if (r) { this.gt = 0; Sound.sfx('confirm'); }
   },
   draw(c) { Vista.draw(c, this.t, true, 0); },
   drawHi(u) {
-    const i = Math.floor(this.t / EP), pt = this.t % EP;
-    if (i < EPILOGUE.length) {
-      const a = clamp(pt / 50, 0, 1) * clamp((EP - pt) / 40, 0, 1);
-      const lines = u.wrap(EPILOGUE[i], 204, 9.6, { italic: true }), y0 = 200 - lines.length * 13;
-      u.plate(156, y0 - 10, 222, lines.length * 13 + 14, 0.9 * a);
-      lines.forEach((ln, k) => u.text(ln, 267, y0 + k * 13, 9.6, { color: '#fffbe8', italic: true, alpha: a }));
+    if (this.gt < 0) {
+      const a = clamp(this.pt / 34, 0, 1), card = EPILOGUE[this.i];
+      const lines = u.wrap(card.s, 206, 9.8, { italic: true }), y0 = 186 - lines.length * 13.5;
+      u.plate(154, y0 - 11, 224, lines.length * 13.5 + 15, 0.92);
+      lines.forEach((ln, k) => u.text(ln, 266, y0 + k * 13.5 + (1 - a) * 2, 9.8, { color: '#fffbe8', italic: true, alpha: a }));
+      Cards.hint(u, this, EPILOGUE.length, 197);
       return;
     }
-    const tt = this.t - EPILOGUE.length * EP, a = clamp(tt / 60, 0, 1), G = this.g;
+    const tt = this.gt, a = clamp(tt / 60, 0, 1), G = this.g;
     u.plate(164, 26, 208, 178, 0.94 * a);
-    u.text('YOUR JOURNEY, GRADED', 268, 40, 8.5, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 2.4 });
+    u.text('THE JOURNEY, GRADED', 268, 40, 8.5, { color: '#fff0b0', glow: '#ff8a20', alpha: a, title: true, ls: 2.4 });
     u.rule(268, 51, 120, '#f6e2a0', a);
     const rows = [
-      ['CARAT', `${G.carat.toFixed(2)} ct`, `${G.n} of ${GEMS.length} diamonds found`],
+      ['CARAT', `${G.carat.toFixed(2)} ct`, `${G.n} of ${GEMS.length} diamonds carried`],
       ['COLOUR', G.colour, `${G.got} of ${G.total} melee gathered`],
-      ['CLARITY', G.clarity[0], G.flaws === 0 ? 'Flawless — not a scratch' : `${G.flaws} flaws upon the road`],
-      ['CUT', G.cut, `${G.time} upon the road`]];
+      ['CLARITY', G.clarity[0], `${G.seen} of ${WONDERS.length} wonders seen`],
+      ['CUT', G.cut, `${G.kept} of ${KEEPS.length} keepsakes brought home`]];
     rows.forEach(([k, v, d], j) => {
       const b = clamp((tt - 50 - j * 28) / 30, 0, 1) * a, y = 66 + j * 26;
       u.text(k, 178, y, 5.4, { color: '#b9a4e0', alpha: b, align: 'left', ls: 1.8, title: true });
@@ -629,7 +710,7 @@ Scenes.list.ending = {
       u.text(d, 178, y + 10, 7.2, { color: '#e6dcff', alpha: b, align: 'left', italic: true });
     });
     const perfect = G.n === GEMS.length && G.colour === 'D' && G.clarity[0] === 'FL' && G.cut === 'Excellent';
-    u.text(perfect ? 'A perfect stone. There is nothing left to teach you.' : 'A finer grade is always possible. The road will wait.', 268, 178, 7.6, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
+    u.text(perfect ? 'A perfect stone. You looked at everything. That was the point.' : 'There is more out there to look at. The road will wait.', 268, 178, 7.6, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
     u.text(Input.touch ? 'TAP TO RETURN' : 'ENTER TO RETURN TO THE TITLE', 268, 193, 5, { color: '#ffe9a8', alpha: clamp((tt - 220) / 40, 0, 1) * (0.6 + 0.4 * Math.sin(this.t * 0.1)), ls: 1.4, title: true });
   }
 };

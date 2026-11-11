@@ -2,49 +2,56 @@
 /* Starlight Queen — themes, parallax backdrops, scenery props, ambient particles */
 const THEMES = {
   north: {
-    id: 'north', seed: 5, music: 'wood', dark: 0.2, darkCol: '8,14,44', amb: 'snow', pit: '#081030',
+    id: 'north', food: 'Korvapuusti: a cinnamon bun. The name means “a slap on the ear”.', seed: 5, music: 'wood', dark: 0.2, darkCol: '8,14,44', amb: 'snow', pit: '#081030',
     tiles: { style: 'dirt', body: '#4c4760', dark: '#37334a', light: '#625c78', speck: '#7c7692', cap: '#eef4ff', capHi: '#ffffff', capDark: '#b4c6e8', capDots: '#d8e6ff',
       plat: '#8a6a4c', platHi: '#e8f0ff', platDark: '#5a4230', brick: '#7a6e86', brickHi: '#a096ac', brickDark: '#4c4458', spike: '#bfe0ff', spikeHi: '#ffffff' },
     liquid: { top: '#e4f8ff', body: '#3f74a8', deep: '#1f3f72', glow: null },
     scatter: [['snowtuft', 0.3], ['rock', 0.08], ['frostgrass', 0.2]], trees: 'spruce'
   },
   canyon: {
-    id: 'canyon', seed: 61, music: 'canyon', dark: 0, amb: 'pollen', pit: '#3a1220',
+    id: 'canyon', food: 'Apple pie, still warm. As American as it gets.', seed: 61, music: 'canyon', dark: 0, amb: 'pollen', pit: '#3a1220',
     tiles: { style: 'dirt', body: '#a8502e', dark: '#7e361c', light: '#c46c3e', speck: '#dc9258', cap: '#eab474', capHi: '#ffe0a0', capDark: '#b46e38', capDots: '#fff0c0',
       plat: '#8e5c36', platHi: '#c08a58', platDark: '#5e3a20', brick: '#c0704a', brickHi: '#e09a70', brickDark: '#863e24', spike: '#5a7a3a', spikeHi: '#d8e8a0' },
     liquid: { top: '#c8f4ee', body: '#2f97a2', deep: '#1c5c74', glow: null },
     scatter: [['drygrass', 0.3], ['cactus', 0.06], ['skull', 0.03], ['rock', 0.1]], trees: 'saguaro'
   },
   meads: {
-    id: 'meads', seed: 11, music: 'meads', dark: 0, amb: 'pollen', pit: '#14264a',
+    id: 'meads', food: 'Midsummer strawberries, the first of the year, with cream.', seed: 11, music: 'meads', dark: 0, amb: 'pollen', pit: '#14264a',
     tiles: { style: 'dirt', body: '#8a5a34', dark: '#6e4426', light: '#a06c40', speck: '#b8946a', cap: '#58b848', capHi: '#9ee86a', capDark: '#3a8a38', capDots: '#ffe870',
       plat: '#b07c44', platHi: '#d8a468', platDark: '#7a5028', brick: '#b8825a', brickHi: '#d8a67c', brickDark: '#7c5234', spike: '#c8c8d0', spikeHi: '#ffffff' },
     liquid: { top: '#7fd0ff', body: '#3a8ad8', deep: '#2a5eb0', glow: null },
     scatter: [['grass', 0.45], ['flower', 0.25], ['bush', 0.06], ['maypole', 0.02]], trees: 'oak'
   },
   wood: {
-    id: 'wood', seed: 23, music: 'wood', dark: 0.16, darkCol: '10,30,40', amb: 'leaves', pit: '#07140f',
+    id: 'wood', food: 'Honeycake.', seed: 23, music: 'wood', dark: 0.16, darkCol: '10,30,40', amb: 'leaves', pit: '#07140f',
     tiles: { style: 'dirt', body: '#4e3a2c', dark: '#3a2a20', light: '#66503c', speck: '#7a6448', cap: '#3f8f4e', capHi: '#7fd070', capDark: '#286838', capDots: '#f0c850',
       plat: '#7a5a38', platHi: '#a88254', platDark: '#4c3620', brick: '#6a7a5a', brickHi: '#8a9c74', brickDark: '#44523a', spike: '#5a4a3a', spikeHi: '#c0a880' },
     liquid: { top: '#8fe8d0', body: '#2f8f8a', deep: '#1f5f66', glow: null },
     scatter: [['fern', 0.3], ['mushroom', 0.14], ['grass', 0.3], ['flower', 0.08]], trees: 'elder'
   },
   halls: {
-    id: 'halls', seed: 37, music: 'halls', dark: 0.56, darkCol: '4,5,14', amb: 'dust',
+    id: 'halls', food: 'Boiled coffee, with cheese in it. The north is like that.', seed: 37, music: 'halls', dark: 0.56, darkCol: '4,5,14', amb: 'dust',
     tiles: { style: 'brick', body: '#555a74', dark: '#383c52', light: '#6e7492', speck: '#a8552e', cap: '#6f7590', capHi: '#9aa2c0', capDark: '#3d4156',
       plat: '#6a6f86', platHi: '#9aa2c0', platDark: '#3d4156', platStyle: 'stone', brick: '#5a5266', brickHi: '#7c7290', brickDark: '#3a3446', spike: '#8a8fa6', spikeHi: '#e0e4f4' },
     liquid: { top: '#ffe070', body: '#ff7a18', deep: '#c83808', glow: '#ff6a10' },
     scatter: [['crystal', 0.07], ['bones', 0.06], ['rubble', 0.2]], trees: null
   },
   fens: {
-    id: 'fens', seed: 41, music: 'fens', dark: 0.5, darkCol: '6,12,24', amb: 'mist',
+    id: 'fens', food: 'Honeycake.', seed: 41, music: 'fens', dark: 0.5, darkCol: '6,12,24', amb: 'mist',
     tiles: { style: 'dirt', body: '#3a3a34', dark: '#28282a', light: '#4c4c40', speck: '#5c5a48', cap: '#5a7a4a', capHi: '#8aa860', capDark: '#3a5438',
       plat: '#5a4a38', platHi: '#7c6a50', platDark: '#3a2e22', brick: '#4a5a58', brickHi: '#6a7c78', brickDark: '#2e3a3a', spike: '#3a3028', spikeHi: '#8a7a60' },
     liquid: { top: '#a8e8b0', body: '#2a5a4c', deep: '#143030', glow: null },
     scatter: [['reeds', 0.3], ['skull', 0.05], ['grass', 0.25], ['deadbush', 0.08]], trees: 'dead'
   },
+  oz: {
+    id: 'oz', food: 'A lamington: sponge, chocolate, coconut. Tomorrow’s morning tea.', seed: 71, music: 'oz', dark: 0, amb: 'pollen', pit: '#3a140c',
+    tiles: { style: 'dirt', body: '#b4401c', dark: '#862a10', light: '#d05a2a', speck: '#e88a4a', cap: '#d8b458', capHi: '#f6e08e', capDark: '#a8782e', capDots: '#fff4c8',
+      plat: '#9a6a44', platHi: '#d0a070', platDark: '#62402a', brick: '#c86a3a', brickHi: '#e8946a', brickDark: '#8a3a1c', spike: '#7a8a4a', spikeHi: '#e0e8a8' },
+    liquid: { top: '#d0f0e0', body: '#3f9488', deep: '#1e5c5c', glow: null },
+    scatter: [['spinifex', 0.3], ['termite', 0.05], ['rock', 0.07], ['wattle', 0.07]], trees: 'gum'
+  },
   gloam: {
-    id: 'gloam', seed: 53, music: 'gloam', dark: 0.34, darkCol: '20,2,2', amb: 'ash',
+    id: 'gloam', food: 'Cornbread. Somebody down here can still bake.', seed: 53, music: 'gloam', dark: 0.34, darkCol: '20,2,2', amb: 'ash', gaze: true,
     tiles: { style: 'rock', body: '#2e2630', dark: '#1e181f', light: '#40363f', speck: '#ff6a20', cap: '#5a5058', capHi: '#8a7e84', capDark: '#241c24',
       plat: '#4a4048', platHi: '#7a6e74', platDark: '#241c24', platStyle: 'stone', brick: '#4a2e2e', brickHi: '#6e4444', brickDark: '#2a1818', spike: '#d8d2c8', spikeHi: '#ff7a2a' },
     liquid: { top: '#fff0a0', body: '#ff6a10', deep: '#b82800', glow: '#ff5a10' },
@@ -254,7 +261,7 @@ const Backdrop = (() => {
       B = (c, cx, yo, t) => {
         c.drawImage(s, 0, 0, W, H);
         drawLayer(c, stars, cx, 0.02, 0);
-        aurora(c, t, cx * 0.03, 0, 1);
+        aurora(c, t, cx * 0.03, 0, 0.72 + 0.28 * World.lit); // the sky answers a raised light
         drawLayer(c, far, cx, 0.07, yo * 0.2 + 8); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.4, yo * 0.5);
       };
     } else if (id === 'canyon') {
@@ -278,6 +285,55 @@ const Backdrop = (() => {
         Art.glow(c, 250, 132, 90, '#fff0b0', 0.8); c.fillStyle = '#fff6d0'; c.beginPath(); c.arc(250, 132, 20, 0, TAU); c.fill();
         drawLayer(c, clouds, cx * 0.03 + t * 0.03, 1, 0);
         drawLayer(c, far, cx, 0.08, yo * 0.2); drawLayer(c, mid, cx, 0.2, yo * 0.35); drawLayer(c, near, cx, 0.42, yo * 0.5);
+      };
+    } else if (id === 'oz') { // tomorrow morning: a blue-to-peach dawn over red country
+      const s = sky(['#101c4c', '#243c80', '#5878b8', '#c8a0b4', '#ffc490', '#ffe6a8', '#fff4cc']);
+      const stars = layer(g => { const r = rng(88); for (let i = 0; i < 70; i++) { const y = r() * r() * 70; R(g, r() * LW, y, 1, 1, y < 30 ? '#c8d4ff' : '#8a9ad0'); } });
+      const far = layer(g => { // one great red rock, and the low ranges either side of it
+        const n = noise(711, 7);
+        for (let x = 0; x < LW; x++) { const h = 30 + n[x] * 5 | 0; R(g, x, H - h, 1, h, '#b8607a'); R(g, x, H - h, 1, 1, '#d88a8c'); }
+        const x0 = 150, wd = 200;
+        for (let i = 0; i < wd; i++) {
+          const k = i / (wd - 1), edge = Math.min(1, Math.min(k, 1 - k) * 7), h = 30 + Math.round(48 * Math.pow(edge, 0.55) + Math.sin(i * 0.11) * 1.5 + Math.sin(i * 0.37) * 0.8);
+          R(g, x0 + i, H - h, 1, h, '#d8603a'); R(g, x0 + i, H - h, 1, 2, '#ffa870');
+          if ((i * 7 + (i >> 3)) % 11 < 2) R(g, x0 + i, H - h + 3, 1, h - 34, '#b84a30'); // rain-grooves down its flanks
+          if (k > 0.62) R(g, x0 + i, H - h + 2, 1, h - 32, i % 2 ? '#b0462e' : '#c0502e');
+        }
+      });
+      const mid = layer(g => { // rounded domes
+        const r = rng(712);
+        for (let x = 0; x < LW; x++) R(g, x, H - 34, 1, 34, '#8a3a40');
+        for (let i = 0; i < 9; i++) { const cx = 20 + i * 70 + r() * 30, rw = 16 + r() * 22, rh = 14 + r() * 20; for (let x = -rw; x <= rw; x++) { const h = Math.sqrt(1 - (x / rw) * (x / rw)) * rh | 0; R(g, cx + x, H - 34 - h, 1, h, x > rw * 0.3 ? '#702c38' : '#8a3a40'); if (h > 2) R(g, cx + x, H - 34 - h, 1, 1, '#c06858'); } }
+      });
+      const near = layer(g => {
+        const n = noise(713, 5), r = rng(714);
+        for (let x = 0; x < LW; x++) { const h = 20 + n[x] * 6 | 0; R(g, x, H - h, 1, h, '#5a1c14'); R(g, x, H - h, 1, 1, '#8a3420'); }
+        for (let i = 0; i < 40; i++) { const x = r() * LW | 0, y = H - (20 + n[x] * 6 | 0); R(g, x - 2, y - 2, 5, 2, '#7a5a24'); R(g, x - 1, y - 3, 3, 1, '#a88438'); }
+        for (let i = 0; i < 6; i++) { // gums, and one windmill
+          const x = 40 + i * 104 + (r() * 30 | 0), y = H - (20 + n[x % LW] * 6 | 0), hgt = 22 + r() * 12 | 0;
+          if (i === 3) { R(g, x, y - 30, 1, 30, '#2a100c'); R(g, x - 3, y, 7, 1, '#2a100c'); for (let k = 0; k < 8; k++) { const a = k / 8 * TAU; R(g, x + Math.cos(a) * 5, y - 30 + Math.sin(a) * 5, 2, 2, '#2a100c'); } R(g, x + 1, y - 31, 7, 2, '#2a100c'); continue; }
+          R(g, x, y - hgt, 2, hgt, '#3a1814'); R(g, x - 5, y - hgt * 0.7, 6, 1, '#3a1814'); R(g, x + 1, y - hgt * 0.85, 6, 1, '#3a1814');
+          for (const [dx, dy, wd] of [[-9, -hgt - 3, 12], [1, -hgt - 6, 12], [-12, -hgt * 0.7 - 4, 9], [5, -hgt * 0.85 - 4, 10]]) { R(g, x + dx, y + dy, wd, 4, '#34301c'); R(g, x + dx + 1, y + dy - 1, wd - 3, 1, '#4c4a26'); }
+        }
+      });
+      const roo = [0, 1].map(f => Art.spr(16, 14, g => { // a kangaroo, far off, going somewhere
+        const c = '#3a1410';
+        R(g, 5, 4 + f, 6, 5, c); R(g, 9, 2 + f, 3, 4, c); R(g, 11, 0 + f, 3, 3, c); R(g, 12, -1 + f, 1, 2, c); R(g, 13, 1 + f, 2, 1, c);
+        R(g, 1, 7 + f, 5, 2, c); R(g, 0, 9 + f * 2, 3, 1, c); R(g, 10, 5 + f, 2, 3, c);
+        if (f) { R(g, 6, 9, 3, 3, c); R(g, 5, 12, 5, 1, c); } else { R(g, 5, 8, 4, 2, c); R(g, 3, 10, 5, 1, c); }
+      }));
+      const clouds = layer(g => { const r = rng(17); for (let i = 0; i < 9; i++) { const x = r() * LW, y = 70 + r() * 50, wd = 50 + r() * 90; R(g, x, y, wd, 2, '#ffd0b0'); R(g, x + wd * 0.2, y - 2, wd * 0.5, 2, '#fff0d8'); R(g, x + wd * 0.1, y + 2, wd * 0.7, 1, '#e8a0a0'); } });
+      B = (c, cx, yo, t) => {
+        c.drawImage(s, 0, 0, W, H);
+        drawLayer(c, stars, cx, 0.02, 0);
+        Art.glow(c, 96, 152, 46, '#ffe9b0', 0.5); c.fillStyle = '#fff8dc'; c.beginPath(); c.arc(96, 152, 10, 0, TAU); c.fill();
+        drawLayer(c, clouds, cx * 0.03 + t * 0.02, 1, 0);
+        drawLayer(c, far, cx, 0.06, yo * 0.2); drawLayer(c, mid, cx, 0.18, yo * 0.35);
+        for (let i = 0; i < 3; i++) { // a mob of kangaroos crossing, unbothered
+          const ph = (t * 0.045 + i * 0.9) % TAU, hop = Math.abs(Math.sin(ph)), x = W + 30 - ((t * 0.5 + i * 22 + cx * 0.3) % (W * 2.4));
+          if (x > -20 && x < W + 20) { c.save(); c.translate(Math.round(x + 16), 0); c.scale(-1, 1); c.drawImage(roo[hop > 0.5 ? 1 : 0], 0, Math.round(H - 44 - hop * 7 + yo * 0.45)); c.restore(); }
+        }
+        drawLayer(c, near, cx, 0.42, yo * 0.5);
       };
     } else if (id === 'wood') {
       const s = sky(['#1f4a44', '#3f7a58', '#8fb870', '#e8e09a', '#fff6c8']);
@@ -449,6 +505,18 @@ const Backdrop = (() => {
       case 'snowtuft': cv = S(12, 5, g => { R(g, 1, 2, 10, 3, '#eef4ff'); R(g, 3, 1, 6, 1, '#ffffff'); R(g, 0, 4, 12, 1, '#c2d2f0'); }); break;
       case 'frostgrass': cv = S(8, 6, g => { for (let i = 0; i < 4; i++) { const h = 2 + r() * 4 | 0; R(g, i * 2, 6 - h, 1, h, i % 2 ? '#a8c0e0' : '#7a94c0'); R(g, i * 2, 6 - h, 1, 1, '#ffffff'); } }); break;
       case 'rock': cv = S(12, 7, g => { const c1 = v % 2 ? '#8a8496' : '#6e6878'; R(g, 1, 3, 10, 4, c1); R(g, 3, 1, 6, 2, c1); R(g, 3, 1, 5, 1, '#b4aec0'); R(g, 8, 4, 3, 3, '#4c4658'); }); break;
+      case 'spinifex': cv = S(12, 7, g => { for (let i = 0; i < 9; i++) { const a = -1.3 + i * 0.32, len = 4 + r() * 3; for (let k = 0; k < len; k++) R(g, 6 + Math.sin(a) * k, 6 - Math.cos(a) * k, 1, 1, k > len - 2 ? '#f6e08e' : i % 2 ? '#d8b458' : '#a8842e'); } }); break;
+      case 'termite': cv = S(9, 18, g => { for (let y = 0; y < 18; y++) { const wd = 2 + Math.round(y * 0.3 + Math.sin(y * 0.9 + v) * 0.8); R(g, 4 - (wd >> 1), y, wd, 1, '#a8421e'); R(g, 4 - (wd >> 1), y, 1, 1, '#d0683a'); if (wd > 3) R(g, 4 + (wd >> 1) - 1, y, 1, 1, '#7a2c12'); } }); break;
+      case 'wattle': cv = S(18, 12, g => { R(g, 2, 5, 14, 7, '#56703a'); R(g, 5, 2, 9, 4, '#56703a'); R(g, 0, 8, 18, 4, '#56703a'); R(g, 4, 3, 6, 1, '#7a964c'); for (let i = 0; i < 12; i++) R(g, 1 + r() * 15, 2 + r() * 8, 1 + (i % 2), 1, i % 3 ? '#ffd838' : '#fff0a0'); }); break;
+      case 'gum': cv = S(46, 66, g => { // a ghost gum: white limbs, thin grey-green leaf
+        const tr = '#f2ece0', sh = '#c2b8a8', lf = ['#5a7048', '#7a8c5a', '#46583a'];
+        for (let y = 0; y < 46; y++) { const x = 22 + Math.round(Math.sin(y * 0.09 + v) * 2.5); R(g, x, 20 + y, 3, 1, tr); R(g, x + 2, 20 + y, 1, 1, sh); if (y % 9 === 4) R(g, x, 20 + y, 2, 1, sh); }
+        const limb = (x0, y0, dx, dy, n) => { for (let k = 0; k < n; k++) R(g, x0 + dx * k, y0 + dy * k, 2, 1, k % 4 === 3 ? sh : tr); };
+        limb(22, 30, -1, -0.8, 13); limb(24, 26, 1, -0.7, 14); limb(23, 20, -0.3, -1, 9); limb(22, 38, -1, -0.4, 8);
+        for (const [cx, cy, rw, rh] of [[9, 16, 9, 5], [36, 14, 9, 5], [21, 8, 10, 5], [12, 32, 6, 3], [30, 22, 6, 3], [28, 5, 6, 3]]) {
+          for (let i = 0; i < rw * rh * 1.3; i++) { const a = r() * TAU, d = Math.sqrt(r()); R(g, cx + Math.cos(a) * d * rw, cy + Math.sin(a) * d * rh, 2, 1, lf[(i + v) % 3]); }
+        }
+      }); break;
       case 'drygrass': cv = S(9, 6, g => { for (let i = 0; i < 5; i++) { const h = 2 + r() * 4 | 0; R(g, i * 2, 6 - h, 1, h, i % 2 ? '#e8c070' : '#c89a48'); } }); break;
       case 'cactus': cv = S(10, 12, g => { const c1 = '#4f8a4a', c2 = '#3a6a3a'; R(g, 4, 1, 3, 11, c1); R(g, 6, 1, 1, 11, c2); R(g, 1, 5, 2, 3, c1); R(g, 1, 7, 4, 2, c1); R(g, 8, 3, 2, 3, c1); R(g, 6, 5, 3, 2, c2); R(g, 5, 0, 1, 1, '#ff8ab0'); }); break;
       case 'maypole': cv = S(26, 56, g => {
@@ -507,6 +575,18 @@ const Backdrop = (() => {
         R(g, 0, 0, 12, 2, '#6a5a3a'); R(g, 1, 2, 10, 22, '#7a1c1c'); R(g, 1, 2, 2, 22, '#9a2c2c');
         R(g, 1, 24, 3, 3, '#7a1c1c'); R(g, 8, 24, 3, 3, '#7a1c1c'); R(g, 4, 24, 4, 1, '#7a1c1c');
         R(g, 4, 8, 4, 1, '#ffb040'); R(g, 4, 6, 1, 3, '#ffb040'); R(g, 7, 6, 1, 3, '#ffb040'); R(g, 5.5, 5, 1, 4, '#ffb040'); R(g, 4, 10, 4, 5, '#1a0a0a');
+      }); break;
+      case 'watcher': cv = S(40, 96, g => { // a great stone figure from an older age, one hand raised
+        const c1 = '#6f7890', c2 = '#555d74', c3 = '#8e98b2', mo = '#5f8a5a';
+        R(g, 6, 84, 28, 12, c2); R(g, 4, 90, 32, 6, c2); R(g, 6, 84, 28, 1, c3); R(g, 4, 90, 32, 1, c1);
+        for (let y = 0; y < 52; y++) { const wd = 12 + y * 0.2 | 0, xl = 20 - (wd >> 1); R(g, xl, 32 + y, wd, 1, c1); R(g, xl, 32 + y, 2, 1, c3); R(g, xl + wd - 3, 32 + y, 3, 1, c2); if (y % 9 === 4) R(g, xl + 4, 32 + y, 1, 7, c2); }
+        R(g, 12, 26, 16, 8, c1); R(g, 12, 26, 2, 8, c3); R(g, 25, 26, 3, 8, c2);
+        R(g, 15, 12, 10, 14, c1); R(g, 15, 12, 2, 14, c3); R(g, 22, 12, 3, 14, c2); R(g, 17, 17, 6, 1, c2); R(g, 18, 20, 1, 3, c2); R(g, 21, 20, 1, 3, c2); R(g, 17, 24, 6, 1, c2);
+        R(g, 14, 8, 12, 4, c1); R(g, 14, 8, 12, 1, c3); for (const x of [14, 17, 20, 23, 25]) R(g, x, 5, 1, 3, c1); R(g, 19, 3, 2, 3, c3);
+        R(g, 28, 24, 4, 4, c1); R(g, 30, 10, 4, 16, c1); R(g, 30, 10, 1, 16, c3); R(g, 29, 4, 6, 7, c1); R(g, 29, 4, 6, 1, c3); R(g, 33, 5, 1, 6, c2);
+        R(g, 6, 30, 6, 4, c1); R(g, 5, 34, 4, 22, c1); R(g, 5, 34, 1, 22, c3);
+        for (let i = 0; i < 12; i++) R(g, 8 + r() * 24, 30 + r() * 60, 2 + r() * 3, 1, mo);
+        R(g, 16, 13, 3, 1, mo); R(g, 30, 9, 4, 1, mo); R(g, 22, 44, 1, 12, c2); R(g, 23, 55, 2, 1, c2);
       }); break;
       case 'throne': cv = S(34, 60, g => {
         const c1 = '#1c1a22', c2 = '#2e2a36', e = '#ff6a20';
