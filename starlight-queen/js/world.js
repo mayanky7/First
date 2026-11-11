@@ -206,7 +206,7 @@ const World = (() => {
   }
   /* ---------- the Hoarder's gaze: on his own ground he looks for her; a stone by the road is not looked at ---------- */
   function hoarderGaze() {
-    const on = w.theme.gaze && w.bossAlive && !w.fight && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
+    const on = w.theme.gaze && w.bossAlive && !w.fight && !w.wonderCard && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
     if (!on) { w.gaze = null; return; }
     if (!w.gaze) { if (!w.wonderCard && --w.gazeT <= 0 && w.player.onGround) { w.gaze = { t: 0, caught: false }; Sound.sfx('gaze'); } return; }
     const g = w.gaze; g.t++;
@@ -240,7 +240,7 @@ const World = (() => {
       w.parts = w.parts.filter(q => q.life > 0);
       if (fx.t === 46) {
         const m = w.marks[fx.to], p = w.player;
-        p.x = m.x - 5; p.y = m.y - p.h; p.vx = p.vy = 0; p.safe = { x: p.x, y: p.y }; p.face = 1; p.hp = MAXHP; p.gliding = false; p.ride = null;
+        p.x = m.x - 5; p.y = m.y - p.h; p.vx = p.vy = 0; p.carry = 0; p.safe = { x: p.x, y: p.y }; p.face = 1; p.hp = MAXHP; p.gliding = false; p.ride = null;
         w.parts = []; w.rings = []; w.signHold = null; w.signText = null; w.gaze = null;
         Game.cp = { x: m.x, y: m.y }; w.spawn = Game.cp;
         enterZone(zoneAt(p.x + 5));
@@ -296,7 +296,8 @@ const World = (() => {
     for (let i = 0; i < w.ents.length; i++) {
       const e = w.ents[i], d = ENT[e.type];
       if (e.dead) continue;
-      if (d.foe && (hush || (!ALWAYS[e.type] && Math.abs(e.x - cx) > W / 2 + 90))) continue;
+      if (d.foe && hush) { if (e.flash > 0) e.flash--; if (e.invT > 0) e.invT--; continue; }
+      if (d.foe && !ALWAYS[e.type] && Math.abs(e.x - cx) > W / 2 + 90) continue;
       d.update(w, e);
       if (e.flash > 0) e.flash--;
     }

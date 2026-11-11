@@ -118,7 +118,7 @@ const Paint = (() => {
       g.globalAlpha = 1;
     }
     for (let i = 0; i < 4; i++) {
-      const off = ((cx * PARA[i]) % LW + LW) % LW, dy = L.cave ? 0 : yo * YO[i], cv = layer(id, i);
+      const off = Math.round((((cx * PARA[i]) % LW + LW) % LW) * S) / S, dy = L.cave ? 0 : Math.round(yo * YO[i] * S) / S, cv = layer(id, i);
       if (id === 'oz' && i === 3) roos(g, cx, yo, t);
       g.imageSmoothingQuality = 'low'; g.drawImage(cv, -off, dy, LW, H); if (LW - off < W + 1) g.drawImage(cv, LW - off - 0.4, dy, LW, H); g.imageSmoothingQuality = 'high';
     }

@@ -8,13 +8,13 @@ const Game = {
   },
   read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
   write(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
-  loadSave() { this.saved = this.read('sq-run'); if (this.saved && this.saved.v !== 3) { this.saved = null; this.write('sq-run', null); } this.vault = this.read('sq-vault') || {}; this.shelf = this.read('sq-shelf') || {}; this.sights = this.read('sq-sights') || {}; this.best = this.read('sq-best'); if (this.best && this.best.v !== 3) this.best = null; },
+  loadSave() { this.saved = this.read('sq-run'); if (this.saved && this.saved.v !== 4) { this.saved = null; this.write('sq-run', null); } this.vault = this.read('sq-vault') || {}; this.shelf = this.read('sq-shelf') || {}; this.sights = this.read('sq-sights') || {}; this.best = this.read('sq-best'); if (this.best && this.best.v !== 4) this.best = null; },
   keepAll() { // what has been found stays found, whatever becomes of the journey it was found on
     Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault); Object.assign(this.shelf, this.keeps); this.write('sq-shelf', this.shelf); Object.assign(this.sights, this.wonders); this.write('sq-sights', this.sights);
   },
   save() {
     this.keepAll();
-    this.saved = { v: 3, oz: !!this.oz, bossHp: this.bossHp || 0, doors: this.doors, keeps: this.keeps, wonders: this.wonders, cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
+    this.saved = { v: 4, oz: !!this.oz, bossHp: this.bossHp || 0, doors: this.doors, keeps: this.keeps, wonders: this.wonders, cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
     this.write('sq-run', this.saved);
   },
   resume() {
@@ -32,7 +32,7 @@ const Game = {
     const cl = [['I', 'Included'], ['I', 'Included'], ['SI', 'Slightly included'], ['SI', 'Slightly included'], ['VS', 'Very slightly included'], ['VVS', 'Very, very slightly included'], ['IF', 'Internally flawless'], ['FL', 'Flawless']][Math.min(7, seen)];
     const cut = ['Fair', 'Fair', 'Good', 'Good', 'Very good', 'Very good', 'Very good', 'Excellent'][Math.min(7, kept)];
     return {
-      v: 3, carat: this.carats(), n, clarity: cl, colour: 'DEFGHIJK'[ci], cut, got, total, seen, kept,
+      v: 4, carat: this.carats(), n, clarity: cl, colour: 'DEFGHIJK'[ci], cut, got, total, seen, kept,
       score: n * 3 + (7 - ci) + seen + kept
     };
   },

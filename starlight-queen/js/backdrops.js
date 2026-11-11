@@ -98,15 +98,15 @@ const Backdrop = (() => {
   { const gr = asg.createLinearGradient(0, 0, 0, 48); gr.addColorStop(0, 'rgba(150,110,255,0)'); gr.addColorStop(0.45, 'rgba(90,190,255,0.35)'); gr.addColorStop(0.86, 'rgba(110,255,190,0.95)'); gr.addColorStop(0.97, 'rgba(200,255,220,1)'); gr.addColorStop(1, 'rgba(110,255,190,0)'); asg.fillStyle = gr; asg.fillRect(0, 0, 1, 48); }
   let auT = -1;
   function aurora(c, t, off, y, alpha) {
-    if ((t >> 1) !== auT) {
-      auT = t >> 1; aug.clearRect(0, 0, 192, 96); aug.globalCompositeOperation = 'lighter';
-      for (let r = 0; r < 3; r++) for (let x = 0; x < 192; x++) {
+    if (((t / 3) | 0) !== auT) {
+      auT = (t / 3) | 0; aug.clearRect(0, 0, 192, 96); aug.globalCompositeOperation = 'lighter';
+      for (let r = 0; r < 3; r++) for (let x = 0; x < 192; x += 2) {
         const wx = x * 2 + off + r * 173;
         const hem = 34 + r * 16 + Math.sin(wx * 0.011 + t * 0.003 + r * 2) * 12 + Math.sin(wx * 0.031 - t * 0.005) * 5;
         const len = (26 + r * 4) * (0.7 + 0.3 * Math.sin(wx * 0.02 + t * 0.006 + r));
         const ray = 0.62 + 0.38 * Math.sin(wx * 0.33 + Math.sin(wx * 0.07) * 3 + t * 0.02);
         const a = (0.22 + 0.2 * Math.sin(wx * 0.008 + t * 0.004 + r * 1.3)) * ray * (r === 1 ? 1 : 0.7);
-        if (a > 0.03) { aug.globalAlpha = a; aug.drawImage(aus, x, hem - len, 1, len); }
+        if (a > 0.03) { aug.globalAlpha = a; aug.drawImage(aus, x, hem - len, 2, len); }
       }
       aug.globalAlpha = 1;
     }

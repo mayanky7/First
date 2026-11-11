@@ -121,7 +121,7 @@ const REGIONS = [
       L.g(0, 4, 8); L.g(5, 7, 5); L.g(8, 11, 3);
       
       L.cp(10, 3);
-      L.mp(12, 2, 5, 37, 0, 1300);
+      L.mp(12, 2, 5, 37, 0, 1300); L.mp(12, 2, 5, 37, 0, 1300, 0.5); // two rafts, so one is never far
       for (let i = 0; i < 5; i++) L.arc(16 + i * 7, 6, 4);
       L.keep('compass', 34, 6); L.wonder('whale', 30, 3);
       L.g(54, 61, 3); L.sign(57, 3, '♪ The sea is wide, the raft is small,|and no one hears me sing at all.');
@@ -181,7 +181,7 @@ const REGIONS = [
       L.b(175, 15, '?H?'); L.gem('cullinan', 176, 18); L.door(179, 13, 8, 'The last door. Beyond it, only him.'); L.arc(141, 11, 5); L.s(152, 10, 4);
       L.arena(181, 204, 13);
       L.sign(207, 13, '♪ The dark is deep, the dark is long,|and someone, somewhere, knows this song.');
-      L.npc(211, 13);
+      L.npc(216, 13);
       L.beacon(226, 13, 'The last beacon burns', true);
     }
   },

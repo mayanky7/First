@@ -3,7 +3,7 @@
 (() => {
   const cv = document.getElementById('game'), ctx = cv.getContext('2d');
   let s = 1; // device pixels per game unit
-  let quality = 1, slowFor = 0, gap = 16.7; // if frames come slowly, paint at a lower resolution rather than stutter
+  let quality = 1, slowFor = 0, fastFor = 0, work = 6, ups = 0; // if painting a frame takes too long, paint at a lower resolution rather than stutter
 
   const SERIF = '"EB Garamond","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
   const TITLE = '"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,serif';
@@ -158,16 +158,15 @@
   let last = 0, acc = 0;
   function loop(now) {
     requestAnimationFrame(loop);
-    if (last && now - last < 200) { // watch the pace; a hidden or throttled tab is ignored
-      gap = gap * 0.92 + (now - last) * 0.08;
-      if (gap > 25 && quality > 0.4) { if (++slowFor > 50) { quality = quality > 0.75 ? 0.7 : quality > 0.55 ? 0.5 : 0.4; slowFor = 0; gap = 16.7; resize(); } } else slowFor = 0;
-    }
     if (!last) last = now;
     acc += Math.min(100, now - last); last = now;
     let n = 0;
     while (acc >= STEP && n < 5) { step(); acc -= STEP; n++; }
     if (n === 5) acc = 0;
-    frame();
+    const t0 = performance.now(); frame(); work = work * 0.92 + (performance.now() - t0) * 0.08;
+    if (work > 15 && quality > 0.4) { fastFor = 0; if (++slowFor > 40) { quality = quality > 0.75 ? 0.7 : quality > 0.55 ? 0.5 : 0.4; slowFor = 0; work = 8; resize(); } }
+    else if (work < 4 && quality < 1 && ups < 2) { slowFor = 0; if (++fastFor > 600) { quality = quality < 0.45 ? 0.5 : quality < 0.6 ? 0.7 : 1; fastFor = 0; ups++; work = 8; resize(); } }
+    else { slowFor = 0; fastFor = 0; }
   }
 
   // pause when the tab is hidden

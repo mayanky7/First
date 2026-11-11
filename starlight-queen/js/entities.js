@@ -151,7 +151,7 @@ function liftPlayer(w, p) {
   if (p.dead || w.state !== 'play') return;
   const s = p.safe || { x: w.spawn.x - 5, y: w.spawn.y - p.h };
   for (let i = 0; i < 12; i++) w.parts.push({ x: p.x + 5 + rand(-6, 6), y: Math.min(p.y + 10, w.cam.y + H + 4), vx: rand(-0.6, 0.6), vy: rand(-3.4, -1.2), life: rand(24, 44), col: i % 2 ? '#bff4ff' : '#ffffff', glow: 1, sz: 1 + (i % 2) });
-  p.x = s.x; p.y = s.y; p.vx = p.vy = 0; p.gliding = false; p.ride = null; p.drop = 0; p.inv = Math.max(p.inv, 100); p.sq = 1.3; p.onGround = true;
+  p.x = s.x; p.y = s.y; p.vx = p.vy = 0; p.carry = 0; p.gliding = false; p.ride = null; p.drop = 0; p.inv = Math.max(p.inv, 100); p.sq = 1.3; p.onGround = true;
   Sound.sfx('lift'); World.ring(p.x + 5, p.y + 11, 34, 5, 16, '#bff4ff'); World.sparkle(p.x + 5, p.y + 8, '#bff4ff', 18);
   if (!Game.seen.lift) { Game.seen.lift = 1; World.toast('Starlight sets her back on the road.'); }
 }
@@ -214,7 +214,7 @@ function makeEnt(s) {
 }
 // each land has its own creatures: the same habits, a different animal
 function walker(w, e, speed, hold) {
-  for (const q of w.players) if (q.lit && !q.dead && Math.abs(q.x - e.x) < 84 && Math.abs(q.y - e.y) < 60) { e.dir = e.x + e.w / 2 > q.x + 5 ? 1 : -1; speed = Math.max(speed, 0.7); hold = true; e.shy = 8; } // they shy from a raised light
+  for (const q of w.players) if (q.lit && !q.dead && Math.abs(q.x - e.x) < 84 && Math.abs(q.y - e.y) < 60) { e.dir = e.x + e.w / 2 > q.x + 5 ? 1 : -1; speed = Math.max(speed, 0.7); hold = true; } // they shy from a raised light
   let ledge = false;
   if (e.onGround) {
     const fx = e.dir > 0 ? e.x + e.w + 1 : e.x - 1;
@@ -483,8 +483,8 @@ ENT.beacon = {
   init(e) { e.w = 40; e.h = 56; e.x -= 20; e.y -= 56; e.on = false; e.fire = 0; },
   update(w, e) {
     const p = nearP(w, e);
-    const at = !p.dead && p.x + p.w > e.x + 2 && p.x < e.x + e.w - 2 && Math.abs(p.y + p.h - (e.y + 56)) < 40;
-    if (!e.on && at && e.final) { const boy = w.ents.find(q => q.type === 'boy'); if (w.bossAlive) return; if (!Game.gems.kohinoor) { if (w.toastT <= 0) World.toast('The beacon is waiting for the Mountain of Light.'); return; } if (boy && (!boy.met || w.t - boy.metT < 430)) return; }
+    const at = !p.dead && p.x + p.w > e.x + 2 && (e.final || p.x < e.x + e.w - 2) && Math.abs(p.y + p.h - (e.y + 56)) < 40;
+    if (!e.on && at && e.final) { const boy = w.ents.find(q => q.type === 'boy'); if (w.bossAlive) return; if (!Game.gems.kohinoor) { if (w.toastT <= 0) World.toast('The beacon is waiting for the Mountain of Light.'); return; } if (boy && !boy.met) { if (w.toastT <= 0) World.toast('Somebody is waiting, a little way back.'); return; } if (boy && w.t - boy.metT < 720) return; }
     if (!e.on && at) { e.on = true; World.lightBeacon(e); }
     if (e.on) {
       e.fire = Math.min(1, e.fire + 0.012);
@@ -670,7 +670,7 @@ ENT.boy = {
   init(e) { e.w = 10; e.h = 22; e.x -= 5; e.y -= 22; e.dir = -1; e.anim = 0; e.met = !!Game.metBoy; e.metT = e.met ? -9999 : 0; e.walk = false; },
   update(w, e) {
     if (w.bossAlive) return; // he is past the mesa. She has to get there.
-    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 42 && Math.abs(p.y - e.y) < 30 && !p.dead;
+    const p = nearP(w, e), dx = p.x - e.x, near = Math.abs(dx) < 42 && !p.dead; // she cannot leap past him
     if (!e.met) {
       e.dir = dx < 0 ? -1 : 1;
       if (Math.abs(dx) < 300 && w.t % 64 === 0) { w.parts.push({ x: e.x + 5 + e.dir * 6, y: e.y - 4, vx: e.dir * 0.25, vy: -0.4, life: 80, max: 80, draw(c, x, y, q) { Paint.note(c, x, y, Math.min(1, q.life / 20)); } }); if (w.t % 256 === 0) Sound.sfx('hum'); }
@@ -678,7 +678,7 @@ ENT.boy = {
       return;
     }
     const age = w.t - e.metT;
-    if (w.state === 'play' && age >= 0 && age < 700) { w.signText = MAYANK_LINES[age < 400 ? 0 : 1]; w.signNear = e; }
+    if (w.state === 'play' && age >= 90 && age < 720) { w.signText = MAYANK_LINES[age < 420 ? 0 : 1]; w.signNear = e; } // a beat first, while her song is still in the air
     // from here he walks beside her
     if (w.zone.warp) { e.walk = false; return; } // he waits on this side of the tear
     const tx = clamp(p.x - 18, w.arena.x0 + 8, w.mainEnd - 24), d = tx - e.x;

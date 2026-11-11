@@ -15,7 +15,7 @@ const WONDER_RANGE = { fox: 64, frogs: 76, undersky: 150, whale: 96, arch: 76, k
 const DANCERS = ['#3a6ab0', '#f0d040', '#f4f4f4', '#d84a3a', '#58b848', '#e88ab0', '#f4f4f4', '#3a6ab0'].map((col, i) => ({ tunic: col, tunicD: mix(col, '#101028', 0.28), belt: '#ffffff', cloak: null, hair: ['#e8c868', '#8a5a30', '#c88a48', '#f0dc98'][i % 4], hairD: ['#c8a040', '#6a4020', '#a06a30', '#d0b870'][i % 4], skin: '#f6d4b4', leg: '#3a3048', boot: '#5a3b28', band: '#4ea848', hem: i % 2 ? -5 : -7, long: i % 2 }));
 ENT.wonder = {
   lit: true,
-  init(e) { e.def = WONDER_BY_ID[e.wonder]; e.cx = e.x; e.gy = e.y; e.w = 280; e.h = 140; e.x -= 140; e.y -= 140; e.seen = !!Game.wonders[e.def.id]; e.k = e.seen ? 1 : 0; e.t0 = 0; e.ph = -1; e.cool = 0; e.glow = 0; e.trail = []; },
+  init(e) { e.def = WONDER_BY_ID[e.wonder]; e.cx = e.x; e.gy = e.y; e.w = 460; e.h = 140; e.x -= 230; e.y -= 140; e.seen = !!Game.wonders[e.def.id]; e.k = e.seen ? 1 : 0; e.t0 = 0; e.ph = -1; e.cool = 0; e.glow = 0; e.trail = []; },
   update(w, e) {
     const p = nearP(w, e), id = e.def.id, dx = p.x + 5 - e.cx;
     const near = !p.dead && Math.abs(dx) < WONDER_RANGE[id] && Math.abs(p.y + p.h - e.gy) < 120;
@@ -173,7 +173,7 @@ ENT.warp = {
   init(e) { e.w = 16; e.h = 46; e.x -= 8; e.y -= 48; e.p = 0; e.lock = false; },
   update(w, e) {
     const p = nearP(w, e), near = !p.dead && Math.abs(p.x + 5 - (e.x + 8)) < 60 && Math.abs(p.y + p.h - (e.y + 48)) < 50;
-    if (!p.lit) w.warpLock = false; // she must lower her hand and raise it again before a tear will take her a second time
+    if (!p.lit && !w.warpFx) w.warpLock = false; // she must lower her hand and raise it again before a tear will take her a second time
     if (near && p.lit && !w.warpLock && !w.warpFx && w.state === 'play') {
       if (e.p === 0) Sound.sfx('bridge');
       e.p = Math.min(64, e.p + 1);
