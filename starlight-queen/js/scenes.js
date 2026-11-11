@@ -127,7 +127,55 @@ const Vista = (() => {
     if (!snow) snow = Paint.makeAmbient('snow');
     if (!dawn) Paint.ambient(c, snow, t, 0.25);
   }
-  return { draw };
+  /* Kauaʻi, late in the day: the fluted green cliffs going down into the sea, a rainbow, and the two of them on the sand */
+  function palm(c, x, y, h, lean, t) {
+    const tx = x + lean, ty = y - h, sw = Math.sin(t * 0.03 + x) * 1.2;
+    c.strokeStyle = '#3a2a22'; c.lineCap = 'round'; c.lineWidth = Math.max(1.2, h * 0.045); c.beginPath(); c.moveTo(x, y); c.quadraticCurveTo(x + lean * 0.2, y - h * 0.6, tx, ty); c.stroke();
+    c.fillStyle = '#1f4a34';
+    for (let i = 0; i < 7; i++) { const a = -Math.PI + i * (Math.PI / 6) + 0.05, len = h * 0.46 * (0.8 + (i % 3) * 0.12), ex = tx + Math.cos(a) * len + sw, ey = ty + Math.sin(a) * len * 0.55 + len * 0.42; c.beginPath(); c.moveTo(tx, ty); c.quadraticCurveTo(tx + Math.cos(a) * len * 0.6, ty + Math.sin(a) * len * 0.75 - 1, ex, ey); c.quadraticCurveTo(tx + Math.cos(a) * len * 0.5, ty + Math.sin(a) * len * 0.4 + 2.4, tx, ty); c.fill(); }
+    c.fillStyle = '#6a4a2a'; c.beginPath(); c.arc(tx - 1, ty + 1.6, 1.3, 0, TAU); c.arc(tx + 1.4, ty + 1.8, 1.2, 0, TAU); c.fill();
+  }
+  function kauai(c, t) {
+    const { soft, disc, vgrad, rr } = Paint;
+    c.fillStyle = vgrad(c, 0, 124, ['#2c4e94', '#5e8ecc', '#a9c4de', '#f6c8a0', '#ffe2a6']); c.fillRect(0, 0, W, 126);
+    c.fillStyle = '#fff4e2'; c.globalAlpha = 0.5; for (const [x, y, wd] of [[40, 30, 70], [150, 18, 90], [270, 40, 80], [330, 66, 60]]) { const xx = (x + t * 0.015) % (W + 100) - 50; c.beginPath(); rr(c, xx, y, wd, 4, 2); for (let k = 0; k < 5; k++) { c.moveTo(xx + wd * (0.14 + k * 0.18) + 8, y + 1.5); c.ellipse(xx + wd * (0.14 + k * 0.18), y + 1.5, 8 + (k % 3) * 3, 5 + (k % 2) * 2.4, 0, Math.PI, 0); } c.fill(); } c.globalAlpha = 1;
+    // the sun going down into the sea, and its road on the water
+    soft(c, 300, 116, 100, '#ffe6a8', 0.6); disc(c, 300, 114, 11, '#fffbe6');
+    // a rainbow, as there usually is
+    c.save(); c.globalAlpha = 0.34; c.lineWidth = 1.5; ['#ff7a7a', '#ffb060', '#ffe36a', '#8ee07a', '#6ab8ff', '#b890ff'].forEach((col, i) => { c.strokeStyle = col; c.beginPath(); c.arc(206, 150, 112 - i * 1.5, Math.PI * 1.08, Math.PI * 1.66); c.stroke(); }); c.restore();
+    c.fillStyle = vgrad(c, 122, H, ['#ffd9a0', '#4fb6b0', '#1f8a94', '#135e78']); c.fillRect(0, 122, W, H - 122);
+    c.fillStyle = 'rgba(255,244,214,0.5)'; for (let i = 0; i < 16; i++) { const k = (t * 0.2 + i * 23) % 60, y = 126 + i * 4.6; c.beginPath(); rr(c, 300 - (10 + i * 3) + Math.sin(i * 2.1 + t * 0.02) * 6, y, (20 + i * 6) * (0.5 + 0.5 * Math.sin(k / 60 * Math.PI)), 0.7, 0.35); c.fill(); }
+    // the cliffs of the north shore: knife-edged ridges, one behind another, each stepping down into the water
+    const ridges = [['#93b8b0', '#7aa4a2', 250, 46, 118], ['#6fa890', '#56907c', 206, 36, 122], ['#4f9470', '#3a7a5a', 160, 24, 127], ['#34804f', '#256440', 112, 16, 134]];
+    ridges.forEach(([lit, shade, reach, top, base], i) => {
+      const r = rng(40 + i), pts = [];
+      for (let x = -4; x <= reach; x += 7) { const k = x / reach, env = top + (base - top) * Math.pow(Math.max(0, k), 1.7); pts.push([x, env + (pts.length % 2 ? 7 + r() * 5 : -r() * 4) * (1 - k * 0.7)]); }
+      c.fillStyle = vgrad(c, top - 6, base, [lit, shade]); c.beginPath(); c.moveTo(-4, base + 2); for (const [x, y] of pts) c.lineTo(x, y); c.lineTo(reach + 6, base + 2); c.closePath(); c.fill();
+      c.strokeStyle = 'rgba(10,40,30,0.22)'; c.lineWidth = 0.7; c.beginPath(); for (let k = 0; k < pts.length; k += 2) { const [x, y] = pts[k]; c.moveTo(x, y); c.quadraticCurveTo(x + 3, (y + base) / 2, x + 7, base + 1); } c.stroke(); // the flutes
+      c.fillStyle = 'rgba(255,240,200,0.16)'; c.beginPath(); for (let k = 0; k + 1 < pts.length; k += 2) { const [x, y] = pts[k]; c.moveTo(x, y); c.lineTo(x + 7, pts[k + 1][1]); c.lineTo(x + 5, (y + base) / 2); c.closePath(); } c.fill();
+      if (i === 2) { c.strokeStyle = 'rgba(255,255,255,0.8)'; c.lineWidth = 0.7; c.beginPath(); c.moveTo(60, 58); c.lineTo(60.6, 124); c.stroke(); soft(c, 60.4, 124, 5, '#ffffff', 0.5); } // a waterfall, a long way off
+      c.fillStyle = `rgba(255,236,200,${0.1 + i * 0.02})`; c.fillRect(0, base - 8, reach + 20, 12); // sea mist at the foot
+    });
+    // surf, and the beach
+    c.fillStyle = 'rgba(255,255,255,0.85)'; c.beginPath(); c.moveTo(-2, 168); c.quadraticCurveTo(90, 156 + Math.sin(t * 0.03) * 1.4, 190, 172 + Math.sin(t * 0.03 + 1) * 1.6); c.quadraticCurveTo(270, 186, W + 2, 196); c.lineTo(W + 2, 200); c.quadraticCurveTo(270, 190, 190, 176); c.quadraticCurveTo(90, 161, -2, 172); c.closePath(); c.fill();
+    c.fillStyle = vgrad(c, 160, H, ['#ffe6b4', '#f0c88a', '#c89a62']); c.beginPath(); c.moveTo(-2, 170); c.quadraticCurveTo(90, 159, 190, 175); c.quadraticCurveTo(270, 189, W + 2, 199); c.lineTo(W + 2, H + 2); c.lineTo(-2, H + 2); c.closePath(); c.fill();
+    palm(c, 22, 196, 96, 16, t); palm(c, 44, 204, 70, -10, t); palm(c, 352, 214, 108, -22, t); palm(c, 372, 210, 74, 6, t);
+    c.fillStyle = 'rgba(120,80,60,0.25)'; c.beginPath(); c.ellipse(94, 181.6, 26, 2.2, 0.06, 0, TAU); c.fill();
+    { // one of the island's wild chickens, with business of its own
+      const x = 150 + Math.sin(t * 0.01) * 14, y = 186 + Math.abs(Math.sin(t * 0.2)) * -0.6, f = Math.cos(t * 0.01) > 0 ? 1 : -1;
+      c.save(); c.translate(x, y); c.scale(f, 1); c.fillStyle = '#7a3a1c'; c.beginPath(); c.ellipse(0, -3, 3, 2.2, 0, 0, TAU); c.fill(); c.fillStyle = '#1c3a34'; c.beginPath(); c.moveTo(-2.4, -3.6); c.quadraticCurveTo(-6, -8, -4.6, -2.4); c.closePath(); c.fill();
+      c.fillStyle = '#c8823a'; c.beginPath(); c.ellipse(2.4, -5.6, 1.5, 1.7, 0, 0, TAU); c.fill(); c.fillStyle = '#d8342c'; c.beginPath(); c.arc(2.4, -7.4, 0.9, 0, TAU); c.arc(3.2, -4.6, 0.6, 0, TAU); c.fill(); c.fillStyle = '#f0c040'; c.beginPath(); c.moveTo(3.8, -5.8); c.lineTo(5.2, -5.4); c.lineTo(3.8, -5); c.fill();
+      c.strokeStyle = '#c8a040'; c.lineWidth = 0.4; c.beginPath(); c.moveTo(-0.6, -1); c.lineTo(-0.6, 0.6); c.moveTo(0.8, -1); c.lineTo(0.8, 0.6); c.stroke(); c.restore();
+    }
+    // the two of them
+    const ax = 100, ay = 181, k = 1.9;
+    soft(c, ax - 10, ay - 20, 44, '#ffe9b8', 0.35);
+    soft(c, ax - 20, ay - 18, 18, '#ffc060', 0.45); Paint.figure(c, ax - 28, ay + 0.6, { face: 1, t: t + 30, scale: k, lantern: true }, Paint.MAYANK);
+    Paint.figure(c, ax, ay, { face: 1, t, scale: k, crown: true, speed: 0.12, ph: 0 });
+    disc(c, ax - 3.4, ay - 41.6, 1.9, '#ff8ab0'); disc(c, ax - 3.4, ay - 41.6, 0.7, '#ffe36a'); // a plumeria behind her ear
+    for (let i = 0; i < 9; i++) { const kk = ((t * 0.25 + i * 41) % 240) / 240, x = (i * 53 + kk * 60) % W, y = 40 + kk * 150 + Math.sin(kk * 9 + i) * 6; c.globalAlpha = 0.7 * Math.sin(kk * Math.PI); disc(c, x, y, 1, i % 2 ? '#ffd0e0' : '#fff6e0'); } c.globalAlpha = 1; // petals on the trade wind
+  }
+  return { draw, kauai };
 })();
 
 /* ---------- Title ---------- */
@@ -621,23 +669,28 @@ const EPILOGUE = [
   { s: 'Under the armour there was hardly anyone. He had only wanted to be warm.' },
   { s: 'Every stone he had shut away woke at once. Over the mesa the stars came back on, like a street when people come home.' },
   { s: 'His name is Mayank. He walked from India on the word of a dream, which had promised him an elf queen in a distant land. Dreams, it turns out, can be trusted with directions.' },
-  { s: 'Ana did not keep the Mountain of Light. She held it up until the sky took it back. Then they went home the long way, which is the only way either of them knows.' },
-  { s: 'In Kaamos they leave the window open now. And when the children at the last fence ask who she is, the Tonttu says: “Her? That is the Starlight Queen. She is from here.”' }
+  { s: 'Ana did not keep the Mountain of Light. She held it up until the sky took it back. In Kaamos they leave the window open now, and the Tonttu tells the children at the last fence: “That is the Starlight Queen. She is from here.”' },
+  { s: 'But she did not go home yet. Mayank took her hand, and took her west once more, over one more sea, to a green island called Kauaʻi, where the mountains walk down into the water and it rains with the sun out.', kauai: true },
+  { s: '“This,” said Mayank, “is the beginning of a new adventure.”', kauai: true }
 ];
 Scenes.list.ending = {
-  enter() { this.t = 0; this.i = 0; this.pt = 0; this.gt = -1; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
+  enter() { this.t = 0; this.i = 0; this.pt = 0; this.gt = -1; this.kT = 0; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
   update(busy) {
     this.t++;
+    { const want = this.gt >= 0 || EPILOGUE[this.i].kauai ? 1 : 0; this.kT += clamp(want - this.kT, -0.02, 0.02); }
     if (busy) return;
     if (this.gt >= 0) { this.gt++; if (Input.hit('enter') && this.gt > 150) Scenes.go('title'); return; }
     const r = Cards.step(this, EPILOGUE.length);
     if (r) { this.gt = 0; Sound.sfx('confirm'); }
   },
-  draw(c) { Vista.draw(c, this.t, true, 0); },
+  draw(c) { // Kaamos at dawn; then, through a wash of light, Kauaʻi
+    if (this.kT > 0.5) Vista.kauai(c, this.t); else Vista.draw(c, this.t, true, 0);
+    const veil = 1 - Math.abs(this.kT - 0.5) * 2; if (veil > 0.01) { c.fillStyle = `rgba(255,244,214,${veil})`; c.fillRect(0, 0, W, H); }
+  },
   drawHi(u) {
     if (this.gt < 0) {
       const g = u.ctx, s = u.s, a = clamp(this.pt / 34, 0, 1), card = EPILOGUE[this.i], lines = u.wrap(card.s, 296, 11, { italic: true }), lh = 15.5, cy = 58;
-      { const gr = g.createRadialGradient(192 * s, cy * s, 0, 192 * s, cy * s, 190 * s); gr.addColorStop(0, 'rgba(20,16,50,0.62)'); gr.addColorStop(0.6, 'rgba(20,16,50,0.36)'); gr.addColorStop(1, 'rgba(20,16,50,0)'); g.save(); g.translate(0, cy * s); g.scale(1, 0.42); g.translate(0, -cy * s); g.fillStyle = gr; g.fillRect(0, (cy - 200) * s, W * s, 400 * s); g.restore(); }
+      { const gr = g.createRadialGradient(192 * s, cy * s, 0, 192 * s, cy * s, 190 * s); gr.addColorStop(0, `rgba(20,16,50,${0.62 + 0.14 * this.kT})`); gr.addColorStop(0.6, `rgba(20,16,50,${0.36 + 0.12 * this.kT})`); gr.addColorStop(1, 'rgba(20,16,50,0)'); g.save(); g.translate(0, cy * s); g.scale(1, 0.42); g.translate(0, -cy * s); g.fillStyle = gr; g.fillRect(0, (cy - 200) * s, W * s, 400 * s); g.restore(); }
       lines.forEach((ln, k) => u.text(ln, 192, cy + (k - (lines.length - 1) / 2) * lh + (1 - a) * 3, 11, { color: '#fffbe8', alpha: a, italic: true }));
       Cards.hint(u, this, EPILOGUE.length, 197);
       return;

@@ -11,7 +11,8 @@ hand, and the starlight comes down into it. So she goes: across the frozen gulf 
 midsummer lands of Sweden, down through the iron deeps of Kiruna, over the sea to a far country
 called America, and, through a tear in the afternoon, to an Australia where it is already
 tomorrow. At the end of the road is the Hoarder King, the Koh-i-Noor, and **Mayank**, who has
-walked from India on the word of a dream, carrying a lantern.
+walked from India on the word of a dream, carrying a lantern. And when the light is
+back in the sky he takes her west once more, to Kauaʻi: "the beginning of a new adventure."
 
 It is a walk more than a fight: calm, painted, and short on words. There are things to find and
 things to simply stand and look at.
