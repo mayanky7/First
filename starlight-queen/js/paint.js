@@ -340,11 +340,12 @@ Paint.tiles = function (g, w, ox, oy) {
         if (m > 0) { const a = Math.min(1, m / 40); g.globalAlpha = a; g.fillStyle = Paint.vgrad(g, y, y + 6, ['rgba(255,255,255,0.95)', 'rgba(170,215,255,0.55)', 'rgba(170,215,255,0)']); g.fillRect(x - 0.2, y, T + 0.4, 6); g.globalAlpha = 1; Paint.soft(g, x + 8, y + 2, 12, '#bfe4ff', 0.28 * a); if ((t + cx * 9) % 40 < 6) Paint.star4(g, x + ((cx * 7) % 12) + 2, y - 1.5, 1.6, '#ffffff', t * 0.05); }
         else if (((t + cx * 23) >> 3) % 9 === 0) Paint.disc(g, x + (cx * 7 + (t >> 5)) % 14 + 1, y + 2 + (cx % 3), 0.5, 'rgba(223,242,255,0.7)');
       } else if (ch === 'D') { // a door that shows itself only to starlight: a veil across the way, thin as breath until she lights it
-        const d = w.doors.find(q => q.cx === cx), k = d ? clamp((w.doorP[d.id] || 0) / 70, 0, 1) : 0, a = 0.2 + 0.55 * k + 0.05 * Math.sin(t * 0.07 + cy);
+        const d = w.doors.find(q => q.cx === cx), k = d ? clamp((w.doorP[d.id] || 0) / 70, 0, 1) : 0, a = 0.42 + 0.45 * k + 0.1 * Math.sin(t * 0.07 + cy);
         const gr = g.createLinearGradient(x, 0, x + T, 0); gr.addColorStop(0, 'rgba(190,220,255,0)'); gr.addColorStop(0.5, `rgba(214,236,255,${a})`); gr.addColorStop(1, 'rgba(190,220,255,0)');
         g.fillStyle = gr; g.fillRect(x, y - 0.2, T, T + 0.4);
         g.fillStyle = `rgba(255,255,255,${0.35 + 0.6 * k})`; for (let i = 0; i < 2; i++) { const yy = ((t * 0.3 + cy * 37 + i * 9) % 16); Paint.disc(g, x + 8 + Math.sin(t * 0.05 + cy + i * 2) * 3, y + yy, 0.45, g.fillStyle); }
-        if (k > 0) Paint.soft(g, x + 8, y + 8, 16, '#bfe4ff', 0.3 * k);
+        Paint.soft(g, x + 8, y + 8, 14, '#bfe4ff', 0.16 + 0.3 * k);
+        g.fillStyle = `rgba(255,255,255,${0.5 + 0.4 * k})`; g.fillRect(x + 7.4, y - 0.2, 1.2, T + 0.4); // its bright seam
       } else { // a runestone: a piece of the land itself, hung in the air, asleep until light or an arrow wakes it
         const used = ch === 'U', pulse = 0.6 + 0.4 * Math.sin(t * 0.06 + cx * 1.3), h1 = hash2(cx, cy), bob = used ? 0 : Math.sin(t * 0.04 + cx) * 0.5;
         g.fillStyle = Paint.vgrad(g, y, y + T, [mix(L.ground[0], L.ridge[1], used ? 0.3 : 0.55), mix(L.ground[1], L.ground[0], 0.5)]);

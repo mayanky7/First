@@ -571,7 +571,12 @@ Scenes.list.play = {
     { // a key, shown above her when the place wants it, instead of a sentence
       const pr = w.prompt && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !wc && !w.warpFx ? w.prompt : null;
       this.prA = (this.prA || 0) + ((pr ? 1 : 0) - (this.prA || 0)) * 0.12; if (pr) this.prK = pr;
-      if (this.prA > 0.03 && this.prK) { const pl = w.player, key = this.prK === 'light' ? (Input.touch ? '☼' : '[E]') : (Input.touch ? '▼' : '[↓]'); u.rich(key, pl.x + 5 - w.cam.x, pl.y - w.cam.y - 13 + Math.sin(w.t * 0.08) * 1.2, 7.4, { color: '#fff3c4', alpha: this.prA * (0.75 + 0.25 * Math.sin(w.t * 0.1)) }); }
+      if (this.prA > 0.03 && this.prK) { // "hold", and the key or button to hold, on a small dark tab so it cannot be mistaken for scenery
+        const pl = w.player, key = this.prK === 'light' ? (Input.touch ? '☼' : '[E]') : (Input.touch ? '▼' : '[↓]'), a = this.prA, x = pl.x + 5 - w.cam.x, y = pl.y - w.cam.y - 15 + Math.sin(w.t * 0.08) * 1.2, wd = u.width('hold', 6.6, { italic: true }) + 17;
+        u.plate(x - wd / 2, y - 6, wd, 12, a * 0.9);
+        u.rich('hold  ' + key, x, y, 6.6, { color: '#fff3c4', alpha: a * (0.8 + 0.2 * Math.sin(w.t * 0.1)), italic: true, shadow: false });
+      }
+      const hint = pr || ''; if (document.body.dataset.hint !== hint) document.body.dataset.hint = hint; // the on-screen button itself pulses
     }
     if (w.fight && w.boss && w.boss.st === 'intro') {
       const a = clamp(w.boss.t0 / 30, 0, 1) * clamp((110 - w.boss.t0) / 20, 0, 1);

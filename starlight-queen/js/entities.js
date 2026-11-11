@@ -66,7 +66,8 @@ function updatePlayer(w, p) {
   if (p.cloak) p.vx = 0;
   // the lantern: starlight, raised
   if (p.lumOut && p.lum > 30) p.lumOut = false;
-  const lightNow = ctl && act(p, 'light') && !p.lumOut && !p.cloak;
+  if (p.autoLit > 0) p.autoLit--; // sometimes the starlight comes without being asked
+  const lightNow = ctl && (act(p, 'light') || p.autoLit > 0) && !p.lumOut && !p.cloak;
   if (lightNow && !p.lit) Sound.sfx('light');
   p.lit = lightNow;
   if (p.lit) { p.lum -= 0.4; if (p.lum <= 0) { p.lum = 0; p.lit = false; p.lumOut = true; Sound.sfx('empty'); } if (w.t % 3 === 0) World.spark(p.x + 5 + rand(-14, 14), p.y - 6 + rand(-10, 10), w.t % 2 ? '#ffffff' : '#bff4ff', 1); }
@@ -150,10 +151,35 @@ function updatePlayer(w, p) {
 function liftPlayer(w, p) {
   if (p.dead || w.state !== 'play') return;
   const s = p.safe || { x: w.spawn.x - 5, y: w.spawn.y - p.h };
+  const dir = p.x > s.x + 2 ? 1 : p.x < s.x - 2 ? -1 : p.face; // which way she was going when she fell
+  if (p.fallAt && Math.abs(p.fallAt.x - s.x) < 24) p.fallAt.n++; else p.fallAt = { x: s.x, n: 1 }; // falling again and again from the same footing means she needs a hand
   for (let i = 0; i < 12; i++) w.parts.push({ x: p.x + 5 + rand(-6, 6), y: Math.min(p.y + 10, w.cam.y + H + 4), vx: rand(-0.6, 0.6), vy: rand(-3.4, -1.2), life: rand(24, 44), col: i % 2 ? '#bff4ff' : '#ffffff', glow: 1, sz: 1 + (i % 2) });
-  p.x = s.x; p.y = s.y; p.vx = p.vy = 0; p.carry = 0; p.gliding = false; p.ride = null; p.drop = 0; p.inv = Math.max(p.inv, 100); p.sq = 1.3; p.onGround = true;
+  // The third time, the light does not set her back: it carries her over.
+  const far = p.fallAt.n >= 3 && !w.fight ? landingBeyond(w, s, dir) : null, to = far || s;
+  p.x = to.x; p.y = to.y; p.vx = p.vy = 0; p.carry = 0; p.gliding = false; p.ride = null; p.drop = 0; p.inv = Math.max(p.inv, 100); p.sq = 1.3; p.onGround = true;
   Sound.sfx('lift'); World.ring(p.x + 5, p.y + 11, 34, 5, 16, '#bff4ff'); World.sparkle(p.x + 5, p.y + 8, '#bff4ff', 18);
-  if (!Game.seen.lift) { Game.seen.lift = 1; World.toast('Starlight sets her back on the road.'); }
+  if (far) { p.safe = { x: to.x, y: to.y }; p.fallAt = null; World.toast('Starlight carries her across.'); Sound.sfx('heal'); }
+  else if (p.fallAt.n >= 2 && bridgeNear(w, s)) { p.autoLit = 240; World.toast('The starlight comes to her hand. There is a road in the air.'); } // a bridge that only shows in her light: so it is lit for her
+  else if (!Game.seen.lift) { Game.seen.lift = 1; World.toast('Starlight sets her back on the road.'); }
+}
+function bridgeNear(w, s) {
+  const c0 = Math.floor((s.x + 5) / T), r0 = Math.floor((s.y + 22) / T);
+  for (let cy = Math.max(0, r0 - 6); cy <= Math.min(w.rows - 1, r0 + 4); cy++) for (let cx = Math.max(0, c0 - 9); cx <= Math.min(w.cols - 1, c0 + 9); cx++) if (w.grid[cy][cx] === 'M') return true;
+  return false;
+}
+// The first sure ground on the far side of whatever she keeps falling into, in the direction she was going.
+function landingBeyond(w, s, dir) {
+  const c0 = Math.floor((s.x + 5) / T), feet = s.y + 22;
+  let gap = false;
+  for (let i = 1; i <= 44; i++) {
+    const cx = c0 + dir * i;
+    if (cx < 1 || cx >= w.cols - 1 || cx * T < w.minX + T || cx * T > w.maxX - 2 * T) return null;
+    let best = null;
+    for (let cy = 2; cy < w.rows; cy++) if (w.grid[cy][cx] === '#' && w.grid[cy - 1][cx] === '.' && w.grid[cy - 2][cx] === '.') { const y = cy * T; if (best === null || Math.abs(y - feet) < Math.abs(best - feet)) best = y; }
+    if (best === null) { gap = true; continue; }
+    if (gap) return { x: cx * T + 3, y: best - 22 };
+  }
+  return null;
 }
 function standingOnPlat(w, p) {
   if (p.ride) return false;
@@ -175,6 +201,7 @@ function killPlayer(w, p, pit) {
   if (p.dead || w.state !== 'play') return;
   if (w.god && !pit) return;
   p.dead = 1; p.hp = 0; Sound.sfx('die'); w.shake = 10; Game.stats.deaths++;
+  if (w.fight && w.boss) Game.bossHp = Math.max(2, Math.min(Game.bossHp || w.boss.hp, w.boss.hp) - 3); // each time she falls to him, he is nearer falling himself
   if (w.players.every(q => q.dead)) Sound.duck(true);
   w.hitstop = 8;
   for (let i = 0; i < 26; i++) { const a = rand(TAU), s = rand(0.5, 2.6); w.parts.push({ x: p.x + 5, y: p.y + 10, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 1, life: rand(40, 80), col: i % 2 ? '#bff4ff' : '#fff6b0', g: -0.01, glow: 1, sz: 1 + (i % 2) }); }
@@ -500,7 +527,7 @@ ENT.beacon = {
 /* ============ The Hoarder King ============ */
 ENT.boss = {
   foe: true, stomp: false, arrow: false,
-  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.max = 10; e.hp = clamp(Game.bossHp || 10, 3, 10); e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
+  init(e) { e.w = 22; e.h = 44; e.x -= 11; e.y -= 44; e.max = 10; e.hp = clamp(Game.bossHp || 10, 2, 10); e.st = 'wait'; e.t0 = 0; e.dir = -1; e.last = ''; e.stunDmg = 0; e.p2 = false; },
   update(w, e) {
     const A = w.arena, p = nearP(w, e);
     e.t0++;
@@ -591,7 +618,7 @@ ENT.boss = {
 };
 function bossHit(w, e, n, hx, hy) {
   if (!ENT.boss.vulnerable(e) || e.invT > 0) return false;
-  e.hp -= n; Game.bossHp = Math.max(3, e.hp); e.stunDmg += n; e.flash = 10; e.invT = 12; Sound.sfx('bosshit'); w.shake = 8; w.hitstop = 6;
+  e.hp -= n; Game.bossHp = Math.max(2, e.hp); e.stunDmg += n; e.flash = 10; e.invT = 12; Sound.sfx('bosshit'); w.shake = 8; w.hitstop = 6;
   World.sparkle(hx, hy, '#ffc040', 10);
   if (e.hp <= 0) { e.hp = 0; e.st = 'dying'; e.t0 = 0; Sound.music(null); w.bossAlive = false; World.clearHazards(); w.hitstop = 18; w.slow = 80; w.flash = 1; World.ring(hx, hy, 6, 140, 26, '#ffffff'); Sound.sfx('slam'); }
   return true;
@@ -648,6 +675,7 @@ ENT.gem = {
   lit: true,
   init(e) { e.def = GEM_BY_ID[e.gem]; e.w = Math.round(11 + e.def.n * 1.2) | 1; e.h = Math.round(e.w * 0.86); e.x -= e.w / 2; e.y -= e.h + 4; e.by = e.y; },
   update(w, e) {
+    if (e.gem === 'kohinoor' && !w.bossAlive) { const q = nearP(w, e), dx = q.x + 5 - (e.x + e.w / 2), dy = q.y + 8 - (e.by + e.h / 2), d = Math.hypot(dx, dy) || 1, v = Math.min(2.4, 0.6 + (w.t - (e.t1 || (e.t1 = w.t))) * 0.004); if (w.t - e.t1 > 90) { e.x += dx / d * v; e.by += dy / d * v; } } // freed, it goes to the one who freed it
     e.y = e.by + Math.sin(w.t * 0.05) * 2.5;
     if (w.t % 9 === 0) w.parts.push({ x: e.x + rand(e.w), y: e.y + rand(e.h), vx: 0, vy: -0.25, life: 26, col: w.t % 18 ? '#ffffff' : e.def.tint, glow: 1, sz: 1 });
     if (touch(w, e)) { e.dead = true; World.gainGem(e); }

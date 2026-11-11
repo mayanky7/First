@@ -166,14 +166,21 @@ const World = (() => {
     for (const k in w.moon) if (--w.moon[k] <= 0) delete w.moon[k];
     let any = 0;
     { // does this place want her light, or her stillness? Then show the key over her head, not a sentence.
-      const p = w.player; let pr = null;
+      const p = w.player; let pr = null; w.promptRoad = false; // promptRoad: the light is needed to go on, not just to see something extra
       if (w.gaze && !p.cloak) pr = 'down';
       else if (!p.lit && !p.dead && !p.lumOut) {
         const pcx = Math.floor((p.x + 5) / T), pcy = Math.floor((p.y + 10) / T);
-        scan: for (let cy = Math.max(0, pcy - 4); cy <= Math.min(w.rows - 1, pcy + 4); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if (ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) { pr = 'light'; break scan; } }
+        scan: for (let cy = Math.max(0, pcy - 4); cy <= Math.min(w.rows - 1, pcy + 4); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if (ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) { pr = 'light'; w.promptRoad = true; break scan; } }
         if (!pr) for (const e of w.ents) if ((e.type === 'warp' && Math.abs(e.x + 8 - p.x - 5) < 56 && Math.abs(e.y + 48 - p.y - p.h) < 50) || (e.type === 'wonder' && e.def.id === 'undersky' && !e.seen && Math.abs(e.cx - p.x - 5) < 120 && Math.abs(e.gy - p.y - p.h) < 40)) { pr = 'light'; break; }
       }
       w.prompt = pr;
+      // Nobody should stand stuck at a door or a gap for want of being told. First the words; and if she still
+      // does not raise her hand, the starlight comes to it by itself.
+      const want = pr === 'light';
+      w.needT = want ? (w.needT || 0) + 1 : 0;
+      const blocked = want && p.onGround && w.needT > 50, fell = want && p.fallAt && p.fallAt.n >= 2 && Math.abs(p.x - p.fallAt.x) < 60;
+      if (blocked && w.state === 'play' && !w.signText) { w.signText = 'Hold [E] to raise her starlight.'; w.signNear = null; }
+      if (want && w.promptRoad && !p.lumOut && w.state === 'play' && (w.needT > 420 || (fell && w.needT > 40))) { p.autoLit = 150; w.needT = 0; if (p.fallAt) p.fallAt.n = 0; toast('The starlight comes to her hand.'); }
     }
     for (const p of w.players) {
       if (!p.lit || p.dead) continue;
