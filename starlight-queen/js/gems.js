@@ -6,79 +6,79 @@ const GEMS = [
     id: 'first', name: 'The First Light', real: false, carat: 0.30, cut: 'Round brilliant', shape: 'round',
     color: 'G · near colourless', tint: '#eaf6ff', clarity: 'VS1', origin: 'Kaavi kimberlite, eastern Finland',
     lesson: 'Carat',
-    text: 'Carat is weight, not size. One carat is exactly 0.2 grams — the word comes from the carob seeds once used to balance jewellers’ scales. This stone weighs 0.06 g. Diamond-bearing kimberlite really does lie under eastern Finland, though no mine has ever opened there.'
+    text: 'Carat is weight, not size: one carat is exactly 0.2 grams. The word comes from the carob seeds once used to balance jewellers’ scales.'
   },
   {
     id: 'cut', name: 'The Lantern Square', real: false, carat: 1.00, cut: 'Princess', shape: 'princess',
     color: 'F · colourless', tint: '#f2f8ff', clarity: 'VS2', origin: 'Jwaneng, Botswana',
     lesson: 'Cut',
-    text: 'Cut is the only one of the four Cs made by human hands. Angles and proportions decide how much light returns to the eye. The modern round brilliant has 57 or 58 facets; its ideal proportions were worked out by Marcel Tolkowsky in 1919. Jwaneng is the richest diamond mine on Earth by value.'
+    text: 'Cut is the only one of the four Cs made by human hands. Its angles decide how much light comes back to the eye.'
   },
   {
     id: 'clarity', name: 'The Ice Window', real: false, carat: 2.00, cut: 'Emerald (step cut)', shape: 'emerald',
     color: 'E · colourless', tint: '#e6fbff', clarity: 'VVS1', origin: 'Diavik, Northwest Territories, Canada',
     lesson: 'Clarity',
-    text: 'Clarity counts the tiny crystals and feathers trapped inside. The scale runs FL, IF, VVS, VS, SI, I — judged under ten-power magnification. A step cut like this one is an open window: it hides nothing, so it demands a clean stone. Diavik was mined from beneath a frozen lake.'
+    text: 'Clarity counts the tiny crystals and feathers trapped inside, judged at ten-power magnification: FL, IF, VVS, VS, SI, I. A step cut hides nothing.'
   },
   {
     id: 'colour', name: 'Midsummer White', real: false, carat: 5.00, cut: 'Oval brilliant', shape: 'oval',
     color: 'D · colourless', tint: '#ffffff', clarity: 'IF', origin: 'Mir pipe, Yakutia, Russia',
     lesson: 'Colour',
-    text: 'For white diamonds, less colour is worth more. The scale starts at D — colourless — and runs to Z, a light yellow. Graders compare a stone, table down, against master stones under lamps that copy daylight. The Mir mine is an open pit more than half a kilometre deep.'
+    text: 'For white diamonds, less colour is worth more. The scale starts at D, colourless, and runs to Z, a light yellow.'
   },
   {
     id: 'pink', name: 'The Savannah Rose', real: false, carat: 6.00, cut: 'Cushion', shape: 'cushion',
     color: 'Fancy vivid pink', tint: '#ff9ac8', clarity: 'VS1', origin: 'Williamson mine, Tanzania',
     lesson: 'Fancy colour',
-    text: 'Past Z the rules turn over: strong colour becomes rare and precious. Yellow comes from nitrogen, blue from boron. Pink comes from no impurity at all — the crystal itself was bent under pressure. Most pinks came from Argyle in Australia, which closed in 2020; the rare large ones, like this, from Tanzania.'
+    text: 'Past Z the rules turn over: strong colour becomes rare and precious. Pink comes from no impurity at all. The crystal itself was bent under pressure.'
   },
   {
     id: 'deep', name: 'The Deep One', real: false, carat: 10.00, cut: 'Pear brilliant', shape: 'pear',
     color: 'H · near colourless', tint: '#f4f0e6', clarity: 'SI1', origin: 'Kimberley, South Africa',
     lesson: 'Where diamonds come from',
-    text: 'A diamond is pure carbon, crystallised about 150 kilometres down, most of them one to three billion years ago. Volcanic eruptions carried them up in pipes of a rock called kimberlite — named after Kimberley, where the great diamond rush began in 1871.'
+    text: 'A diamond is pure carbon, crystallised about 150 kilometres down, most of them one to three billion years ago. Volcanoes carried them up in pipes of kimberlite.'
   },
   {
     id: 'unclesam', name: 'Uncle Sam', real: true, carat: 12.42, cut: 'Emerald (step cut)', shape: 'emerald',
     color: 'M · faint brown', tint: '#f6e6cc', clarity: 'VVS', origin: 'Crater of Diamonds, Arkansas, USA',
     lesson: 'A real American find',
-    text: 'The largest diamond ever found in the United States: 40.23 carats in the rough, picked up in 1924 near Murfreesboro, Arkansas. It was cut down to this 12.42-carat stone. The field is now a state park where anyone may dig — and keep what they find.'
+    text: 'The largest diamond ever found in the United States: 40.23 carats in the rough, found by a mine worker in 1924. The field is now a park where anyone may dig, and keep what they find.'
   },
   {
     id: 'dresden', name: 'The Dresden Green', real: true, carat: 41, cut: 'Pear brilliant', shape: 'pear',
-    color: 'Natural fancy green', tint: '#8fe6a8', clarity: 'VS1', origin: 'Golconda region, India',
+    color: 'Natural fancy green', tint: '#8fe6a8', clarity: 'VS1, seen in its setting', origin: 'Probably Golconda, India',
     lesson: 'Colour by radiation',
-    text: 'About 41 carats, and the largest naturally green diamond known. Its colour was made by natural radiation in the earth, over millions of years. It has been in Dresden, Germany, since the 1740s and is kept in the Green Vault there.'
+    text: 'The largest naturally green diamond known. Its colour was made by natural radiation in the earth, over millions of years. It came to Dresden in the 1740s.'
   },
   {
     id: 'hope', name: 'The Hope Diamond', real: true, carat: 45.52, cut: 'Antique cushion', shape: 'cushion',
-    color: 'Fancy deep greyish blue', tint: '#6f9ae8', clarity: 'VS1', origin: 'Kollur mine, Golconda, India',
+    color: 'Fancy deep greyish blue', tint: '#6f9ae8', clarity: 'VS1', origin: 'Probably the Kollur mine, India',
     lesson: 'Blue from boron',
-    text: '45.52 carats. A trace of boron makes it blue; after ultraviolet light it glows red for a while, like an ember. Cut from a larger French crown jewel, it now rests in the Smithsonian in Washington — one of the most visited objects in any museum.'
+    text: 'A trace of boron makes it blue. After ultraviolet light it glows red for a while, like an ember. It rests in the Smithsonian in Washington.'
   },
   {
     id: 'argyle', name: 'The Argyle Alpha', real: true, carat: 3.14, cut: 'Emerald shape', shape: 'emerald',
     color: 'Fancy vivid purplish pink', tint: '#ff7ab8', clarity: 'Not published', origin: 'Argyle mine, East Kimberley, Western Australia',
     lesson: 'Rarity',
-    text: 'Only 3.14 carats, and the largest vivid pink the Argyle mine ever offered at its yearly tender, in 2018. Argyle gave the world about nine in every ten of its pink diamonds; they were less than a thousandth of what it dug. The mine closed in November 2020. There will be no more. Small is not the same as slight.'
+    text: 'Small, and the largest vivid pink the Argyle mine ever offered. Argyle gave the world about nine in ten of its pink diamonds. It stood on Gija and Miriwoong country, and closed in 2020.'
   },
   {
     id: 'tiffany', name: 'The Tiffany Yellow', real: true, carat: 128.54, cut: 'Cushion brilliant, 82 facets', shape: 'cushion',
     color: 'Fancy yellow', tint: '#ffe26a', clarity: 'VS1, by Tiffany', origin: 'Kimberley, South Africa',
     lesson: 'Cut for colour',
-    text: '128.54 carats, cut from a 287.42-carat crystal found in 1877. Its cutters gave it 82 facets — two dozen more than a standard brilliant — to make the yellow blaze rather than to save weight. Nitrogen in the crystal gives it its colour.'
+    text: 'Cut from a 287.42-carat crystal with 82 facets, two dozen more than a standard brilliant, to make the yellow blaze. Nitrogen gives it its colour.'
   },
   {
     id: 'cullinan', name: 'Cullinan I · The Great Star of Africa', real: true, carat: 530.2, cut: 'Pear brilliant, 74 facets', shape: 'pear',
     color: 'Colourless', tint: '#ffffff', clarity: 'Not formally graded', origin: 'Premier Mine, Cullinan, South Africa',
     lesson: 'The largest crystal',
-    text: '530.2 carats, cut from the Cullinan — at 3,106 carats the largest gem diamond crystal ever found, in 1905. The rough was cleaved into nine great stones and many small ones. This, the largest, is set in the Sovereign’s Sceptre of the British Crown Jewels.'
+    text: 'Cut from the Cullinan, at 3,106 carats the largest gem diamond crystal ever found. It is set in the Sovereign’s Sceptre of the British Crown Jewels.'
   },
   {
     id: 'kohinoor', name: 'The Koh-i-Noor', real: true, carat: 105.6, cut: 'Oval brilliant', shape: 'oval',
-    color: 'Colourless', tint: '#fffdf4', clarity: 'Not formally graded', origin: 'Golconda region, India',
+    color: 'Colourless', tint: '#fffdf4', clarity: 'Not formally graded', origin: 'Probably Golconda, India',
     lesson: 'The Mountain of Light',
-    text: 'Its name is Persian for “Mountain of Light”. Mined in India long ago, it was won and lost by Mughal, Persian, Afghan and Sikh rulers. Britain took it with the Punjab in 1849 and recut it in 1852, from about 191 carats to 105.6. It lies in the Tower of London; India and others have asked for its return.'
+    text: 'Its name is Persian for “Mountain of Light”. Won and lost by Mughal, Persian, Afghan and Sikh rulers, it was taken by Britain in 1849. India and others have asked for its return.'
   }
 ];
 const GEM_BY_ID = {}; GEMS.forEach((g, i) => { g.n = i; GEM_BY_ID[g.id] = g; });

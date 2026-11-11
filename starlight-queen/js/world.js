@@ -23,7 +23,7 @@ const World = (() => {
     const L = buildWorld();
     Object.assign(w, {
       t: 0, state: 'play', grid: L.grid, rows: L.rows, cols: L.cols, parts: [], bumps: [], torches: L.torches, zones: L.zones,
-      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, signHold: null, wonderCard: null, warpFx: null, litHold: 0, marks: L.marks, moon: {}, doors: L.doors, doorP: {}, gaze: null, gazeT: 200, lit: 0, hitstop: 0, combo: 0, comboT: 0, hudPop: 0, rings: [], slow: 0, hurtFx: 0,
+      shake: 0, flash: 0, signText: null, signNear: null, toastT: 0, introT: 0, clearT: 0, card: null, deadT: 0, gemFx: null, signHold: null, wonderCard: null, warpFx: null, litHold: 0, marks: L.marks, moon: {}, doors: L.doors, doorP: {}, gaze: null, gazeT: 900, warpLock: false, lit: 0, hitstop: 0, combo: 0, comboT: 0, hudPop: 0, rings: [], slow: 0, hurtFx: 0,
       gemBlocks: L.gemBlocks, popN: L.popN, gemQ: [], arena: L.arena, bossAlive: !Game.bossDown, fight: false, dawn: Game.bossDown ? 1 : 0, dawning: false, minX: 0, maxX: L.cols * T, boss: null, meleeTotal: L.melee
     });
     w.colTheme = new Array(w.cols);
@@ -32,7 +32,7 @@ const World = (() => {
     for (const d of L.doors) if (Game.doors[d.id]) for (let i = 0; i < d.h; i++) w.grid[d.cy - i][d.cx] = '.';
     for (const k in L.popN) if (Game.meleeGot[L.popN[k]]) { const [gx, gy] = k.split(',').map(Number); w.grid[gy][gx] = 'U'; }
     w.ents = L.ents.filter(s => !(s.t === 'keep' && Game.keeps[s.keep]) && !(s.t === 'shard' && Game.meleeGot[s.n]) && !(s.t === 'gem' && Game.gems[s.gem]) && !(s.t === 'boss' && Game.bossDown)).map(makeEnt);
-    if (Game.bossDown) { setGate(w.arena.gr, '.'); if (!Game.gems.kohinoor) w.ents.push(makeEnt({ t: 'gem', x: (w.arena.x0 + w.arena.x1) / 2, y: w.arena.floor - 30, gem: 'kohinoor' })); }
+    if (Game.bossDown) { setGate(w.arena.gr, '.'); if (!Game.gems.kohinoor) w.ents.push(makeEnt({ t: 'gem', x: (w.arena.x0 + w.arena.x1) / 2, y: w.arena.floor - 6, gem: 'kohinoor' })); }
     w.plats = w.ents.filter(e => e.type === 'plat');
     w.boss = w.ents.find(e => e.type === 'boss') || null;
     const sp = cp || L.start;
@@ -59,9 +59,9 @@ const World = (() => {
     w.zone = z; w.theme = THEMES[z.theme];
     w.bx0 = z.warp ? z.x0 : 0; w.bx1 = z.warp ? z.x1 : (w.mainEnd || w.cols * T);
     if (!w.fight) { w.minX = w.bx0; w.maxX = w.bx1; }
-    w.amb = Backdrop.makeAmbient(w.theme.amb);
+    w.amb = Paint.makeAmbient(w.theme.amb);
     if (!w.fight) { Sound.music(Game.bossDown && z.theme === 'gloam' ? 'dawn' : w.theme.music); Sound.setRate(z.manic > 1 ? 0.84 : 1); }
-    Game.region = z.map;
+    Game.region = z.map; Game.oz = !!z.warp;
     const key = z.title + '|' + z.sub;
     if (!Game.seen[key]) { Game.seen[key] = 1; w.introT = 180; w.introZone = z; }
   }
@@ -77,21 +77,19 @@ const World = (() => {
         const h = hash2(x * 7 + 3, cy * 13 + th.seed);
         if (th.trees && x - lastTree > 7 && h < 0.5 && !keep.has(x) && x > 1 && x < w.cols - 2 && w.grid[cy][x - 1] === '#' && w.grid[cy][x + 1] === '#'
           && (x * T < w.arena.x0 - 60 || x * T > w.arena.x1 + 30)) {
-          w.back.push({ img: Backdrop.prop(th.trees, x % 3), x: x * T + 8, y: cy * T + 1 }); lastTree = x;
+          w.back.push({ type: th.trees, v: x % 3, x: x * T + 8, y: cy * T + 1 }); lastTree = x;
         }
         if (keep.has(x)) continue;
         let acc = 0; const h2 = hash2(x * 31 + 1, cy * 17 + th.seed * 3);
-        for (const [type, prob] of th.scatter) { acc += prob; if (h2 < acc) { w.decor.push({ img: Backdrop.prop(type, (h * 97 | 0) % 4), x: x * T + 4 + (h * 8 | 0), y: cy * T + 1 }); break; } }
+        for (const [type, prob] of th.scatter) { acc += prob; if (h2 < acc) { w.decor.push({ type, v: (h * 97 | 0) % 4, x: x * T + 4 + (h * 8 | 0), y: cy * T + 1 }); break; } }
       }
     }
     const A = w.arena;
     const gy = (w.rows - 3) * T + 1; // Kaamos: the last few houses, and the gate Ana has never passed
-    [[2, 0], [13, 1], [21, 2], [30, 0]].forEach(([cx, v]) => w.back.push({ img: Backdrop.prop('cottage', v), x: cx * T, y: gy }));
-    w.back.push({ img: Backdrop.prop('gate', 0), x: 39 * T, y: gy });
-    // stone watchers stand at every border, left by whoever walked this road first
-    w.zones.forEach((z, i) => { if (!i || z.warp || z.theme === 'gloam') return; for (const dx of [-3, 4]) { const cx = Math.round(z.x0 / T) + dx; for (let cy = 4; cy < w.rows; cy++) if (w.grid[cy][cx] === '#' && w.grid[cy - 1][cx] === '.' && w.grid[cy - 4][cx] !== '#') { w.back.push({ img: Backdrop.prop('watcher', i), x: cx * T + 8, y: cy * T + 1 }); break; } } });
-    w.back.push({ img: Backdrop.prop('throne', 0), x: A.x1 - 26, y: A.floor });
-    for (let i = 0; i < 5; i++) w.back.push({ img: Backdrop.prop('banner', 0), x: A.x0 + 40 + i * 76, y: A.floor - 62, hang: true });
+    [[2, 0], [13, 1], [21, 2], [30, 0]].forEach(([cx, v]) => w.back.push({ type: 'cottage', v, x: cx * T, y: gy }));
+    w.back.push({ type: 'gate', v: 0, x: 39 * T, y: gy });
+    w.back.push({ type: 'throne', v: 0, x: A.x1 - 26, y: A.floor });
+    for (let i = 0; i < 5; i++) w.back.push({ type: 'banner', v: i, x: A.x0 + 40 + i * 76, y: A.floor - 62, hang: true });
     for (let i = 0; i < 4; i++) w.torches.push({ x: A.x0 + 78 + i * 76, y: A.floor - 40 });
   }
 
@@ -159,7 +157,7 @@ const World = (() => {
     w.fight = false; setGate(w.arena.gr, '.'); setGate(w.arena.gl, '.'); w.minX = w.bx0; w.maxX = w.bx1;
     w.dawning = true; Sound.music('dawn'); toast('The Hoarder King is fallen. The Mountain of Light is waiting.');
     Game.stats.foes++; Game.bossDown = true;
-    w.ents.push(makeEnt({ t: 'gem', x: clamp(x, w.arena.x0 + 40, w.arena.x1 - 40), y: w.arena.floor - 30, gem: 'kohinoor' }));
+    w.ents.push(makeEnt({ t: 'gem', x: clamp(x, w.arena.x0 + 40, w.arena.x1 - 40), y: w.arena.floor - 6, gem: 'kohinoor' }));
     Game.save();
   }
 
@@ -167,14 +165,25 @@ const World = (() => {
   function starlight() {
     for (const k in w.moon) if (--w.moon[k] <= 0) delete w.moon[k];
     let any = 0;
+    { // does this place want her light, or her stillness? Then show the key over her head, not a sentence.
+      const p = w.player; let pr = null;
+      if (w.gaze && !p.cloak) pr = 'down';
+      else if (!p.lit && !p.dead && !p.lumOut) {
+        const pcx = Math.floor((p.x + 5) / T), pcy = Math.floor((p.y + 10) / T);
+        scan: for (let cy = Math.max(0, pcy - 4); cy <= Math.min(w.rows - 1, pcy + 4); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) { const ch = w.grid[cy][cx]; if (ch === 'D' || (ch === 'M' && !w.moon[cx + cy * w.cols])) { pr = 'light'; break scan; } }
+        if (!pr) for (const e of w.ents) if ((e.type === 'warp' && Math.abs(e.x + 8 - p.x - 5) < 56 && Math.abs(e.y + 48 - p.y - p.h) < 50) || (e.type === 'wonder' && e.def.id === 'undersky' && !e.seen && Math.abs(e.cx - p.x - 5) < 120 && Math.abs(e.gy - p.y - p.h) < 40)) { pr = 'light'; break; }
+      }
+      w.prompt = pr;
+    }
     for (const p of w.players) {
       if (!p.lit || p.dead) continue;
       any = 1;
       const pcx = Math.floor((p.x + 5) / T), pcy = Math.floor((p.y + 10) / T);
       for (let cy = Math.max(0, pcy - 6); cy <= Math.min(w.rows - 1, pcy + 6); cy++) for (let cx = Math.max(0, pcx - 6); cx <= Math.min(w.cols - 1, pcx + 6); cx++) {
         const ch = w.grid[cy][cx];
-        if (ch !== 'M' && ch !== 'D') continue;
+        if (ch !== 'M' && ch !== 'D' && ch !== '?' && ch !== 'H' && ch !== 'S' && ch !== 'G') continue;
         if (Math.hypot(cx * T + 8 - (p.x + 5), cy * T + 8 - (p.y + 10)) > 92) continue;
+        if (ch !== 'M' && ch !== 'D') { if ((w.t + cx * 5 + cy * 3) % 16 === 0) bump(cx, cy); continue; } // a sleeping stone wakes to her light
         if (ch === 'M') { const k = cx + cy * w.cols; if (!w.moon[k]) { sparkle(cx * T + 8, cy * T + 3, '#dff2ff', 6); if (w.t - (w.bridgeS || 0) > 12) { Sound.sfx('bridge'); w.bridgeS = w.t; } } w.moon[k] = 170; }
         else { const d = w.doors.find(q => q.cx === cx && cy <= q.cy && cy > q.cy - q.h); if (d) d.seen = w.t; }
       }
@@ -199,15 +208,15 @@ const World = (() => {
   function hoarderGaze() {
     const on = w.theme.gaze && w.bossAlive && !w.fight && w.state === 'play' && !w.card && w.player.x < w.arena.x0 - 220;
     if (!on) { w.gaze = null; return; }
-    if (!w.gaze) { if (--w.gazeT <= 0) { w.gaze = { t: 0, caught: false }; Sound.sfx('gaze'); } return; }
+    if (!w.gaze) { if (!w.wonderCard && --w.gazeT <= 0 && w.player.onGround) { w.gaze = { t: 0, caught: false }; Sound.sfx('gaze'); } return; }
     const g = w.gaze; g.t++;
     if (g.t > 100 && !g.caught) { // the sweep
       const bx = w.cam.x + W + 40 - (g.t - 100) * 3.4;
       for (const p of w.players) if (!p.dead && !p.cloak && p.radiant <= 0 && Math.abs(p.x + 5 - bx) < 22) {
-        g.caught = true; Sound.sfx('seen'); toast('He has seen you. Next time: be a stone.'); w.shake = 8;
+        g.caught = true; Sound.sfx('seen'); toast('He has seen you.'); w.shake = 8;
         hurtPlayer(w, p, bx + 40);
       }
-      if (bx < w.cam.x - 60 || g.caught) { if (g.t > 100 + (W + 100) / 3.4 || g.caught) { w.gaze = null; w.gazeT = 760 + rand(260) | 0; } }
+      if (bx < w.cam.x - 60 || g.caught) { if (g.t > 100 + (W + 100) / 3.4 || g.caught) { w.gaze = null; w.gazeT = 1500 + rand(500) | 0; } }
     }
   }
 
@@ -259,8 +268,9 @@ const World = (() => {
     for (const q of w.rings) q.life--; if (w.rings.length) w.rings = w.rings.filter(q => q.life > 0);
     if (w.introT > 0) w.introT--;
     if (w.comboT > 0) w.comboT--; if (w.hudPop > 0) w.hudPop--;
-    if (w.toastT > 0) w.toastT--;
+    if (w.toastT > 0 && !w.wonderCard) w.toastT--; // a notice waits its turn behind a wonder
     if (w.wonderCard && ++w.wonderCard.t > 600) w.wonderCard = null;
+    const hush = !!w.wonderCard; // while there is a wonder to look at, everything else on the road stops to look as well
     if (w.shake > 0) w.shake *= 0.86;
     if (w.flash > 0) w.flash = w.flash > 0.6 ? w.flash * 0.8 : Math.max(0, w.flash - 0.03);
     if (w.dawning && w.dawn < 1) w.dawn = Math.min(1, w.dawn + 0.004);
@@ -286,15 +296,15 @@ const World = (() => {
     for (let i = 0; i < w.ents.length; i++) {
       const e = w.ents[i], d = ENT[e.type];
       if (e.dead) continue;
-      if (d.foe && !ALWAYS[e.type] && Math.abs(e.x - cx) > W / 2 + 90) continue;
+      if (d.foe && (hush || (!ALWAYS[e.type] && Math.abs(e.x - cx) > W / 2 + 90))) continue;
       d.update(w, e);
       if (e.flash > 0) e.flash--;
     }
     // words stay up long enough to be read, even if the walker has moved on
     if (w.signText) { if (!w.signHold || w.signHold.text !== w.signText) w.signHold = { text: w.signText, e: w.signNear, t0: w.t }; }
-    else if (w.signHold) { const h = w.signHold; if (w.t - h.t0 < Math.max(210, h.text.length * 4.4)) { w.signText = h.text; w.signNear = h.e; } else w.signHold = null; }
+    else if (w.signHold) { const h = w.signHold; if (w.t - h.t0 < Math.max(170, h.text.length * 3.6)) { w.signText = h.text; w.signNear = h.e; } else w.signHold = null; }
     // foes vs the travellers
-    if (w.state === 'play') for (const p of alive) for (const e of w.ents) {
+    if (w.state === 'play' && !hush && !w.warpFx) for (const p of alive) for (const e of w.ents) {
       const d = ENT[e.type];
       if (!d.foe || e.dead || p.dead || !overlap(e, p)) continue;
       const above = p.vy > 0.3 && p.y + p.h - p.vy <= e.y + Math.max(8, e.h * 0.5);
@@ -343,75 +353,6 @@ const World = (() => {
   }
 
   /* ---------- rendering ---------- */
-  function drawTiles(c, ox, oy) {
-    const x0 = Math.max(0, Math.floor(ox / T)), x1 = Math.min(w.cols - 1, Math.floor((ox + W) / T));
-    const y0 = Math.max(0, Math.floor(oy / T)), y1 = Math.min(w.rows - 1, Math.floor((oy + H) / T));
-    for (let cx = x0; cx <= x1; cx++) {
-      const th = w.colTheme[cx], ts = Art.tileSet(th), P = th.tiles;
-      for (let cy = y0; cy <= y1; cy++) {
-        const ch = w.grid[cy][cx];
-        if (ch === '.' || ch === '~') continue;
-        let x = cx * T - ox, y = cy * T - oy;
-        if (w.bumps.length) for (const b of w.bumps) if (b.cx === cx && b.cy === cy) y -= Math.round(Math.sin(b.t / 10 * Math.PI) * 5);
-        const v6 = (hash2(cx, cy) * 6) | 0, v = v6 & 3;
-        if (ch === '#') {
-          c.drawImage(ts.fill[v6], x, y);
-          const up = cy > 0 ? w.grid[cy - 1][cx] : '#', dn = cy < w.rows - 1 ? w.grid[cy + 1][cx] : '#';
-          let depth = 0; while (depth < 5 && cy - depth - 1 >= 0 && w.grid[cy - depth - 1][cx] === '#') depth++;
-          if (depth) { c.fillStyle = `rgba(7,6,20,${Math.min(0.62, depth * 0.16)})`; c.fillRect(x, y, T, T); }
-          if (cx > 0 && w.grid[cy][cx - 1] !== '#') { R(c, x, y, 1, T, P.light); if (v & 1) R(c, x, y + 5 + v, 1, 3, P.dark); }
-          if (cx < w.cols - 1 && w.grid[cy][cx + 1] !== '#') { R(c, x + T - 2, y, 2, T, P.dark); if (v > 1) R(c, x + T - 3, y + 3 + v * 2, 1, 4, P.dark); }
-          if (dn !== '#' && dn !== '~') { R(c, x, y + T - 2, T, 2, P.dark); if (v < 2) R(c, x + 4 + v * 5, y + T, 2, 2 + v, P.dark); }
-          if (up !== '#') { c.fillStyle = 'rgba(10,8,30,0.22)'; c.fillRect(x, y + 6, T, 3); c.drawImage(ts.cap[v], x, y); }
-        }
-        else if (ch === '=') c.drawImage(ts.plat, x, y);
-        else if (ch === 'B') c.drawImage(ts.brick, x, y);
-        else if (ch === 'U') c.drawImage(ts.used, x, y);
-        else if (ch === '^') c.drawImage(ts.spike, x, y);
-        else if (ch === 'X') { R(c, x, y, T, T, '#16131a'); R(c, x + 2, y, 3, T, '#3a3440'); R(c, x + 10, y, 3, T, '#3a3440'); R(c, x, y + 6, T, 2, '#2a2530'); R(c, x + 3, y + 6, 1, 2, '#ff6a20'); }
-        else if (ch === 'M') { // a bridge of light: a rumour until starlight finds it
-          const m = w.moon[cx + cy * w.cols] || 0;
-          if (m > 0) { c.globalAlpha = Math.min(1, m / 40); c.drawImage(Art.S.moon[(w.t >> 3) % 2], x, y); c.globalAlpha = 1; }
-          else if (((w.t + cx * 23) >> 3) % 9 === 0) R(c, x + (cx * 7 + (w.t >> 5)) % 14, y + 2 + (cx % 3), 1, 1, 'rgba(223,242,255,0.7)');
-        }
-        else if (ch === 'D') { // a door that shows itself only to starlight
-          const d = w.doors.find(q => q.cx === cx), k = d ? clamp((w.doorP[d.id] || 0) / 70, 0, 1) : 0, row = d ? d.cy - cy : 0;
-          R(c, x, y, T, T, '#2a2f44'); R(c, x, y, 2, T, '#3a4160'); R(c, x + 14, y, 2, T, '#1c2032'); if (cy % 2) R(c, x + 2, y + 7, 12, 1, '#222638');
-          const a = 0.1 + 0.9 * k + (k > 0 ? 0.1 * Math.sin(w.t * 0.3) : 0), col = `rgba(223,242,255,${clamp(a, 0, 1)})`;
-          R(c, x + 3, y, 1, T, col); R(c, x + 12, y, 1, T, col);
-          if (d && row === d.h - 1) { R(c, x + 4, y + 2, 8, 1, col); R(c, x + 5, y + 1, 6, 1, col); }
-          if (d && row === (d.h >> 1)) { R(c, x + 7, y + 3, 2, 10, col); R(c, x + 3, y + 7, 10, 2, col); R(c, x + 5, y + 5, 1, 1, col); R(c, x + 10, y + 5, 1, 1, col); R(c, x + 5, y + 10, 1, 1, col); R(c, x + 10, y + 10, 1, 1, col); }
-          if (k > 0) Art.glow(c, x + 8, y + 8, 14, '#bfe4ff', 0.35 * k);
-        }
-        else c.drawImage(ts.rune[(w.t >> 3) % 4], x, y);
-      }
-    }
-  }
-  function drawLiquid(c, ox, oy, glowPass) {
-    const x0 = Math.max(0, Math.floor(ox / T)), x1 = Math.min(w.cols - 1, Math.floor((ox + W) / T));
-    const y0 = Math.max(0, Math.floor(oy / T)), y1 = Math.min(w.rows - 1, Math.floor((oy + H) / T));
-    for (let cx = x0; cx <= x1; cx++) {
-      const Lq = w.colTheme[cx].liquid;
-      if (!!Lq.glow !== glowPass) continue;
-      for (let cy = y0; cy <= y1; cy++) {
-        if (w.grid[cy][cx] !== '~') continue;
-        const x = cx * T - ox, y = cy * T - oy, top = cy === 0 || w.grid[cy - 1][cx] !== '~';
-        if (top) {
-          for (let i = 0; i < 4; i++) {
-            const h = Math.round(4 + Math.sin(w.t * 0.07 + (cx * 4 + i) * 0.55) * 1.6);
-            R(c, x + i * 4, y + h, 4, T - h, Lq.body); R(c, x + i * 4, y + h, 4, 1, Lq.top);
-          }
-          const b = (w.t + cx * 37) % 90; if (b < 12) R(c, x + (cx * 5 % 12), y + 7 - (b >> 2), 2, 2, Lq.top);
-          if (!Lq.glow) { R(c, x, y + 7, T, 2, Lq.deep); R(c, x + ((w.t >> 3) + cx * 7) % 13, y + 10, 3, 1, Lq.top); }
-        } else {
-          R(c, x, y, T, T, Lq.deep); R(c, x, y, T, 3, Lq.body);
-          const k = (w.t * 0.3 + cx * 9) % 32;
-          R(c, x + (k | 0) % 14, y + 6 + (cx % 3) * 3, 3, 1, Lq.body);
-        }
-        if (top && Lq.glow && cx % 2 === 0) Art.glow(c, x + 8, y + 4, 30, Lq.glow, 0.22 + 0.05 * Math.sin(w.t * 0.1 + cx));
-      }
-    }
-  }
   // blend factor toward the neighbouring zone when the camera is near a border
   function blend() {
     const cx = w.cam.x + W / 2, z = zoneAt(cx), i = w.zones.indexOf(z), R0 = 150;
@@ -452,77 +393,67 @@ const World = (() => {
         }
       }
     }
-    c.drawImage(lc, 0, 0);
+    c.drawImage(lc, 0, 0, W, H);
   }
   function drawParts(c, ox, oy, glow) {
     for (const q of w.parts) {
       if (!!q.glow !== glow) continue;
       const x = q.x - ox, y = q.y - oy;
-      if (q.img) {
-        if (q.squash) { const im = q.life > 17 ? Art.flashOf(q.img) : q.img, k = Math.min(1, (22 - q.life) / 4), wd = im.width * (1 + 0.6 * k), hg = im.height * (1 - 0.7 * k); c.drawImage(im, Math.round(x - wd / 2), Math.round(y + q.img.height / 2 - hg), Math.round(wd), Math.max(2, Math.round(hg))); }
-        else if (q.spin) { c.save(); c.translate(Math.round(x), Math.round(y)); c.rotate(q.spin * (q.max - q.life)); c.drawImage(q.img, -q.img.width / 2, -q.img.height / 2); c.restore(); }
-        else if (q.fade) { c.globalAlpha = q.life / q.max * 0.45; Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip); c.globalAlpha = 1; }
-        else Art.blit(c, q.img, x - q.img.width / 2, y - q.img.height / 2, q.flip, q.flipV);
-      } else { c.fillStyle = q.col; const s = q.sz || 1; c.fillRect(Math.round(x - s / 2), Math.round(y - s / 2), s, s); }
+      if (x < -20 || x > W + 20) continue;
+      if (q.draw) q.draw(c, x, y, q);
+      else { const s = (q.sz || 1) * 0.62, k = q.max ? q.life / q.max : Math.min(1, q.life / 8); c.globalAlpha = Math.min(1, k * 1.4); c.fillStyle = q.col; c.beginPath(); c.arc(x, y, s, 0, TAU); c.fill(); }
     }
+    c.globalAlpha = 1;
   }
-  function pitOf(th) {
-    return th._pit || (th._pit = Art.spr(T, 64, g => { for (let i = 0; i < 8; i++) { g.globalAlpha = Math.min(1, (i + 2) / 6); g.fillStyle = th.pit || '#05060c'; g.fillRect(0, i * 8, T, 8); } }));
-  }
+  let blendCv = null;
   function draw(c) {
     const sh = w.shake > 0.5 ? w.shake : 0;
-    const ox = Math.round(w.cam.x + rand(-sh, sh) * 0.5), oy = Math.round(w.cam.y + rand(-sh, sh) * 0.5);
+    const ox = w.cam.x + rand(-sh, sh) * 0.5, oy = w.cam.y + rand(-sh, sh) * 0.5;
     const bl = blend(), yo = w.rows * T - H - w.cam.y;
-    Backdrop.build(bl.a.theme)(c, w.cam.x, yo, w.t);
-    if (bl.b && bl.k > 0.01) {
-      bg2.globalAlpha = 1; bg2.globalCompositeOperation = 'source-over';
-      Backdrop.build(bl.b.theme)(bg2, w.cam.x, yo, w.t);
-      c.globalAlpha = bl.k; c.drawImage(bc, 0, 0); c.globalAlpha = 1;
+    Paint.backdrop(c, bl.a.theme, w.cam.x, yo, w.t, w.lit);
+    if (bl.b && bl.k > 0.01) { // crossing a border: the next land's sky comes up through this one
+      const cw = c.canvas.width, chh = c.canvas.height;
+      if (!blendCv || blendCv.width !== cw || blendCv.height !== chh) { blendCv = document.createElement('canvas'); blendCv.width = cw; blendCv.height = chh; }
+      const g2 = blendCv.getContext('2d'); g2.setTransform(cw / W, 0, 0, cw / W, 0, 0); g2.globalAlpha = 1;
+      Paint.backdrop(g2, bl.b.theme, w.cam.x, yo, w.t, w.lit);
+      c.save(); c.setTransform(1, 0, 0, 1, 0, 0); c.globalAlpha = bl.k; c.drawImage(blendCv, 0, 0); c.restore();
     }
     if (w.dawn > 0) { c.fillStyle = `rgba(255,190,120,${w.dawn * 0.25})`; c.fillRect(0, 0, W, H); }
     if (w.state === 'clear') { // far beacons answer, one by one
       [[60, 92], [168, 78], [318, 96]].forEach(([x, y], i) => {
         const k = clamp((w.clearT - 110 - i * 45) / 30, 0, 1);
-        if (k > 0) { Art.glow(c, x, y, (9 + Math.sin(w.t * 0.3 + i) * 2) * k, '#ffb040', 0.95); R(c, x - 1, y - 1, 2, 2, '#fff6b0'); R(c, x, y - 2 - ((w.t >> 3) + i) % 2, 1, 1, '#ffc040'); }
+        if (k > 0) { Paint.soft(c, x, y, (10 + Math.sin(w.t * 0.3 + i) * 2) * k, '#ffb040', 0.95); Paint.disc(c, x, y, 1.1 * k, '#fff6b0'); }
       });
     }
-    for (const d of w.back) {
-      const x = d.x - ox - d.img.width / 2;
-      if (x > W || x + d.img.width < 0) continue;
-      c.drawImage(d.img, Math.round(x), Math.round(d.hang ? d.y - oy : d.y - oy - d.img.height));
-    }
+    for (const d of w.back) { const x = d.x - ox; if (x > W + 80 || x < -80) continue; Paint.prop(c, d.type, d.v, x, d.y - oy, w, d); }
     for (const e of w.ents) { const d = ENT[e.type]; if (d.back) d.back(c, w, e, ox, oy); }
-    for (const tq of w.torches) Backdrop.torch(c, tq.x - ox, tq.y - oy + 14, w.t);
-    for (const d of w.decor) { const x = d.x - ox - d.img.width / 2; if (x > W || x < -30) continue; c.drawImage(d.img, Math.round(x), Math.round(d.y - oy - d.img.height)); }
-    const yb = w.rows * T - oy - 64;
-    if (yb < H) for (let cx = Math.max(0, Math.floor(ox / T)); cx <= Math.min(w.cols - 1, Math.floor((ox + W) / T)); cx++) if (w.grid[w.rows - 1][cx] === '.') c.drawImage(pitOf(w.colTheme[cx]), cx * T - ox, yb);
-    drawLiquid(c, ox, oy, false);
-    drawTiles(c, ox, oy);
-    { // whatever lies under the last row carries on down, so the frame never shows sky beneath the world
-      const yb2 = w.rows * T - oy;
-      if (yb2 < H) for (let cx = Math.max(0, Math.floor(ox / T)); cx <= Math.min(w.cols - 1, Math.floor((ox + W) / T)); cx++) {
-        const ch = w.grid[w.rows - 1][cx], th = w.colTheme[cx];
-        R(c, cx * T - ox, yb2, T, H - yb2, ch === '~' ? th.liquid.deep : ch === '.' ? (th.pit || '#05060c') : mix(th.tiles.body, '#07060f', 0.62));
-      }
+    for (const tq of w.torches) Paint.torch(c, tq.x - ox, tq.y - oy + 14, w.t, false);
+    for (const d of w.decor) { const x = d.x - ox; if (x > W + 20 || x < -20) continue; Paint.prop(c, d.type, d.v, x, d.y - oy, w, d); }
+    { // mist in the deeps, where there is no ground
+      const L = Paint.LOOK[w.theme.id] || Paint.LOOK.north, yb = w.rows * T - oy - 70;
+      if (yb < H) { c.fillStyle = Paint.vgrad(c, yb, yb + 70, [L.pit + '00', L.pit + 'cc', L.pit]); c.fillRect(0, yb, W, H - yb + 1); }
     }
+    Paint.liquid(c, w, ox, oy, false);
+    Paint.terrain(c, w, ox, oy);
+    Paint.tiles(c, w, ox, oy);
     for (const e of w.ents) { const d = ENT[e.type]; if (!d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     for (let i = w.players.length - 1; i >= 0; i--) drawPlayer(c, w, w.players[i], ox, oy);
     drawParts(c, ox, oy, false);
     darkness(c, ox, oy, bl);
-    drawLiquid(c, ox, oy, true);
-    for (const tq of w.torches) { Art.glow(c, tq.x - ox, tq.y - oy - 4, 20 + Math.sin(w.t * 0.3 + tq.x) * 2, '#ff9a30', 0.55); Backdrop.flame(c, tq.x - ox, tq.y - oy, w.t, 1); }
+    Paint.liquid(c, w, ox, oy, true);
+    for (const tq of w.torches) Paint.torch(c, tq.x - ox, tq.y - oy + 14, w.t, true);
     for (const e of w.ents) { const d = ENT[e.type]; if (d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     drawParts(c, ox, oy, true);
-    for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.85 * (1 - k); c.strokeStyle = q.col; c.lineWidth = r > 60 ? 2 : 1; c.beginPath(); c.arc(Math.round(q.x - ox), Math.round(q.y - oy), r, 0, TAU); c.stroke(); }
+    for (const q of w.rings) { const k = 1 - q.life / q.max, r = q.r0 + (q.r1 - q.r0) * (1 - (1 - k) * (1 - k)); c.globalAlpha = 0.8 * (1 - k); c.strokeStyle = q.col; c.lineWidth = r > 60 ? 1.4 : 0.8; c.beginPath(); c.arc(q.x - ox, q.y - oy, Math.max(0.1, r), 0, TAU); c.stroke(); }
     c.globalAlpha = 1;
-    Backdrop.drawAmbient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
+    Paint.ambient(c, w.amb, w.t, w.cam.x - lastCamX); lastCamX = w.cam.x;
     if (w.gemFx) {
       const fx = w.gemFx, x = fx.x - ox, y = fx.y - oy, k = Math.min(1, fx.t / 30);
       c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = fx.gem.tint;
-      for (let i = 0; i < 12; i++) { const a = i / 12 * TAU + w.fxT * 0.02, len = (60 + (i % 3) * 40) * k, wd = 0.05 + (i % 2) * 0.04; c.globalAlpha = 0.22 * k; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a - wd) * len, y + Math.sin(a - wd) * len); c.lineTo(x + Math.cos(a + wd) * len, y + Math.sin(a + wd) * len); c.fill(); }
+      for (let i = 0; i < 12; i++) { const a = i / 12 * TAU + w.fxT * 0.02, len = (60 + (i % 3) * 40) * k, wd = 0.05 + (i % 2) * 0.04; c.globalAlpha = 0.2 * k; c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(a - wd) * len, y + Math.sin(a - wd) * len); c.lineTo(x + Math.cos(a + wd) * len, y + Math.sin(a + wd) * len); c.fill(); }
       c.restore();
-      Art.glow(c, x, y, 30 + 20 * k, '#ffffff', 0.6);
-      const im = Art.gemSprite(fx.gem), sc = 1 + k * 0.8; c.drawImage(im, Math.round(x - im.width * sc / 2), Math.round(y - im.height * sc / 2), Math.round(im.width * sc), Math.round(im.height * sc));
+      Paint.soft(c, x, y, 34 + 20 * k, '#ffffff', 0.6);
+      drawGemHi(c, x, y, 6 + 6 * k, fx.gem, w.fxT);
     }
     if (w.gaze) { // the sky reddens; then the look itself crosses the road
       const g = w.gaze, warn = clamp(g.t / 60, 0, 1) * (0.14 + 0.06 * Math.sin(w.t * 0.25));
@@ -537,15 +468,15 @@ const World = (() => {
     if (w.warpFx) { // the afternoon, folding
       const t = w.warpFx.t, k = t < 46 ? t / 46 : 1 - (t - 46) / 50, p = w.player, px = p.x - ox + 5, py = p.y - oy + 10;
       c.save(); c.globalCompositeOperation = 'lighter';
-      for (let i = 0; i < 5; i++) { const r = t < 46 ? (1 - k) * 220 * (1 - i * 0.16) + 6 : (1 - k) * 260 * (1 - i * 0.16) + 6; c.globalAlpha = 0.5 * k; c.strokeStyle = i % 2 ? '#ffe6a8' : '#bfe4ff'; c.lineWidth = 2; c.beginPath(); c.ellipse(px, py, r * 0.7, r, 0, 0, TAU); c.stroke(); }
+      for (let i = 0; i < 5; i++) { const r = t < 46 ? (1 - k) * 220 * (1 - i * 0.16) + 6 : (1 - k) * 260 * (1 - i * 0.16) + 6; c.globalAlpha = 0.5 * k; c.strokeStyle = i % 2 ? '#ffe6a8' : '#bfe4ff'; c.lineWidth = 1.4; c.beginPath(); c.ellipse(px, py, r * 0.7, r, 0, 0, TAU); c.stroke(); }
       c.restore();
       c.fillStyle = World.calm ? `rgba(10,14,36,${k * k})` : `rgba(255,250,236,${k * k})`; c.fillRect(0, 0, W, H);
     }
-    if (w.hurtFx > 0) { c.globalAlpha = (w.hurtFx / 16) * (w.hurtFx / 16); c.drawImage(hurtImg, 0, 0); c.globalAlpha = 1; }
+    if (w.hurtFx > 0) { c.globalAlpha = (w.hurtFx / 16) * (w.hurtFx / 16); c.drawImage(hurtImg, 0, 0, W, H); c.globalAlpha = 1; }
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
-    // the interface is drawn crisp, above the pixels (scenes.js)
     // embers about to leap from lava below the screen are announced at its edge
-    for (const e of w.ents) if (e.type === 'ember' && e.warn > 0 && e.x - ox > -10 && e.x - ox < W + 10) { const yy = Math.min(e.by - oy, H - 4); Art.glow(c, e.x - ox + 4, yy, 8 + (40 - e.warn) * 0.3, '#ff7a20', 0.5 + 0.3 * Math.sin(w.t * 0.6)); R(c, e.x - ox + 3, yy - 6 - (w.t >> 2) % 3, 2, 3, '#ffd070'); }
+    for (const e of w.ents) if (e.type === 'ember' && e.warn > 0 && e.x - ox > -10 && e.x - ox < W + 10) { const yy = Math.min(e.by - oy, H - 4); Paint.soft(c, e.x - ox + 4, yy, 8 + (40 - e.warn) * 0.3, '#ff7a20', 0.5 + 0.3 * Math.sin(w.t * 0.6)); }
   }
+
   return Object.assign(w, { load, update, draw, ring, dust, spark, sparkle, toast, gainShard, gainGem, bump, lightBeacon, checkpoint, bossDefeated, clearHazards, wonder, warp, zoneAt });
 })();

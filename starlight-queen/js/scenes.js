@@ -4,22 +4,22 @@ const Game = {
   cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0,
   stats: { foes: 0, deaths: 0, hits: 0, frames: 0 }, saved: null, vault: {}, shelf: {}, sights: {}, best: null,
   newGame() {
-    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
+    Object.assign(this, { cp: null, melee: 0, meleeGot: {}, gems: {}, seen: {}, doors: {}, keeps: {}, wonders: {}, metBoy: false, bossDown: false, region: 0, bossHp: 0, oz: false, stats: { foes: 0, deaths: 0, hits: 0, frames: 0 } });
   },
   read(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } },
   write(k, v) { try { v === null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
-  loadSave() { this.saved = this.read('sq-run'); this.vault = this.read('sq-vault') || {}; this.shelf = this.read('sq-shelf') || {}; this.sights = this.read('sq-sights') || {}; this.best = this.read('sq-best'); },
+  loadSave() { this.saved = this.read('sq-run'); if (this.saved && this.saved.v !== 3) { this.saved = null; this.write('sq-run', null); } this.vault = this.read('sq-vault') || {}; this.shelf = this.read('sq-shelf') || {}; this.sights = this.read('sq-sights') || {}; this.best = this.read('sq-best'); if (this.best && this.best.v !== 3) this.best = null; },
   keepAll() { // what has been found stays found, whatever becomes of the journey it was found on
     Object.assign(this.vault, this.gems); this.write('sq-vault', this.vault); Object.assign(this.shelf, this.keeps); this.write('sq-shelf', this.shelf); Object.assign(this.sights, this.wonders); this.write('sq-sights', this.sights);
   },
   save() {
     this.keepAll();
-    this.saved = { doors: this.doors, keeps: this.keeps, wonders: this.wonders, cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
+    this.saved = { v: 3, oz: !!this.oz, bossHp: this.bossHp || 0, doors: this.doors, keeps: this.keeps, wonders: this.wonders, cp: this.cp, melee: this.melee, meleeGot: Object.keys(this.meleeGot), gems: this.gems, seen: this.seen, metBoy: this.metBoy, bossDown: this.bossDown, region: this.region, stats: this.stats };
     this.write('sq-run', this.saved);
   },
   resume() {
     const s = this.saved; this.newGame();
-    Object.assign(this, { doors: s.doors || {}, keeps: s.keeps || {}, wonders: s.wonders || {}, cp: s.cp, melee: s.melee || 0, gems: s.gems || {}, seen: s.seen || {}, metBoy: !!s.metBoy, bossDown: !!s.bossDown, region: s.region || 0, stats: s.stats || this.stats });
+    Object.assign(this, { doors: s.doors || {}, keeps: s.keeps || {}, wonders: s.wonders || {}, cp: s.cp, melee: s.melee || 0, gems: s.gems || {}, seen: s.seen || {}, metBoy: !!s.metBoy, bossDown: !!s.bossDown, region: s.region || 0, bossHp: s.bossHp || 0, stats: s.stats || this.stats });
     (s.meleeGot || []).forEach(n => { this.meleeGot[n] = 1; });
   },
   playerDied() { Scenes.go('play', { respawn: true }); },
@@ -32,7 +32,7 @@ const Game = {
     const cl = [['I', 'Included'], ['I', 'Included'], ['SI', 'Slightly included'], ['SI', 'Slightly included'], ['VS', 'Very slightly included'], ['VVS', 'Very, very slightly included'], ['IF', 'Internally flawless'], ['FL', 'Flawless']][Math.min(7, seen)];
     const cut = ['Fair', 'Fair', 'Good', 'Good', 'Very good', 'Very good', 'Very good', 'Excellent'][Math.min(7, kept)];
     return {
-      carat: this.carats(), n, clarity: cl, colour: 'DEFGHIJK'[ci], cut, got, total, seen, kept,
+      v: 3, carat: this.carats(), n, clarity: cl, colour: 'DEFGHIJK'[ci], cut, got, total, seen, kept,
       score: n * 3 + (7 - ci) + seen + kept
     };
   },
@@ -93,150 +93,47 @@ function drawGemCard(u, gem, t, a, footer) {
   if (footer) u.text(footer, 92, 189, 5.4, { color: '#f0d896', alpha: a * (0.7 + 0.3 * Math.sin(t * 0.1)), ls: 1.3, title: true });
 }
 
+/* ---------- the establishing painting: Kaamos in its valley, at night (title, prologue) and at dawn (ending) ---------- */
 const Vista = (() => {
-  let L = null, snow = null;
-  function build() {
-    L = {
-      night: Backdrop.sky(['#04050d', '#0a1030', '#18244e', '#2a3868', '#4a4a78']),
-      dawn: Backdrop.sky(['#28306e', '#5a4a8c', '#b86a8a', '#f09a6a', '#ffd890', '#fff6d8']),
-      mN: Backdrop.mountains('#141c3c', '#0e1430', null, 50, 60, 901, 999),
-      hN: Backdrop.hills('#0b1226', '#141c3c', 44, 16, 902),
-      mD: Backdrop.mountains('#7a6aa8', '#5c4e90', '#ffe8e0', 50, 60, 901, 92),
-      hD: Backdrop.hills('#4a7a5a', '#7ab070', 44, 16, 902),
-      stars: Backdrop.layer(g => { const r = rng(77); for (let i = 0; i < 46; i++) R(g, r() * Backdrop.LW, r() * 120, 1, 1, r() < 0.2 ? '#7a88b8' : '#3a4670'); })
-    };
-  }
-  /* ---- the title painting: Kaamos under the aurora, Ana and the Tonttu on the ridge above it ---- */
-  let N = null;
-  function spruce(g, x, base, hgt, body, lit, snowc) { // tiered, snow on the upper side of each bough
-    const tiers = Math.max(3, hgt / 9 | 0);
-    for (let y = 0; y < hgt; y++) {
-      const k = y / hgt, ph = (y % (hgt / tiers)) / (hgt / tiers), wd = Math.max(1, Math.round((k * 0.75 + ph * 0.3) * hgt * 0.42));
-      R(g, x - wd, base - hgt + y, wd * 2 + 1, 1, body);
-      const rows = Math.max(1, hgt / tiers * 0.16);
-      if (ph * hgt / tiers < rows && y > 2) { R(g, x - wd, base - hgt + y, Math.max(1, Math.round(wd * 0.8)), 1, snowc); R(g, x + 1, base - hgt + y, Math.max(1, Math.round(wd * 0.45)), 1, lit); }
-      else if (wd > 5) R(g, x + Math.round(wd * 0.35), base - hgt + y, Math.round(wd * 0.5), 1, lit === '#3a4c86' ? '#0f1a40' : body);
-    }
-    R(g, x, base - hgt - 1, 1, 2, snowc); R(g, x - 1, base, 3, 3, '#1a1420');
-  }
-  function buildNight() {
-    N = { smoke: [] };
-    N.sky = Backdrop.sky(['#02030c', '#050c2c', '#0b1f52', '#1b3d78', '#3d5c96', '#7c78a6', '#c79aa8']);
-    N.stars = Art.spr(W, 150, g => {
-      const r = rng(31);
-      for (let i = 0; i < 230; i++) { const x = r() * W, y = r() * r() * 150, b = r(); R(g, x, y, 1, 1, b > 0.9 ? '#ffffff' : b > 0.6 ? '#b9c8f0' : '#5f73a8'); }
-      for (let i = 0; i < 90; i++) { const k = r(), x = 40 + k * 330 + (r() - 0.5) * 50, y = 96 - k * 84 + (r() - 0.5) * 22; R(g, x, y, 1, 1, r() > 0.5 ? '#8ea4dc' : '#465a92'); }
-    });
-    N.far2 = Backdrop.mountains('#3a548e', '#30477c', '#aebfe6', 44, 34, 811, 58);
-    N.far = Backdrop.mountains('#22346a', '#19274f', '#dfe8ff', 34, 58, 812, 52);
-    N.valley = Art.spr(W, H, g => {
-      const r = rng(77), snow = ['#dfe8ff', '#b7c6ee', '#8fa1d6', '#6c7cb8', '#4f5c98'];
-      // snowfield, darkening toward the viewer
-      for (let x = 0; x < W; x++) { const top = 150 + Math.round(Math.sin(x * 0.021) * 3 + Math.sin(x * 0.057 + 1) * 1.5); for (let y = top; y < H; y++) { const k = (y - top) / 62, d = ([0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5][(y & 3) * 4 + (x & 3)] / 16 - 0.5) * 0.24; R(g, x, y, 1, 1, snow[clamp(Math.floor((k + d) * 4.4), 0, 4)]); } R(g, x, top, 1, 1, '#f4f8ff'); }
-      // frozen lake
-      for (let y = 160; y < 174; y++) { const k = Math.sin((y - 160) / 14 * Math.PI), hw = 30 + k * 62; R(g, 250 - hw, y, hw * 2, 1, y < 162 ? '#31467e' : '#16234c'); }
-      R(g, 196, 173, 108, 1, '#eef4ff'); R(g, 222, 160, 60, 1, '#c9d6f2');
-      // road west, with lantern posts
-      for (let i = 0; i < 110; i++) { const k = i / 110, x = 176 - k * 176, y = 180 - Math.sin(k * 2.2) * 16 + k * 4; R(g, x, y, 3, 2, '#9fb0e0'); R(g, x, y + 2, 3, 1, '#7c8cc6'); }
-      // the town
-      const house = (x, y, wd, hg, wall, lit) => {
-        R(g, x, y - hg, wd, hg, wall); R(g, x, y - hg, 1, hg, '#00000030'); R(g, x + wd - 1, y - hg, 1, hg, '#00000040');
-        for (let i = 0; i < 4; i++) R(g, x - 1 + i, y - hg - 1 - i, wd + 2 - i * 2, 1, i < 2 ? '#f4f8ff' : '#cbd8f4');
-        R(g, x + 2, y - hg + 3, 2, 2, lit ? '#ffd56a' : '#27345e'); if (wd > 9) R(g, x + wd - 4, y - hg + 3, 2, 2, '#ffd56a');
-        R(g, x + (wd >> 1), y - 3, 2, 3, '#3a2418'); R(g, x + wd - 3, y - hg - 5, 2, 3, '#5a5060');
-        N.smoke.push([x + wd - 2, y - hg - 6]);
-      };
-      [[150, 158, 11, 7, '#a82c26', 1], [166, 160, 13, 8, '#c8a43e', 1], [184, 157, 10, 7, '#a82c26', 0], [199, 159, 12, 8, '#b8322a', 1], [312, 158, 12, 8, '#b8322a', 1], [329, 160, 13, 8, '#d0ae48', 1], [347, 157, 10, 7, '#a82c26', 1], [364, 160, 12, 8, '#b8322a', 0]].forEach(h => house(...h));
-      // church
-      R(g, 294, 147, 9, 12, '#ece4d2'); R(g, 296, 135, 5, 12, '#ece4d2'); for (let i = 0; i < 7; i++) R(g, 298 - (i >> 1), 128 + i, 1 + i, 1, '#31406e'); R(g, 298, 124, 1, 4, '#dfe8ff'); R(g, 297, 125, 3, 1, '#dfe8ff'); R(g, 297, 139, 3, 4, '#ffd56a'); R(g, 293, 146, 11, 1, '#f4f8ff'); R(g, 297, 153, 3, 6, '#3a2418');
-      // little spruces across the valley
-      for (let i = 0; i < 46; i++) { const x = r() * W | 0, y = 152 + r() * 30 | 0; if (y > 158 && y < 176 && x > 186 && x < 316) continue; spruce(g, x, y, 7 + r() * 9 | 0, '#152450', '#c5d2f2', '#eaf0ff'); }
-    });
-    N.fg = Art.spr(W, H, g => {
-      // the ridge: in shadow, moon-rimmed
-      const ridge = x => x < 70 ? 170 - x * 0.1 : x < 120 ? 163 + (x - 70) * 0.06 : 166 + Math.pow((x - 120) / 62, 2) * 52;
-      for (let x = 0; x < 184; x++) { const top = Math.round(ridge(x)); R(g, x, top, 1, H - top, '#1c2550'); R(g, x, top + 3, 1, 5, '#263264'); R(g, x, top, 1, 2, '#f4f8ff'); R(g, x, top + 2, 1, 1, '#8fa1d6'); }
-      for (let i = 0; i < 26; i++) { const r = hash2(i, 5), x = r * 170, top = ridge(x); R(g, x, top + 8 + hash2(i, 9) * 30, 3 + hash2(i, 2) * 5, 1, '#263264'); }
-      // framing spruces, close to the lens
-      spruce(g, 4, 220, 156, '#060b22', '#3a4c86', '#6f82bc'); spruce(g, 30, 224, 92, '#0a1230', '#3a4c86', '#8a9cd0');
-      spruce(g, 376, 222, 172, '#060b22', '#3a4c86', '#6f82bc'); spruce(g, 348, 226, 100, '#0a1230', '#3a4c86', '#8a9cd0'); spruce(g, 322, 228, 58, '#0d1638', '#3a4c86', '#a4b4e0');
-      for (let x = 170; x < W; x++) { const h = 6 + Math.sin(x * 0.11) * 2 + Math.sin(x * 0.37) * 1.5; R(g, x, H - h, 1, h + 1, '#0a1230'); }
-    });
-  }
-  function nightScene(c, t) {
-    if (!N) buildNight();
-    c.drawImage(N.sky, 0, 0);
-    c.drawImage(N.stars, 0, 0);
-    for (let i = 0; i < 9; i++) { const x = (i * 97 + 31) % W, y = (i * 53 + 11) % 100, k = Math.sin(t * 0.05 + i * 1.7); if (k > 0.55) { R(c, x - 1, y, 3, 1, '#ffffff'); R(c, x, y - 1, 1, 3, '#ffffff'); } }
-    { const k = (t % 900) / 40; if (k < 1) { const x = 300 - k * 90, y = 20 + k * 34; for (let j = 0; j < 9; j++) R(c, x + j * 2.2, y - j * 0.85, 2, 1, `rgba(255,255,255,${(1 - j / 9) * (1 - k)})`); } }
-    // moon
-    c.save(); c.globalCompositeOperation = 'lighter'; c.fillStyle = 'rgba(190,224,255,0.07)'; c.beginPath(); c.moveTo(188, 18); c.lineTo(196, 18); c.lineTo(276, 172); c.lineTo(224, 172); c.fill(); c.restore();
-    Backdrop.aurora(c, t, 0, 0, 1);
-    c.drawImage(N.far2, 0, 0); c.drawImage(N.far, 0, 6);
-    c.drawImage(N.valley, 0, 0);
-    // the lake keeps a faint copy of the sky's fire
-    c.save(); c.beginPath(); for (let y = 162; y < 173; y++) { const k = Math.sin((y - 160) / 14 * Math.PI), hw = 30 + k * 62; c.rect(250 - hw, y, hw * 2, 1); } c.clip();
-    c.translate(0, 172); c.scale(1, -0.24); Backdrop.aurora(c, t, 0, -8, 0.55); c.restore();
-    for (let i = 0; i < 6; i++) R(c, 248 + Math.sin(t * 0.04 + i * 2) * 4, 162 + i * 1.8, 4 + (i % 2) * 3, 1, 'rgba(223,240,255,0.6)');
-    // chimney smoke, window glow
-    N.smoke.forEach(([x, y], i) => { for (let j = 0; j < 5; j++) { const k = ((t * 0.5 + i * 17 + j * 12) % 60) / 60; R(c, x + Math.sin(k * 5 + i) * 2 + k * 5, y - k * 16, 1 + (k > 0.5), 1, `rgba(200,208,232,${0.5 * (1 - k)})`); } if (i % 3 !== 2) Art.glow(c, x - 4, y + 10, 6, '#ffb84a', 0.25 + 0.05 * Math.sin(t * 0.07 + i)); });
-    Art.glow(c, 298, 140, 6, '#ffb84a', 0.35);
-    c.drawImage(N.fg, 0, 0);
-    // the two of them
-    const ay = 163;
-    Art.glow(c, 60, ay - 22, 22, '#ffb84a', 0.3 + 0.05 * Math.sin(t * 0.09));
-    c.drawImage(Art.S.tonttu[(t >> 5) % 2], 40, ay - 33, 30, 34);
-    R(c, 71, ay - 20, 1, 8, '#6a5a4a'); R(c, 69, ay - 13, 5, 6, '#ffd56a'); R(c, 70, ay - 12, 3, 4, '#fff6c8'); R(c, 69, ay - 14, 5, 1, '#3a2c20');
-    c.drawImage(Art.S.anaBig[(t >> 5) % 2], 80, ay - 68);
-    if (!snow) snow = Backdrop.makeAmbient('snow');
-    Backdrop.drawAmbient(c, snow, t, 0.25);
-  }
-  const STARS = [[70, 40], [112, 24], [158, 15], [204, 12], [250, 17], [294, 28], [330, 46]];
-  function cliff(c, col, hi) {
-    c.fillStyle = col;
-    c.beginPath(); c.moveTo(0, H); c.lineTo(0, 150); c.lineTo(40, 146); c.lineTo(96, 150); c.lineTo(132, 154); c.lineTo(146, 166); c.lineTo(160, 196); c.lineTo(190, H); c.fill();
-    R(c, 0, 149, 40, 1, hi); R(c, 40, 147, 30, 1, hi); R(c, 70, 149, 30, 1, hi); R(c, 100, 151, 30, 1, hi);
-  }
+  let snow = null;
+  const HOUSES = [[182, 171, 0], [198, 173, 1], [214, 170, 0], [246, 172, 2], [262, 170, 0], [283, 173, 1]];
   function draw(c, t, dawn, scroll) {
-    if (!L) build();
-    if (!dawn) { nightScene(c, t); return; }
-    c.drawImage(dawn ? L.dawn : L.night, 0, 0, W, H);
-    if (!dawn) {
-      Backdrop.drawLayer(c, L.stars, scroll * 0.2, 1, 0);
-      Art.glow(c, 322, 150, 70 + Math.sin(t * 0.03) * 6, '#ff3a10', 0.55);
-    } else {
-      const sy = 150 - Math.min(40, t * 0.05);
-      Art.glow(c, 318, sy, 90, '#fff0b0', 0.9); c.fillStyle = '#fffbe6'; c.beginPath(); c.arc(318, sy, 14, 0, TAU); c.fill();
-      STARS.forEach(([x, y], i) => {
-        const tw = 0.6 + 0.4 * Math.sin(t * 0.08 + i * 1.7);
-        Art.glow(c, x, y, 9 + tw * 4, '#ffffff', 0.7 * tw);
-        R(c, x - 1, y - 3, 2, 6, '#fff'); R(c, x - 3, y - 1, 6, 2, '#fff');
-      });
+    const { soft, disc, vgrad, rr } = Paint, id = dawn ? 'dawn' : 'vista';
+    Paint.backdrop(c, id, scroll || 0, 0, t, 1);
+    // the valley floor, and the lake with the sky lying in it
+    c.fillStyle = vgrad(c, 156, H, dawn ? ['#c9b6d6', '#8f86b8', '#5a5a94'] : ['#31508e', '#1d3368', '#101c44']); c.beginPath(); c.moveTo(0, 166); c.quadraticCurveTo(120, 152, 250, 160); c.quadraticCurveTo(330, 164, W, 156); c.lineTo(W, H); c.lineTo(0, H); c.closePath(); c.fill();
+    c.fillStyle = vgrad(c, 178, 200, dawn ? ['#ffd9a8', '#f0a890', '#8a7ab0'] : ['#16306a', '#0b1840', '#081030']); c.beginPath(); c.ellipse(248, 190, 150, 13, 0, 0, TAU); c.fill();
+    c.save(); c.beginPath(); c.ellipse(248, 190, 150, 13, 0, 0, TAU); c.clip();
+    if (!dawn) { c.translate(0, 206); c.scale(1, -0.3); Backdrop.aurora(c, t, 0, 0, 0.5); }
+    else soft(c, 300, 186, 60, '#fff0c0', 0.5);
+    c.restore();
+    c.fillStyle = dawn ? 'rgba(255,255,255,0.4)' : 'rgba(200,225,255,0.22)'; for (let i = 0; i < 7; i++) { const k = (t * 0.1 + i * 37) % 120; c.beginPath(); rr(c, 150 + i * 31 + k * 0.2, 185 + (i % 3) * 3.4, 14 - k * 0.08, 0.6, 0.3); c.fill(); }
+    // the town: a few lit windows, and the church
+    for (const [x, y, v] of HOUSES) {
+      const wall = ['#b53a30', '#c8a84a', '#a8342c'][v];
+      soft(c, x, y - 3, 9, '#ffcf70', dawn ? 0.25 : 0.5);
+      c.fillStyle = mix(wall, dawn ? '#ffd8b0' : '#1a2450', dawn ? 0.2 : 0.3); c.fillRect(x - 5, y - 6, 10, 6);
+      c.fillStyle = dawn ? '#fff4ea' : '#dfe8ff'; c.beginPath(); c.moveTo(x - 6.4, y - 5.6); c.lineTo(x, y - 10.4); c.lineTo(x + 6.4, y - 5.6); c.closePath(); c.fill();
+      c.fillStyle = '#ffdc90'; c.fillRect(x - 3, y - 4.2, 2.2, 2.2); c.fillRect(x + 1, y - 4.2, 2.2, 2.2);
+      if (!dawn) { c.fillStyle = 'rgba(220,230,255,0.2)'; for (let j = 0; j < 3; j++) { const k = ((t * 0.3 + x + j * 30) % 90) / 90; c.globalAlpha = (1 - k) * 0.5; c.beginPath(); c.arc(x + 3 + k * 4, y - 12 - k * 14, 1 + k * 2, 0, TAU); c.fill(); } c.globalAlpha = 1; }
     }
-    Backdrop.drawLayer(c, dawn ? L.mD : L.mN, dawn ? 0 : scroll, 1, 6);
-    if (!dawn) { // Mount Gloam, smouldering in the east
-      c.fillStyle = '#080a18'; c.beginPath(); c.moveTo(262, 180); c.lineTo(312, 112); c.lineTo(320, 116); c.lineTo(330, 111); c.lineTo(384, 176); c.lineTo(384, 190); c.fill();
-      Art.glow(c, 321, 112, 16 + Math.sin(t * 0.06) * 3, '#ff5a10', 0.9); R(c, 318, 114, 2, 12, '#ff6a20'); R(c, 325, 113, 1, 18, '#d84a10');
-    } else {
-      [176, 222, 262, 300, 356].forEach((x, i) => {
-        const y = H - L.mD.hh[x] + 6;
-        R(c, x - 1, y - 5, 3, 5, '#4a3e78'); R(c, x - 2, y - 6, 5, 1, '#4a3e78');
-        Art.glow(c, x, y - 8, 8 + Math.sin(t * 0.3 + i) * 2, '#ffb040', 0.95); R(c, x - 1, y - 9, 2, 3, '#fff6b0'); R(c, x, y - 10 - ((t >> 3) + i) % 2, 1, 1, '#ffc040');
-      });
-    }
-    Backdrop.drawLayer(c, dawn ? L.hD : L.hN, dawn ? 0 : scroll * 1.6, 1, 4);
-    cliff(c, dawn ? '#2a5a3c' : '#05080f', dawn ? '#6ab868' : '#1a2440');
-    // the Queen
-    const img = Art.S.anaBigCrown[(t >> 5) % 2];
-    if (dawn) c.drawImage(Art.S.boy.idle[(t >> 5) % 2], 36, 94, 48, 56);
-    Art.glow(c, 104, 122, 44 + Math.sin(t * 0.05) * 4, dawn ? '#fff6d0' : '#9fd8ff', dawn ? 0.5 : 0.6);
-    c.drawImage(img, 82, 82);
-    for (let i = 0; i < 8; i++) {
-      const k = ((t * 0.5 + i * 31) % 120) / 120;
-      c.fillStyle = `rgba(200,240,255,${(1 - k) * 0.8})`; c.fillRect(Math.round(104 + Math.sin(i * 2.4 + k * 5) * 22), Math.round(146 - k * 70), 1, 1);
-    }
+    soft(c, 230, 160, 12, '#ffcf70', dawn ? 0.3 : 0.55); c.fillStyle = dawn ? '#fff4ea' : '#e6ecff'; c.fillRect(227.6, 156, 4.8, 15); c.beginPath(); c.moveTo(226.6, 156.4); c.lineTo(230, 146); c.lineTo(233.4, 156.4); c.closePath(); c.fill(); c.fillRect(229.7, 143, 0.6, 4); c.fillRect(228.8, 144.2, 2.4, 0.6); c.fillStyle = '#ffdc90'; c.fillRect(229, 159, 2, 4);
+    c.fillStyle = dawn ? '#3a3c6c' : '#0c1634'; c.beginPath(); for (const [x, hh] of [[170, 12], [176, 9], [206, 11], [222, 8], [238, 10], [254, 9], [272, 12], [292, 10], [300, 13], [312, 9], [326, 12], [340, 10], [142, 14], [128, 11], [352, 14], [366, 12]]) Paint.spruce(c, x, 174 + (x % 5) * 0.5, hh); c.fill();
+    // the ridge above the town, where she stands
+    c.fillStyle = vgrad(c, 150, H, dawn ? ['#fff6ee', '#e8cfe0', '#b0a0cc'] : ['#e6eeff', '#9fb4e4', '#5a70b0']); c.beginPath(); c.moveTo(-2, 178); c.quadraticCurveTo(50, 162, 96, 171); c.quadraticCurveTo(150, 184, 176, H + 2); c.lineTo(-2, H + 2); c.closePath(); c.fill();
+    c.fillStyle = dawn ? 'rgba(120,90,150,0.25)' : 'rgba(20,34,80,0.35)'; c.beginPath(); c.ellipse(86, 172.4, 22, 2.2, 0.08, 0, TAU); c.fill();
+    // the dark spruces at the edge of the picture
+    c.fillStyle = dawn ? '#2c2a58' : '#070c20'; c.beginPath(); Paint.spruce(c, 12, 232, 150); Paint.spruce(c, 372, 236, 176); Paint.spruce(c, 346, 232, 104); Paint.spruce(c, 40, 230, 70); c.fill();
+    // Ana; and beside her the Tonttu, or at the end of it all, Mayank and his lantern
+    const ax = 92, ay = 171.6, k = 1.9;
+    soft(c, ax, ay - 20, 46 + Math.sin(t * 0.05) * 3, dawn ? '#fff0c8' : '#9fc8ff', dawn ? 0.35 : 0.3);
+    if (dawn) { soft(c, ax - 20, ay - 18, 20, '#ffc060', 0.5); Paint.figure(c, ax - 30, ay + 0.6, { face: 1, t: t + 30, scale: k, lantern: true }, Paint.MAYANK); }
+    c.save(); c.translate(dawn ? ax + 30 : ax - 30, ay + 1.2); c.scale(k, k); if (!dawn) soft(c, 4, -6, 9, '#ffcf70', 0.4); Paint.tonttu(c, 0, 0, t, dawn ? -1 : 1); c.restore();
+    Paint.figure(c, ax, ay, { face: 1, t, scale: k, crown: dawn, speed: 0.12, ph: 0 });
+    if (!snow) snow = Paint.makeAmbient('snow');
+    if (!dawn) Paint.ambient(c, snow, t, 0.25);
   }
-  return { draw, STARS };
+  return { draw };
 })();
 
 /* ---------- Title ---------- */
@@ -278,33 +175,24 @@ Scenes.list.title = {
       const bg = g.createLinearGradient(0, (H - 24) * s, 0, H * s); bg.addColorStop(0, 'rgba(4,6,26,0)'); bg.addColorStop(1, 'rgba(4,6,26,0.85)'); g.save(); g.globalAlpha = b; g.fillStyle = bg; g.fillRect(0, (H - 24) * s, W * s, 24 * s); g.restore(); }
     this.items.forEach((it, i) => {
       const on = i === this.sel, y = 122 + i * 13;
-      const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${MAP_NAMES[Game.saved.region || 0]}` : `The vault  ·  ${vn} of ${GEMS.length} diamonds`;
+      const label = it === 'new' ? (Game.saved ? 'New journey' : 'Begin the journey') : it === 'continue' ? `Continue  ·  ${Game.saved.oz ? 'Australia' : MAP_NAMES[Game.saved.region || 0]}` : `The windowsill  ·  ${vn} of ${GEMS.length} diamonds`;
       u.text(label, 192, y, on ? 10 : 8.4, { color: on ? '#ffe9a8' : '#aab3d4', alpha: b * (on ? 1 : 0.8) });
       if (on) { const hw = u.width(label, 10) / 2 + 8, d = 1.7 + 0.3 * Math.sin(t * 0.12); g.save(); g.globalAlpha = b; g.fillStyle = '#f3d384'; for (const sx of [-1, 1]) { g.save(); g.translate((192 + sx * hw) * s, y * s); g.rotate(Math.PI / 4); g.fillRect(-d * s / 2, -d * s / 2, d * s, d * s); g.restore(); } g.restore(); }
     });
     if (Game.best) u.text(`Finest journey  ·  ${Game.best.carat.toFixed(1)} ct  ·  ${Game.best.colour} colour  ·  ${Game.best.clarity[0]}  ·  ${Game.best.cut} cut`, 192, 122 + this.items.length * 13 + 4, 6.6, { color: '#d9b566', alpha: b, italic: true });
-    u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, 4.4, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.6, title: true });
+    u.text(Input.touch ? 'TAP A LINE TO CHOOSE' : '↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ' + (Sound.muted ? 'OFF' : 'ON') + '   ·   G  FULLSCREEN', 192, 208.5, Input.touch ? 6.2 : 5, { color: '#cfd5ea', alpha: b * 0.85, ls: 1.4, title: true });
   }
 };
 
 /* ---------- Prologue ---------- */
 const PROLOGUE = [
-  { s: 'Kaamos is at the top of Finland. After us there is Norway, and after Norway, weather.' },
-  { s: 'The town is named for the dark. The sun goes down in November and is not expected back until January. We don’t take it personally. We have stars.' },
-  { s: 'Every child here wears a reflector on the coat: a plastic snowflake. It makes no light of its own. It waits for yours, and hands it back.' },
-  { s: 'Ana wore hers and waited. Winters, she stood where the road leaves town and shone at every pair of headlamps. It was always the snowplough.' },
-  { s: 'At eleven she left her window open all night for an owl. We have owls. None had post. Towards morning, at thirty below, somebody quietly shut it.' },
-  { s: 'She tried the back of the wardrobe. It was the back of a wardrobe.' },
-  { s: 'What did come was the library bus, every second Thursday, engine running. Two weeks a book. She read the way other people pack.' },
-  { s: 'We were good to her; let that be written down. We knew her shoe size. We knew how she took her coffee before she had tasted any.' },
-  { s: 'She grew up, which here is done mostly in the dark, and kept the reflector on. For the traffic, she said.' },
-  { s: 'It was the one who had shut the window who spoke, in the end. The Tonttu: red cap, low opinion of everything. He cannot cross the threshold and has never seen the need. Somebody has to be in.' },
-  { s: 'News reaches a Tonttu by chimney. Far in the west a Hoarder King is shutting the world’s great diamonds in a room without windows. For every stone he shuts away, a star goes out. Up here, we notice.', fx: 'gems' },
-  { s: '“A diamond is a reflector with airs,” said the Tonttu. “Shut it in the dark and you have bought a pebble. Somebody should go and tell him.”' },
-  { s: 'The greatest is the Koh-i-Noor, the Mountain of Light. It ruins every king who holds it, the old story says. A woman may carry it unharmed. The Tonttu looked at Ana.' },
-  { s: 'Over the frozen gulf, then. Through the manic lands of Sweden, where at midsummer nobody, including the sun, goes to bed. Down the iron mines. Over the sea to a far country called America.' },
-  { s: 'He looked at her coat on its hook, and the snowflake pinned to it. “That only works,” he said, “on a road.”' },
-  { s: 'She goes this morning, in the dark, which narrows it down very little. We shall watch her reflector as far as the last street lamp. After that it wants somebody else’s light.' }
+  { s: 'Far in the north there is a small town called Kaamos. The name means the long dark.' },
+  { s: 'The old people say the north belonged to the elves once: the star-folk. They went west over the sea. Every house still leaves one window unshuttered, in case.' },
+  { s: 'Ana grew up at the last fence, looking at the place where the road stops being Kaamos and becomes everywhere else. Nothing ever came down it for her.' },
+  { s: 'Then, one winter, the stars began to go out. A king in the west was gathering the great diamonds of the world and shutting them away in the dark.', fx: 'gems' },
+  { s: '“A diamond is starlight that fell asleep in the earth,” said the Tonttu, who kept her house. “He has the Mountain of Light itself. He only wants to be warm. They always do.”' },
+  { s: 'Ana held out her hand, the way you would to see if it was snowing. The starlight came down into it like a bird that had been waiting for her to stand still.' },
+  { s: '“Well,” said the Tonttu. “That explains the ears. Your boots are by the door. They have been by the door for years.”' }
 ];
 // Shared by the prologue and the epilogue: one card at a time, and nothing moves on until the reader does.
 const Cards = {
@@ -322,7 +210,7 @@ const Cards = {
   hint(u, sc, n, y) {
     const g = u.ctx, s = u.s, a = clamp((sc.pt - 50) / 30, 0, 1);
     for (let k = 0; k < n; k++) { g.save(); g.translate((192 - (n - 1) * 3.5 + k * 7) * s, y * s); g.rotate(Math.PI / 4); g.fillStyle = k === sc.i ? '#f3d384' : k < sc.i ? 'rgba(243,211,132,0.45)' : 'rgba(200,210,240,0.22)'; const d = (k === sc.i ? 2.2 : 1.5) * s; g.fillRect(-d / 2, -d / 2, d, d); g.restore(); }
-    if (Input.touch) { u.text('TAP TO GO ON', 192, y + 8, 4.4, { color: '#cfd5ea', alpha: a * (0.55 + 0.3 * Math.sin(sc.t * 0.08)), ls: 1.6, title: true }); u.text('SKIP', 366, 12, 4.4, { color: '#cfd5ea', alpha: 0.6, ls: 1.4, title: true }); }
+    if (Input.touch) { u.text('TAP TO GO ON', 192, y + 8, 6.2, { color: '#cfd5ea', alpha: a * (0.55 + 0.3 * Math.sin(sc.t * 0.08)), ls: 1.4, title: true }); u.text('SKIP', 362, 12, 6.2, { color: '#cfd5ea', alpha: 0.6, ls: 1.4, title: true }); }
     else u.rich('[ENTER]  go on        [←]  back        [ESC]  skip', 192, y + 9, 5, { color: '#aeb9d6', alpha: 0.35 + 0.5 * a });
   }
 };
@@ -344,10 +232,10 @@ Scenes.list.intro = {
       for (let i = 0; i < 7; i++) {
         const k = clamp(k0 * 1.6 - i * 0.09, 0, 1); if (k <= 0 || k >= 1) continue;
         const x = 400 - k * 440, y = 112 + i * 3 - Math.sin(k * Math.PI) * (22 + i * 3), gem = GEMS[5 + i] || GEMS[11];
-        for (let j = 1; j < 10; j++) R(c, x + j * 3, y + j * 0.3, 2, 1, `rgba(255,255,255,${0.5 - j * 0.05})`);
-        Art.glow(c, x, y, 9, gem.tint, 0.7); c.drawImage(Art.gemSprite(gem, 9), Math.round(x - 4), Math.round(y - 4));
+        { const gr = c.createLinearGradient(x, 0, x + 30, 0); gr.addColorStop(0, 'rgba(255,255,255,0.6)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); c.strokeStyle = gr; c.lineWidth = 0.8; c.beginPath(); c.moveTo(x, y); c.lineTo(x + 30, y + 3); c.stroke(); }
+        Paint.soft(c, x, y, 10, gem.tint, 0.6); drawGemHi(c, x, y, 3.6, gem, t);
       }
-      Art.glow(c, 0, 120, 70 * k0, '#ff3a10', 0.45);
+      Paint.soft(c, 0, 120, 70 * k0, '#ff3a10', 0.4);
     }
   },
   drawHi(u) {
@@ -438,7 +326,7 @@ Scenes.list.map = {
     });
     const [mx, my] = MAP_NODES[this.to];
     g.save(); g.imageSmoothingEnabled = false; g.shadowColor = '#fff8d0'; g.shadowBlur = 6 * s;
-    g.drawImage(Art.S.queen.idle[(t >> 5) % 2], (mx - 12) * s, (my - 27 + Math.sin(t * 0.08)) * s, 24 * s, 28 * s);
+    g.scale(s, s); Paint.figure(g, mx, my - 3 + Math.sin(t * 0.08), { face: -1, t, scale: 1.1 });
     g.restore();
     const a = clamp((t - 30) / 40, 0, 1);
     u.plate(72, 166, 240, 34, 0.95 * a);
@@ -470,7 +358,7 @@ Scenes.list.play = {
       else if (pick === 3) { Game.save(); Scenes.go('title'); }
       return;
     }
-    if (!Game.seen.hello && w.state === 'play' && w.introT <= 0 && !w.fight) { Game.seen.hello = 1; w.toast(touchKeys('[←] [→]  walk      [SPACE]  leap      [X]  arrow      [E]  reflector'), true); }
+    if (!Game.seen.hello && w.state === 'play' && w.introT <= 0 && !w.fight) { Game.seen.hello = 1; w.toast(touchKeys('[←] [→]  walk      [SPACE]  leap'), true); }
     w.update();
   },
   draw(c) { World.draw(c); },
@@ -478,7 +366,7 @@ Scenes.list.play = {
     const w = World, z = w.introZone;
     if (w.introT > 0 && z && w.state === 'play' && !w.card && !w.gemFx && !w.signText && !w.wonderCard && !w.warpFx) {
       const a = clamp(w.introT / 40, 0, 1) * clamp((180 - w.introT) / 30, 0, 1);
-      u.panel(0, 46, W, 60, 0.3 * a, '#060814');
+      { const gr = u.ctx.createLinearGradient(0, 34 * u.s, 0, 114 * u.s); gr.addColorStop(0, 'rgba(6,8,20,0)'); gr.addColorStop(0.5, `rgba(6,8,20,${0.42 * a})`); gr.addColorStop(1, 'rgba(6,8,20,0)'); u.ctx.fillStyle = gr; u.ctx.fillRect(0, 34 * u.s, W * u.s, 80 * u.s); }
       u.text(z.title.toUpperCase(), 192, 66, 24, { metal: true, alpha: a, title: true, ls: 7 });
       u.rule(192, 84, 96, '#c8a860', a);
       u.text(z.sub, 192, 96, 9.5, { color: '#f0e8d0', alpha: a, italic: true });
@@ -490,8 +378,8 @@ Scenes.list.play = {
       const heart = (x, y, sz, full, pop) => {
         g.save(); g.translate(x * s, y * s); g.scale(sz * s * (1 + pop * 0.25) / 10, sz * s * (1 + pop * 0.25) / 10);
         g.beginPath(); g.moveTo(0, 3.6); g.bezierCurveTo(-1.2, -1.4, -6, -1.6, -6, 1.6); g.bezierCurveTo(-6, 5, -1.6, 7, 0, 9.4); g.bezierCurveTo(1.6, 7, 6, 5, 6, 1.6); g.bezierCurveTo(6, -1.6, 1.2, -1.4, 0, 3.6); g.closePath();
-        if (full) { const gr = g.createLinearGradient(0, -1, 0, 9); gr.addColorStop(0, '#b8ffe4'); gr.addColorStop(1, '#33c391'); g.fillStyle = gr; g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 3; g.fill(); g.shadowColor = 'transparent'; g.fillStyle = 'rgba(255,255,255,0.75)'; g.beginPath(); g.arc(-3, 1.4, 1.1, 0, TAU); g.fill(); }
-        else { g.fillStyle = 'rgba(6,10,26,0.55)'; g.fill(); g.strokeStyle = 'rgba(184,255,228,0.45)'; g.lineWidth = 0.9; g.stroke(); }
+        if (full) { g.fillStyle = '#c4f6e2'; g.shadowColor = 'rgba(4,8,24,0.7)'; g.shadowBlur = 3; g.fill(); g.shadowColor = 'transparent'; }
+        else { g.fillStyle = 'rgba(6,10,26,0.5)'; g.fill(); g.strokeStyle = 'rgba(196,246,226,0.8)'; g.lineWidth = 0.9; g.stroke(); }
         g.restore();
       };
       w.players.forEach((p, k) => {
@@ -519,41 +407,51 @@ Scenes.list.play = {
         const gr = g.createLinearGradient(x * s, 0, (x + bw) * s, 0); gr.addColorStop(0, vul ? '#fff6c8' : '#ff8a3a'); gr.addColorStop(1, vul ? '#f3d384' : '#d8341c');
         g.fillStyle = gr; g.beginPath(); g.roundRect ? g.roundRect(x * s, y * s, Math.max(3, bw * k) * s, 3 * s, 1.5 * s) : g.rect(x * s, y * s, bw * k * s, 3 * s); g.fill();
         g.strokeStyle = 'rgba(217,179,106,0.7)'; g.lineWidth = Math.max(1, s * 0.3); g.beginPath(); g.roundRect ? g.roundRect((x - 1) * s, (y - 1) * s, (bw + 2) * s, 5 * s, 2.5 * s) : g.rect((x - 1) * s, (y - 1) * s, (bw + 2) * s, 5 * s); g.stroke();
-        u.text('THE HOARDER KING', 192, y - 6.5, 4.6, { color: '#f3d384', ls: 1.8, title: true });
+        u.text('THE HOARDER KING', 192, y - 6.5, 5.4, { color: '#f3d384', ls: 1.8, title: true });
       }
     }
     // dialogue: eases in and out, speaker set apart, keys shown as keycaps
     const wc = w.wonderCard && w.state === 'play' && !w.card && !w.gemFx && !this.paused ? w.wonderCard : null;
     if (wc) { // a wonder: the frame narrows like a film's, it is named once in gold, and then it is left alone
-      const a = clamp(wc.t / 36, 0, 1) * clamp((600 - wc.t) / 50, 0, 1), ease = 1 - (1 - a) * (1 - a), lines = u.wrap(wc.def.line, 340, 8.4, { italic: true });
+      const a = clamp(wc.t / 36, 0, 1) * clamp((600 - wc.t) / 50, 0, 1), ease = 1 - (1 - a) * (1 - a), lines = u.wrap(wc.def.line, 340, 8.6, { italic: true });
       const th = 31 * ease, bh = (13 + lines.length * 11) * ease, hair = Math.max(1, s * 0.4);
       u.panel(0, 0, W, th, 0.9, '#04050d'); u.panel(0, H - bh, W, bh + 1, 0.9, '#04050d');
       g.fillStyle = `rgba(214,186,120,${0.55 * a})`; g.fillRect(0, th * s, W * s, hair); g.fillRect(0, (H - bh) * s - hair, W * s, hair);
-      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, th - 22.5, 4.6, { color: '#d9b566', ls: 2.2, title: true, alpha: a, shadow: false });
+      u.text(`A WONDER   ·   ${Object.keys(Game.wonders).length} OF ${WONDERS.length}`, 192, th - 22.5, 5.4, { color: '#d9b566', ls: 1.8, title: true, alpha: a, shadow: false });
       u.text(wc.def.name.toUpperCase(), 192, th - 10.5, 13, { metal: true, title: true, ls: 3, alpha: a });
       lines.forEach((ln, i) => u.text(ln, 192, H - bh + 11.5 + i * 11, 8.4, { color: '#f4ecd6', italic: true, alpha: a, shadow: false }));
     }
     const want = w.signText && w.state === 'play' && !this.paused && !w.card && !w.gemFx && !wc;
     if (wc || w.state === 'clear') this.signA = 0;
-    if (want) { this.signTxt = w.signText; this.signLow = w.player.y - w.cam.y > 96; }
+    if (want) this.signTxt = w.signText;
     this.signA = (this.signA || 0) + ((want ? 1 : 0) - (this.signA || 0)) * 0.22;
-    if (this.signA > 0.02 && this.signTxt) {
+    const top = Input.touch, base = top ? 48 : 198; // on a phone the foot of the frame belongs to the thumbs, so words go under the HUD
+    const toastOn = w.toastT > 0 && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !wc;
+    const veil = Math.max(this.signA > 0.02 && this.signTxt ? this.signA : 0, toastOn ? clamp(w.toastT / 24, 0, 1) : 0);
+    if (veil > 0.02) {
+      const y0 = top ? 26 : base - 44, y1 = top ? 82 : H, gr = g.createLinearGradient(0, y0 * s, 0, y1 * s);
+      if (top) { gr.addColorStop(0, 'rgba(4,6,18,0)'); gr.addColorStop(0.4, `rgba(4,6,18,${0.6 * veil})`); gr.addColorStop(1, 'rgba(4,6,18,0)'); } else { gr.addColorStop(0, 'rgba(4,6,18,0)'); gr.addColorStop(0.8, `rgba(4,6,18,${0.66 * veil})`); gr.addColorStop(1, `rgba(4,6,18,${0.66 * veil})`); }
+      g.fillStyle = gr; g.fillRect(0, y0 * s, W * s, (y1 - y0) * s);
+    }
+    let signTop = base;
+    if (this.signA > 0.02 && this.signTxt) { // words on the road: one quiet line at the foot of the frame
       let txt = this.signTxt, who = null;
       if (Input.touch) txt = touchKeys(txt);
       const m = /^(Tonttu|Mayank): /.exec(txt); if (m) { who = m[1]; txt = txt.slice(m[0].length); }
-      const lines = txt.split('|'), fs = 8.2, lh = 11.5, a = this.signA, ease = 1 - (1 - a) * (1 - a);
-      const wd = Math.min(352, Math.max(...lines.map(l => u.width(l.replace(/[\[\]]/g, '  '), fs))) + 30), hgt = lines.length * lh + 11 + (who ? 5 : 0);
-      const y0 = (this.signLow ? 40 : 170 - hgt / 2) + (1 - ease) * (this.signLow ? -6 : 6);
-      u.plate(192 - wd / 2, y0, wd, hgt, a);
-      if (who) u.text(who.toUpperCase(), 192, y0 + 7, 4.6, { color: '#d9b566', ls: 2, title: true, alpha: a, shadow: false });
-      lines.forEach((ln, i) => u.rich(ln, 192, y0 + (who ? 16.5 : 11) + i * lh, fs, { color: '#eef2ff', alpha: a, shadow: false }));
+      const lines = txt.split('|'), fs = 8.8, lh = 11.5, a = this.signA, ease = 1 - (1 - a) * (1 - a), y0 = (top ? base + (who ? 6 : 0) : base - (lines.length - 1) * lh) + (1 - ease) * 4;
+      if (who) u.text(who.toUpperCase(), 192, y0 - 10, 5.4, { color: '#d9b566', ls: 2, title: true, alpha: a });
+      lines.forEach((ln, i) => u.rich(ln, 192, y0 + i * lh, fs, { color: '#f6f1e4', alpha: a, italic: !/\[/.test(ln) }));
+      signTop = top ? y0 + lines.length * lh : y0 - (who ? 20 : 12);
     }
-    if (w.toastT > 0 && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !wc && !(this.signA > 0.3 && /\[/.test(w.toastText))) {
+    if (toastOn) {
       const tm = w.toastMax || 240, a = clamp(w.toastT / 24, 0, 1) * clamp((tm - w.toastT) / 12, 0, 1), tl = w.toastText.split('|'), ease = 1 - (1 - a) * (1 - a);
-      const wd = Math.max(...tl.map(l => u.width(l, 8.4, { italic: tl.length === 1 }))) + 26, hgt = tl.length * 11.5 + 8;
-      const ty = (this.signA > 0.3 && !this.signLow ? 34 : 190 - hgt / 2) + (1 - ease) * 5;
-      u.plate(192 - wd / 2, ty, wd, hgt, a * 0.92);
-      tl.forEach((ln, i) => u.rich(ln, 192, ty + 10 + i * 11.5, 8.4, { color: '#fff3c4', alpha: a, italic: tl.length === 1, shadow: false }));
+      const ty = (this.signA > 0.3 ? signTop : base) - (top ? 0 : (tl.length - 1) * 11) + (1 - ease) * 4;
+      tl.forEach((ln, i) => u.rich(ln, 192, ty + i * 11, i ? 8.2 : 8.6, { color: i ? '#e6dcc0' : '#fff3c4', alpha: a, italic: !/\[/.test(ln) }));
+    }
+    { // a key, shown above her when the place wants it, instead of a sentence
+      const pr = w.prompt && w.state === 'play' && !w.card && !w.gemFx && !this.paused && !wc && !w.warpFx ? w.prompt : null;
+      this.prA = (this.prA || 0) + ((pr ? 1 : 0) - (this.prA || 0)) * 0.12; if (pr) this.prK = pr;
+      if (this.prA > 0.03 && this.prK) { const pl = w.player, key = this.prK === 'light' ? (Input.touch ? '☼' : '[E]') : (Input.touch ? '▼' : '[↓]'); u.rich(key, pl.x + 5 - w.cam.x, pl.y - w.cam.y - 13 + Math.sin(w.t * 0.08) * 1.2, 7.4, { color: '#fff3c4', alpha: this.prA * (0.75 + 0.25 * Math.sin(w.t * 0.1)) }); }
     }
     if (w.fight && w.boss && w.boss.st === 'intro') {
       const a = clamp(w.boss.t0 / 30, 0, 1) * clamp((110 - w.boss.t0) / 20, 0, 1);
@@ -562,13 +460,13 @@ Scenes.list.play = {
       u.text('Thief of the Mountain of Light', 192, 90, 8.5, { color: '#e6c8b0', italic: true, alpha: a });
     }
     if (w.state === 'clear') {
-      const a = clamp((w.clearT - 50) / 40, 0, 1);
-      u.text(w.clearText.toUpperCase(), 192, 52, 17, { metal: true, alpha: a, title: true, ls: 3 });
-      u.rule(192, 66, 90, '#c8a860', a);
-      u.text('Far off, one window in Kaamos answers.', 192, 77, 9, { color: '#fff3d8', alpha: clamp((w.clearT - 100) / 40, 0, 1), italic: true });
-      u.text(`${Game.carats().toFixed(2)} carats, two travellers, one lantern`, 192, 90, 7.4, { color: '#dffbff', alpha: clamp((w.clearT - 170) / 40, 0, 1), italic: true });
+      const a = clamp((w.clearT - 50) / 40, 0, 1), ease = 1 - (1 - a) * (1 - a), th = 31 * ease, bh = 30 * ease, hair = Math.max(1, s * 0.4);
+      u.panel(0, 0, W, th, 0.9, '#04050d'); u.panel(0, H - bh, W, bh + 1, 0.9, '#04050d');
+      g.fillStyle = `rgba(214,186,120,${0.55 * a})`; g.fillRect(0, th * s, W * s, hair); g.fillRect(0, (H - bh) * s - hair, W * s, hair);
+      u.text(w.clearText.toUpperCase(), 192, th - 14, 14, { metal: true, alpha: a, title: true, ls: 3 });
+      u.text('Far off, one window in Kaamos answers.', 192, H - bh + 11, 8.8, { color: '#f4ecd6', alpha: clamp((w.clearT - 100) / 40, 0, 1), italic: true, shadow: false });
+      u.text(`${Game.carats().toFixed(2)} carats, two travellers, one lantern`, 192, H - bh + 22, 7.4, { color: '#d9c48a', alpha: clamp((w.clearT - 170) / 40, 0, 1), italic: true, shadow: false });
     }
-    if (w.combo >= 2 && w.comboT > 0 && !w.card) u.text('×' + w.combo, w.comboX - w.cam.x, w.comboY - 12 - w.cam.y - (55 - w.comboT) * 0.15, Math.round((7 + Math.min(5, w.combo * 0.35)) * (1 + 0.6 * clamp((w.comboT - 47) / 8, 0, 1)) * 2) / 2, { color: w.combo >= 8 ? '#ffe9a0' : '#dffbff', glow: w.combo >= 8 ? '#ffb040' : '#7fd8ff', alpha: clamp(w.comboT / 20, 0, 1), title: true });
     if (w.card && w.card.t < 22) u.panel(0, 0, W, H, 1 - w.card.t / 22, '#ffffff');
     if (w.card) drawGemCard(u, w.card.gem, w.card.t, clamp(w.card.t / 25, 0, 1), w.card.t > 70 ? (Input.touch ? 'TAP TO CONTINUE' : 'ENTER TO CONTINUE') : '');
     if (this.paused) {
@@ -585,7 +483,7 @@ Scenes.list.play = {
   }
 };
 
-/* ---------- The Vault: the diamonds, and under them what else came home ---------- */
+/* ---------- The Windowsill (once the Vault): what came home, set where the light can get at it ---------- */
 const GEM_WHERE = ['Finland', 'Finland', 'the Gulf', 'Sweden', 'Sweden', 'Kiruna', 'America', 'America', 'America', 'Australia', 'the Mesa', 'the Mesa', 'the King'];
 Scenes.list.vault = {
   enter() {
@@ -622,7 +520,7 @@ Scenes.list.vault = {
   draw(c) { c.fillStyle = '#05060f'; c.fillRect(0, 0, W, H); const r = rng(3); for (let i = 0; i < 40; i++) R(c, r() * W, r() * H, 1, 1, '#1c2440'); },
   drawHi(u) {
     const g = u.ctx, s = u.s, t = this.t, n = Object.keys(Game.vault).length, cur = this.items[this.sel];
-    u.text('THE VAULT', 192, 17, 13.5, { metal: true, title: true, ls: 5 });
+    u.text('THE WINDOWSILL', 192, 17, 13.5, { metal: true, title: true, ls: 5 });
     u.text(`${n} of ${GEMS.length} diamonds   ·   ${GEMS.reduce((a, q) => a + (Game.vault[q.id] ? q.carat : 0), 0).toFixed(2)} of ${GEM_TOTAL_CT.toFixed(2)} carats`, 192, 29.5, 6.4, { color: '#a9b4d0', italic: true });
     const frame = (x, y, wd, hg) => { g.save(); g.strokeStyle = '#d6ba78'; g.lineWidth = Math.max(1, s * 0.5); g.strokeRect(x * s, y * s, wd * s, hg * s); g.restore(); };
     for (const it of this.items) {
@@ -637,7 +535,7 @@ Scenes.list.vault = {
         u.text(has ? `${gem.carat} ct` : '—', x, y + 16, 6, { color: has ? '#fff6dc' : '#6a76a0', title: true });
       } else if (it.kind === 'keep') {
         if (on) frame(x - 9.5, y - 9.5, 19, 19);
-        g.save(); g.imageSmoothingEnabled = false; g.globalAlpha = has ? 1 : 0.16; g.drawImage(Art.S.keep[it.i], (x - 7.5) * s, (y - 7.5) * s, 15 * s, 15 * s); g.restore();
+        g.save(); g.scale(s, s); g.globalAlpha = has ? 1 : 0.18; Paint.keepsake(g, it.i, x, y, 1.25); g.restore();
       } else {
         if (on) frame(x - 9.5, y - 9.5, 19, 19);
         g.save(); g.translate(x * s, y * s); g.rotate(has ? Math.sin(t * 0.02 + it.i) * 0.12 : 0);
@@ -647,8 +545,8 @@ Scenes.list.vault = {
       }
     }
     g.save(); g.fillStyle = 'rgba(214,186,120,0.35)'; g.fillRect(24 * s, 146 * s, 336 * s, Math.max(1, s * 0.4)); g.restore();
-    u.text(`KEEPSAKES   ·   ${Object.keys(Game.shelf).length} OF ${KEEPS.length}`, 24, 154.5, 4.6, { color: '#d6ba78', align: 'left', ls: 1.6, title: true });
-    u.text(`WONDERS SEEN   ·   ${Object.keys(Game.sights).length} OF ${WONDERS.length}`, 211, 154.5, 4.6, { color: '#d6ba78', align: 'left', ls: 1.6, title: true });
+    u.text(`KEEPSAKES   ·   ${Object.keys(Game.shelf).length} OF ${KEEPS.length}`, 24, 154.5, 5.4, { color: '#d6ba78', align: 'left', ls: 1.3, title: true });
+    u.text(`WONDERS SEEN   ·   ${Object.keys(Game.sights).length} OF ${WONDERS.length}`, 211, 154.5, 5.4, { color: '#d6ba78', align: 'left', ls: 1.3, title: true });
     { // the one in hand
       const has = this.has(cur), d = cur.def, where = cur.kind === 'gem' ? GEM_WHERE[cur.i] : WONDERS[cur.i].where;
       const nm = cur.kind === 'gem' ? d.name : d.name, line = !has ? (cur.kind === 'wonder' ? `Not yet seen. It is out there, in ${where}.` : cur.kind === 'keep' ? `Not yet found. It is out there, in ${where}.` : where === 'the King' ? 'The Hoarder King has it.' : `Not yet found. It is out there, in ${where}.`)
@@ -657,23 +555,18 @@ Scenes.list.vault = {
       let fs = 6.2, lines = u.wrap(line, 350, fs, { italic: true }); if (lines.length > 2) { fs = 5.6; lines = u.wrap(line, 356, fs, { italic: true }); }
       lines.slice(0, 2).forEach((ln, i) => u.text(ln, 192, 195.5 + i * 7, fs, { color: has ? '#c8d2ee' : '#7884ac', italic: true }));
     }
-    u.text(Input.touch ? 'TAP TO CHOOSE   ·   TAP A DIAMOND TWICE TO STUDY IT   ·   TAP THE TITLE TO RETURN' : '← → ↑ ↓  CHOOSE   ·   ENTER  STUDY A DIAMOND   ·   ESC  RETURN', 192, 211, 4.4, { color: '#98a6cc', ls: 1.3, title: true });
+    u.text(Input.touch ? 'TAP TO CHOOSE   ·   TAP A DIAMOND TWICE TO STUDY IT   ·   TAP THE TITLE TO RETURN' : '← → ↑ ↓  CHOOSE   ·   ENTER  STUDY A DIAMOND   ·   ESC  RETURN', 192, 211, Input.touch ? 5.6 : 5, { color: '#98a6cc', ls: 1.1, title: true });
     if (this.open) drawGemCard(u, cur.def, t, clamp((t - this.ot) / 20, 0, 1), Input.touch ? 'TAP TO CLOSE' : 'ENTER TO CLOSE');
   }
 };
 
 /* ---------- Ending ---------- */
 const EPILOGUE = [
-  { s: 'The Hoarder King fell as such kings do: all at once, and surprised. His room had no windows. It was full of pebbles. He had guarded them for years.' },
-  { s: 'Beyond the mesa, on the red rock, in the dark: a lantern, and somebody singing the verse she had lost under the mountain. She has never asked where he learned it.' },
-  { s: 'His name was Mayank. He had walked from India on the word of a dream, which had promised him an elf queen in a distant land. He considers the dream broadly accurate.' },
-  { s: 'He says his lantern found her reflector first. She says she saw his lantern. We have stopped asking. They have gone everywhere since side by side, each quite sure of the way.' },
-  { s: 'In the sun the largest pebble was the Mountain of Light again. Ana kept it a fortnight, the usual loan. Then, there being no desk, she returned it upward, where every star can get at it.' },
-  { s: 'Then the long road home. At the top of Finland, Mayank asked what time the sun came up. “January,” said Ana.' },
-  { s: 'They came up our road at four in the afternoon, which in December is night. The last street lamp found her reflector first. Then a lantern, walking beside it.' },
-  { s: 'The Tonttu had kept her porridge warm the whole time. It was terrible. He found a second spoon without being asked. They ate all of it.' },
-  { s: '“An elf queen,” said the Tonttu. “Queen of what?” Mayank pointed up.' },
-  { s: 'It is on the sign at the gate now: STARLIGHT QUEEN. We used ink. The population above it we keep in pencil. She comes and goes.' }
+  { s: 'Under the armour there was hardly anyone. He had only wanted to be warm.' },
+  { s: 'Every stone he had shut away woke at once. Over the mesa the stars came back on, like a street when people come home.' },
+  { s: 'His name is Mayank. He walked from India on the word of a dream, which had promised him an elf queen in a distant land. Dreams, it turns out, can be trusted with directions.' },
+  { s: 'Ana did not keep the Mountain of Light. She held it up until the sky took it back. Then they went home the long way, which is the only way either of them knows.' },
+  { s: 'In Kaamos they leave the window open now. And when the children at the last fence ask who she is, the Tonttu says: “Her? That is the Starlight Queen. She is from here.”' }
 ];
 Scenes.list.ending = {
   enter() { this.t = 0; this.i = 0; this.pt = 0; this.gt = -1; Sound.music('dawn'); Sound.duck(false); Sound.setRate(1); this.g = Game.lastGrade || Game.grade(); },
@@ -710,7 +603,7 @@ Scenes.list.ending = {
       u.text(d, 178, y + 10, 7.2, { color: '#e6dcff', alpha: b, align: 'left', italic: true });
     });
     const perfect = G.n === GEMS.length && G.colour === 'D' && G.clarity[0] === 'FL' && G.cut === 'Excellent';
-    u.text(perfect ? 'A perfect stone. You looked at everything. That was the point.' : 'There is more out there to look at. The road will wait.', 268, 178, 7.6, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
+    u.text(perfect ? 'A perfect stone. You stopped, and looked at everything.' : 'There is more out there to look at. The road will wait.', 268, 178, 7.6, { color: '#fffbe8', italic: true, alpha: clamp((tt - 190) / 40, 0, 1) });
     u.text(Input.touch ? 'TAP TO RETURN' : 'ENTER TO RETURN TO THE TITLE', 268, 193, 5, { color: '#ffe9a8', alpha: clamp((tt - 220) / 40, 0, 1) * (0.6 + 0.4 * Math.sin(this.t * 0.1)), ls: 1.4, title: true });
   }
 };

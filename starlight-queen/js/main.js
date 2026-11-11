@@ -2,9 +2,8 @@
 /* Starlight Queen — boot, main loop, presentation (pixel buffer + crisp serif overlay text) */
 (() => {
   const cv = document.getElementById('game'), ctx = cv.getContext('2d');
-  const [buf, c] = mk(W, H);
-  const bcv = document.createElement('canvas'); bcv.width = 96; bcv.height = 54; const bx = bcv.getContext('2d');
-  let s = 1; // device pixels per game pixel
+  let s = 1; // device pixels per game unit
+  let quality = 1, slowFor = 0, gap = 16.7; // if frames come slowly, paint at a lower resolution rather than stutter
 
   const SERIF = '"EB Garamond","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L","Iowan Old Style",Georgia,"Times New Roman",serif';
   const TITLE = '"Cinzel","Trajan Pro","Palatino Linotype","Book Antiqua",Palatino,"URW Palladio L",Georgia,serif';
@@ -111,11 +110,10 @@
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
     const ww = window.innerWidth, wh = window.innerHeight;
-    let k = Math.min(ww / W, wh / H) * dpr; // device px per game px
-    if (k >= 2 && Math.floor(k) / k > 0.9) k = Math.floor(k); // integer scaling keeps pixels even, unless it wastes much screen
-    s = Math.max(1, Math.min(k, 5));
-    cv.width = Math.round(W * s); cv.height = Math.round(H * s);
-    const cssK = Math.min(ww / W, wh / H) >= 2 && k >= 2 && Math.floor(k) === k ? k / dpr : Math.min(ww / W, wh / H);
+    const cssK = Math.min(ww / W, wh / H);
+    s = Math.max(1, Math.min(cssK * dpr, 6.5) * quality); // device px per game unit: the picture is painted at the screen's own resolution, unless the machine cannot keep up
+    cv.width = Math.round(W * s); cv.height = Math.round(H * s); s = cv.width / W;
+    Paint.setScale(s);
     cv.style.width = (W * cssK) + 'px'; cv.style.height = (H * cssK) + 'px';
     dropCache();
     const vg = document.getElementById('vig'); if (vg) { vg.style.width = cv.style.width; vg.style.height = cv.style.height; }
@@ -127,16 +125,9 @@
   function frame() {
     const sc = Scenes.cur;
     if (!sc) return;
-    c.globalAlpha = 1; c.globalCompositeOperation = 'source-over';
-    sc.draw(c);
-    ctx.imageSmoothingEnabled = false;
-    ctx.globalAlpha = 1;
-    ctx.drawImage(buf, 0, 0, cv.width, cv.height);
-    // soft bloom: a small, contrast-boosted copy of the frame laid back over it
-    bx.globalCompositeOperation = 'source-over'; bx.drawImage(buf, 0, 0, 96, 54);
-    bx.globalCompositeOperation = 'multiply'; bx.drawImage(bcv, 0, 0); bx.drawImage(bcv, 0, 0); // keep only the brightest lights
-    ctx.save(); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high'; ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = sc.noBloom ? 0 : 0.13;
-    ctx.drawImage(bcv, 0, 0, cv.width, cv.height); ctx.restore();
+    ctx.setTransform(s, 0, 0, s, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+    sc.draw(ctx);
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
     if (sc.drawHi) sc.drawHi(UI);
     // soft vignette
     const mode = sc === Scenes.list.play && !World.card && !sc.paused ? 'play' : 'menu';
@@ -168,6 +159,10 @@
   let last = 0, acc = 0;
   function loop(now) {
     requestAnimationFrame(loop);
+    if (last && now - last < 200) { // watch the pace; a hidden or throttled tab is ignored
+      gap = gap * 0.92 + (now - last) * 0.08;
+      if (gap > 25 && quality > 0.4) { if (++slowFor > 50) { quality = quality > 0.75 ? 0.7 : quality > 0.55 ? 0.5 : 0.4; slowFor = 0; gap = 16.7; resize(); } } else slowFor = 0;
+    }
     if (!last) last = now;
     acc += Math.min(100, now - last); last = now;
     let n = 0;
@@ -183,7 +178,6 @@
     if (document.hidden && sc === Scenes.list.play && !sc.paused && World.state === 'play' && !World.player.dead && !World.card && !World.gemFx) { sc.paused = true; sc.armR = false; Sound.duck(true); }
   });
 
-  Art.init();
   Input.bindTouch();
   Input.onFirst(() => Sound.init());
   window.addEventListener('pointerdown', () => Sound.init());

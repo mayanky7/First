@@ -533,7 +533,7 @@ const Art = (() => {
     SKN.meads = { // midsummer småtroll in flower crowns
       goblin: re(G, { '#6fa044': '#c08a5a', '#4c7a30': '#93623a', '#3e5e28': '#6f4a2a', '#6b6258': '#4ea848', '#4a433c': '#3a8a3a' }, g => { R(g, 5, 0, 1, 1, '#ff6a8a'); R(g, 8, 0, 1, 1, '#ffe060'); R(g, 11, 1, 1, 1, '#ffffff'); R(g, 6, 1, 1, 1, '#ffffff'); })
     };
-    SKN.halls = { // knockers of the deep, in miners' lamps
+    SKN.halls = { // gruvrå, the mine-folk, in miners' lamps
       goblin: re(G, { '#6fa044': '#9aa0b6', '#4c7a30': '#6e748c', '#3e5e28': '#4c526a', '#6b6258': '#e8b830', '#4a433c': '#a8801c' }, g => { R(g, 7, 1, 3, 1, '#fffbe0'); })
     };
     SKN.canyon = {
@@ -547,7 +547,7 @@ const Art = (() => {
       }),
       wolf: re(Wf, { '#4b4a5c': '#b58c5c', '#33323f': '#80603a', '#6a697c': '#d6b480' }), // coyotes
       bat: re(Bt, white, beak), // gulls, out at sea
-      troll: re(Tr, { '#7d8291': '#7c5436', '#5b5f6d': '#573a22', '#9aa0b0': '#9c7048', '#5a3d28': '#573a22', '#6f8f52': '#9c7048' }) // sasquatch
+      troll: re(Tr, { '#7d8291': '#7c5436', '#5b5f6d': '#573a22', '#9aa0b0': '#9c7048', '#5a3d28': '#573a22', '#6f8f52': '#9c7048' }) // a canyon ogre
     };
     SKN.gloam = { // the Hoarder's own: cinder-things
       goblin: re(G, { '#6fa044': '#3c2c32', '#4c7a30': '#2a1c22', '#3e5e28': '#1e1418', '#ffe14a': '#ff7a20', '#6b6258': '#5a2018', '#4a433c': '#3a1410' }),

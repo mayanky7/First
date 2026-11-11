@@ -8,35 +8,34 @@ const REGIONS = [
     theme: 'north', cols: 232, title: 'Finland', sub: 'Kaamos, in the long winter night', map: 0,
     build(L) {
       L.g(0, 40, 3); L.start(3, 3);
-      L.sign(8, 3, 'Tonttu: “This is as far as I go. Reflector on the outside of the coat.|I’ll keep your porridge warm. It will be terrible by then.”');
-      L.sign(26, 3, 'The gate is shut. Hold up your reflector — [E].|It has no light of its own. It borrows the stars’.');
-      L.door(39, 3, 4, 'The last gate of Kaamos stands open.');
-      L.sign(36, 3, 'KAAMOS. Population 412. Mind the reindeer.|Someone has crossed out 412 and pencilled in 411. Already.');
+      L.sign(12, 3, 'Tonttu: “I’ll keep the porridge warm. Go.”');
+      L.sign(26, 3, '[E]  raise your hand to the stars');
+      L.door(39, 3, 8, 'The last gate of Kaamos stands open.');
+      
       L.s(13, 4, 4);
       L.b(20, 6, '?');
-      L.sign(23, 3, 'Hiisi. Small, spiteful, soon flattened. Leap on them.|The Tonttu has swept worse from under her bed.');
-      L.e('goblin', 28, 3);
-      L.b(31, 6, 'B?B'); L.b(32, 10, '?'); L.gem('first', 32, 13);
-      L.g(41, 47, 4); L.sign(45, 4, 'The Hoarder’s sacks were full and his cart was fast.|What he spilled, he never missed. You will.'); L.g(48, 57, 5); L.s(50, 6, 3); L.e('goblin', 53, 5);
-      L.g(58, 66, 3); L.sign(60, 3, 'The Tonttu’s quiver: starlight, caught on clear nights.|[X] looses an arrow. It refills in time. Most things do.');
       
-      L.g(70, 84, 3); L.b(74, 6, 'BSB'); L.e('goblin', 79, 3);
+      L.b(31, 5, '???'); L.b(32, 8, '?'); L.gem('first', 32, 11);
+      L.g(41, 47, 4); L.cp(43, 4); L.g(48, 57, 5); L.s(50, 6, 3); L.sign(55, 5, 'Under this drift something small and round sleeps till spring.'); L.e('goblin', 53, 5);
+      L.g(58, 66, 3); L.sign(60, 3, '[X]  loose a starlight arrow');
+      
+      L.g(70, 84, 3); L.b(74, 6, '?S?'); L.e('goblin', 79, 3);
       L.p(86, 4, 2); L.p(89, 5, 2); L.s(86, 6, 2); L.keep('himmeli', 90, 8);
-      L.g(93, 104, 3); L.sign(95, 3, 'Press [SPACE] again in the air, and hold,|to glide upon your cloak. It was a reading-blanket once.');
+      L.g(93, 104, 3); L.sign(95, 3, '[SPACE] in the air, and hold, to glide');
       L.g(100, 104, 5);
       L.arc(105, 8, 8);
       L.g(113, 146, 3); L.cp(98, 3);
-      L.b(119, 6, '?B?'); L.e('wolf', 127, 3); L.sign(117, 3, 'Wolves ahead. Hold [↓] and draw your cloak about you.|What the cloak covers, hungry things walk past.'); L.sign(123, 3, '♪ The lane goes round, the lane comes back,|but I have boots and a starlit pack.');
+      L.b(119, 6, '???'); L.e('wolf', 127, 3); L.sign(117, 3, 'Wolves. Hold [↓] and be still under your cloak.'); L.sign(123, 3, '♪ The lane goes round, the lane comes back,|but I have boots and a starlit pack.');
       L.g(128, 131, 4); L.g(132, 135, 5); L.g(136, 139, 6); L.wonder('fox', 137, 6); L.s(136, 7, 4);
       L.b(143, 6, 'H');
       L.g(150, 170, 3); L.e('goblin', 156, 3); 
-      L.b(160, 6, 'B?B'); L.b(161, 10, '?');
-      L.sign(152, 3, 'Small sparkles are melee — diamonds under a fifth of a carat.|Gather them. They set your Colour grade.');
+      L.b(160, 6, '???'); L.b(161, 10, '?');
+      
       L.p(172, 4, 3); L.p(177, 6, 3); L.p(181, 4, 3); L.s(172, 6, 3); L.s(181, 6, 3);
-      L.m(180, 9, 2); L.gem('cut', 181, 12); L.sign(186, 3, 'Old roads ran through the air here, once.|They are still there. They only want asking, with a light.');
+      L.m(180, 9, 2); L.gem('cut', 181, 12); 
       L.g(184, 231, 3); L.b(192, 6, '??'); L.e('wolf', 198, 3);
       L.g(204, 206, 4); L.g(207, 209, 5); L.g(210, 231, 6); L.s(204, 6, 6);
-      L.sign(214, 6, 'The last street lamp. Past it, we cannot see you.|Light the beacon. We should like to watch you get smaller.');
+      L.sign(214, 6, 'The last fence. Light the beacon, Ana.');
       L.beacon(221, 6, 'The beacon of Kaamos burns behind you');
     }
   },
@@ -44,7 +43,7 @@ const REGIONS = [
     theme: 'north', cols: 36, join: true,
     build(L) { // the frozen gulf
       L.liq(0, 35, 2); L.g(0, 2, 3);
-      L.sign(1, 3, 'The Gulf of Bothnia, breaking up for spring.|The ice that kept her in will carry her out.');
+      L.sign(1, 3, 'A cold thing crosses this ice at night. She only wants to be warm.');
       L.mp(4, 2, 3, 3, 0, 210); L.p(11, 2, 3); L.mp(15, 2, 3, 4, 0, 230, 0.5); L.p(23, 2, 2); L.mp(26, 2, 3, 4, 0, 190);
       L.s(11, 4, 3); L.gem('clarity', 17, 7); L.s(23, 4, 2); L.e('bat', 14, 9, { free: true });
       L.g(33, 35, 3);
@@ -54,11 +53,11 @@ const REGIONS = [
     theme: 'meads', cols: 252, title: 'Sweden', sub: 'The manic midsummer lands', map: 1, manic: 1.3,
     build(L) {
       L.g(0, 30, 3);
-      L.sign(4, 3, 'Sweden at midsummer. The sun will not set, and nor will she.|Nobody has told her yet that she may sit down.');
+      
       L.cp(7, 3);
       L.s(11, 4, 3); L.e('goblin', 17, 3);
       L.p(20, 5, 3); L.p(25, 8, 4); L.s(25, 10, 4); L.e('spider', 27, 8, { len: 4 });
-      L.g(31, 33, 5); L.g(34, 44, 3); L.e('wolf', 42, 3); L.b(37, 6, '?B?'); L.sign(35, 3, 'DANCE! EAT! LEAP! No sleeping till August!|(The management is sorry. The management is also dancing.)');
+      L.g(31, 33, 5); L.g(34, 44, 3); L.e('wolf', 42, 3); L.b(37, 6, '???'); L.sign(35, 3, 'DANCE! EAT! LEAP! No sleeping till August!');
       L.g(48, 70, 3);
       L.p(49, 5, 3); L.p(53, 8, 3); L.p(57, 11, 10); L.s(58, 13, 5); L.gem('colour', 65, 14);
       L.e('spider', 61, 11, { len: 8 }); L.e('goblin', 58, 3);
@@ -66,19 +65,19 @@ const REGIONS = [
       L.s(80, 6, 3);
       L.p(97, 4, 2); L.p(101, 5, 3); L.s(97, 6, 2); L.s(101, 7, 2);
       L.g(104, 125, 3); L.cp(106, 3);
-      L.sign(108, 3, 'Midsummer spiders spin from the high planks.|An arrow cuts the thread. They take it personally.');
+      
       L.p(107, 6, 2); L.p(110, 9, 12);
       L.e('spider', 113, 9, { len: 5 }); L.e('spider', 121, 9, { len: 5 });
       L.s(111, 4, 10); L.s(111, 11, 3); L.b(118, 13, 'S');
       L.g(126, 128, 5); L.g(129, 131, 7); L.s(129, 8, 2); L.keep('dala', 131, 9); L.wonder('frogs', 144, 3);
-      L.g(132, 150, 3); L.sign(148, 3, 'Is it Tuesday? Is it night? Nobody in Sweden knows.|You will miss this. Keep running.'); L.e('goblin', 135, 3); L.b(137, 6, '?B?B?');
+      L.g(132, 150, 3); L.b(137, 6, '?????');
       L.g(154, 156, 3); L.s(154, 5, 3);
       L.g(160, 180, 3); L.cp(161, 3); L.e('wolf', 166, 3);
       L.p(163, 6, 2); L.p(167, 9, 4); L.e('spider', 169, 9, { len: 5 }); L.s(167, 11, 4);
       L.g(181, 184, 5); L.g(185, 188, 7); L.g(189, 200, 9); L.e('goblin', 194, 9);
-      L.sign(196, 9, 'A long way down. Trust your cloak —|and look for what shines beneath it.');
+      
       L.arc(201, 11, 12); L.p(205, 4, 3); L.gem('pink', 206, 7);
-      L.g(213, 251, 3); L.sign(216, 3, 'A stove left on, a door unlatched — she almost turns back.|Then she remembers who keeps the house.'); L.e('goblin', 226, 3); L.b(222, 6, '?H?');
+      L.g(213, 251, 3); L.e('goblin', 226, 3); L.b(222, 6, '?H?');
       L.g(236, 238, 4); L.g(239, 251, 5); L.beacon(244, 5, 'The midsummer beacon burns');
     }
   },
@@ -88,30 +87,30 @@ const REGIONS = [
     build(L) {
       L.ceil(0, 251, 2);
       L.g(0, 18, 10);
-      L.door(5, 10, 4, 'The door into the deeps remembers how to open.');
-      L.sign(2, 10, 'A wall, and silver lines in it, almost.|Some doors only show themselves to starlight.');
-      L.sign(9, 10, 'The iron deeps of Kiruna. Every road goes under, once.|She stops singing here. She does not notice when.');
+      L.door(5, 10, 6, 'The door into the deeps remembers how to open.');
+      
+      L.sign(9, 10, '♪ The dark is deep, the dark is long, and —|She stops singing here.');
       L.torch(11, 10);
       L.g(19, 22, 8); L.g(23, 26, 6); L.g(27, 50, 4); L.s(20, 9, 2); L.s(24, 7, 2);
       L.ceil(27, 50, 4);
-      L.e('bat', 31, 15); L.e('goblin', 37, 4); L.b(38, 7, '?B?'); L.torch(34, 4); L.torch(47, 4);
+      L.e('bat', 31, 15); L.e('goblin', 37, 4); L.b(38, 7, '???'); L.torch(34, 4); L.torch(47, 4);
       L.liq(51, 58, 2); L.mp(51, 3, 3, 5, 0, 200); L.arc(52, 6, 6);
-      L.g(59, 75, 4); L.e('bat', 63, 15); L.e('goblin', 68, 4); L.torch(61, 4); L.torch(73, 4); L.b(65, 7, 'BHB');
+      L.g(59, 75, 4); L.e('bat', 63, 15); L.e('goblin', 68, 4); L.torch(61, 4); L.torch(73, 4); L.b(65, 7, '?H?');
       L.g(76, 78, 6); L.liq(79, 81, 2); L.g(82, 84, 7); L.liq(85, 87, 2); L.g(88, 90, 6); L.liq(91, 93, 2); L.keep('ore', 89, 8); L.wonder('undersky', 160, 12);
-      L.e('ember', 80, 2, { h: 7 }); L.e('ember', 92, 2, { h: 7 }); L.s(82, 8, 3);
+      L.s(82, 8, 3);
       L.g(94, 110, 4); L.cp(96, 4); L.torch(99, 4);
-      L.sign(101, 4, 'A troll holds the bridge. Leap upon it thrice —|or stand well back and be rude with arrows.');
+      
       L.ceil(94, 126, 5);
       L.liq(111, 124, 1); L.p(111, 3, 14); L.e('troll', 119, 4);
       L.g(125, 140, 4); L.b(129, 7, '?S?'); L.e('bat', 132, 14); L.torch(127, 4); L.torch(138, 4);
       L.g(141, 143, 6); L.g(144, 146, 8); L.g(147, 149, 10); L.g(150, 170, 12);
       L.s(141, 7, 3); L.s(144, 9, 3); L.s(147, 11, 3);
-      L.torch(151, 12); L.torch(168, 12); L.sign(164, 12, 'Something in the roof is waiting to be looked at.|Hold up the reflector — [E].'); L.sign(153, 12, 'This is how a diamond is made: carbon, pressure, time.|Nothing down here is wasted. Not even this.'); L.b(158, 15, '?');
+      L.torch(151, 12); L.torch(168, 12); L.b(158, 15, '?');
       L.gem('deep', 158, 17);
       L.g(171, 200, 5); L.e('troll', 181, 5); L.e('bat', 176, 14); L.spk(191, 193, 5); L.b(185, 8, '?H?');
       L.torch(177, 5); L.torch(197, 5); L.cp(173, 5);
       L.liq(201, 216, 2); L.mp(201, 4, 3, 4, 0, 200); L.mp(209, 4, 3, 5, 0, 200, 0.5); L.e('ember', 208, 2, { h: 8 });
-      L.g(217, 251, 5); L.sign(219, 5, 'The lamp ahead is the first in a long while.|These are the years that do not go in the letters home.'); L.e('goblin', 222, 5);
+      L.g(217, 251, 5); L.e('goblin', 222, 5);
       L.g(229, 231, 6); L.g(232, 234, 7); L.g(235, 251, 8); L.torch(237, 8); L.torch(247, 8);
       L.beacon(242, 8, 'The lamp of the deeps is kindled');
     }
@@ -121,11 +120,10 @@ const REGIONS = [
     build(L) { // the sea crossing
       L.liq(0, 61, 2);
       L.g(0, 4, 8); L.g(5, 7, 5); L.g(8, 11, 3);
-      L.sign(8, 3, 'The western sea. One raft, and no way to book a return.|Every map she ever owned ended here.');
+      
       L.cp(10, 3);
-      L.mp(12, 2, 5, 37, 0, 720);
+      L.mp(12, 2, 5, 37, 0, 1300);
       for (let i = 0; i < 5; i++) L.arc(16 + i * 7, 6, 4);
-      L.e('bat', 47, 9, { free: true });
       L.keep('compass', 34, 6); L.wonder('whale', 30, 3);
       L.g(54, 61, 3); L.sign(57, 3, '♪ The sea is wide, the raft is small,|and no one hears me sing at all.');
     }
@@ -135,28 +133,28 @@ const REGIONS = [
     build(L) {
       L.liq(0, 251, 1);
       L.g(0, 22, 3); L.cp(3, 3); L.cp(19, 3, true);
-      L.sign(6, 3, 'Port of entry. Purpose of visit: “Diamonds. Possibly a king.”|The form has no box for that. She ticks OTHER.');
-      L.sign(10, 3, 'They say there is a field in this country|where anyone may dig for diamonds, and keep what they find.');
+      
+      L.sign(10, 3, 'There is a field here where anyone may dig for diamonds.');
       L.b(16, 6, '?'); L.gemBlock('unclesam', 17, 6); L.b(18, 6, '?');
-      L.s(9, 4, 3); L.e('wraith', 30, 6); L.sign(21, 3, 'A lantern, already lit. She did not light it.|Somebody is walking this road from the other end.');
+      L.s(9, 4, 3); L.e('wraith', 30, 6); L.sign(21, 3, 'A lantern, already lit. She did not light it.');
       L.g(26, 34, 3); L.e('wolf', 31, 3);
       L.p(36, 2, 2); L.p(39, 2, 2); L.s(36, 4, 2); L.s(39, 4, 2); L.e('wraith', 41, 7);
-      L.g(43, 60, 3); L.sign(44, 3, 'Boot prints in the red dust, coming the other way.|Whoever it is takes small steps, and stops to look at things.'); L.b(47, 6, '?B?'); L.e('goblin', 49, 3); L.spk(53, 54, 3);
+      L.g(43, 60, 3); L.b(47, 6, '???'); L.e('goblin', 49, 3); L.spk(53, 54, 3);
       L.mp(61, 2, 3, 5, 0, 230);
       L.g(69, 80, 3); L.keep('quartz', 75, 7); L.wonder('arch', 204, 3); L.g(73, 76, 5); L.e('wolf', 78, 3); L.s(73, 6, 4);
       L.p(82, 5, 2); L.p(86, 7, 2); L.p(90, 5, 3); L.gem('dresden', 87, 11);
       L.e('wraith', 84, 3);
       L.g(93, 112, 3); L.cp(95, 3);
-      L.sign(98, 3, 'Dust-wraiths. They speak in the voices of Kaamos, kindly.|Stamping does nothing. Only light undoes them.');
+      L.sign(98, 3, 'Dust-wraiths. Only light undoes them.');
       L.b(101, 6, '?H?'); L.mark('canyonBack', 105, 3);
-      L.sign(107, 3, 'A tear in the afternoon. Through it: red earth, and tomorrow morning.|Hold up the reflector — [E] — and it will open. It is a long way round.');
+      
       L.warp(110, 3, 'ozArrive');
-      L.g(116, 118, 3); L.g(122, 124, 4); L.g(128, 140, 3); L.sign(129, 3, 'She dreams in a third language now. The jokes come last.|Tonight one arrives on time. She nearly weeps.'); L.e('wolf', 133, 3);
+      L.g(116, 118, 3); L.g(122, 124, 4); L.g(128, 140, 3); L.e('wolf', 133, 3);
       L.s(116, 5, 3); L.s(122, 6, 3);
       L.mp(141, 2, 3, 3, 0, 200); L.mp(147, 2, 3, 3, 0, 200, 0.5);
-      L.g(153, 170, 3); L.cp(155, 3); L.b(158, 6, 'BSB'); L.e('troll', 165, 3);
-      L.g(171, 173, 5); L.g(174, 176, 7); L.arc(177, 9, 5); L.m(181, 3, 4); L.gem('hope', 183, 6); L.e('wraith', 187, 8);
-      L.g(189, 215, 3); L.sign(190, 3, 'She posts a letter to Kaamos. A tonttu cannot read.|She writes anyway, and draws the canyon in the margin.'); L.e('wolf', 196, 3); L.spk(208, 209, 3); L.e('wraith', 212, 5);
+      L.g(153, 170, 3); L.cp(155, 3); L.b(158, 6, '?S?'); L.e('troll', 165, 3);
+      L.g(171, 173, 5); L.g(174, 176, 7); L.arc(177, 9, 5); L.m(177, 6, 12); L.gem('hope', 183, 10);
+      L.g(189, 215, 3); L.spk(210, 211, 3);
       L.b(198, 6, '?H?');
       L.g(219, 251, 3); L.e('goblin', 224, 3); L.g(232, 234, 4); L.g(235, 251, 5); L.beacon(242, 5, 'The canyon beacon burns');
     }
@@ -166,27 +164,26 @@ const REGIONS = [
     build(L) {
       L.liq(0, 231, 2);
       L.g(0, 20, 3);
-      L.sign(6, 3, 'The Hoarder’s mesa. Every great diamond he has taken|lies on this road. He has not looked at one in years.');
-      L.sign(11, 3, 'When the sky reddens, he is looking. Hold [↓]. Be a stone.|He has never once looked at a stone.');
-      L.e('goblin', 15, 3);
+      
+      L.sign(11, 3, 'When the sky reddens, he is looking. Hold [↓]. Be a stone.');
       L.g(23, 24, 3); L.e('ember', 21, 2, { h: 6 }); L.e('ember', 26, 2, { h: 6, ph: 0.5 });
-      L.g(27, 45, 3); L.sign(28, 3, 'The Mountain of Light came out of the ground in Golconda.|Everyone who has taken it since has called it a gift.'); L.e('troll', 38, 3); L.b(31, 6, '?H?');
+      L.g(27, 45, 3); L.e('troll', 38, 3); L.b(31, 6, '?H?');
       L.g(46, 48, 5); L.g(49, 51, 7); L.g(52, 70, 9); L.s(46, 6, 3); L.s(49, 8, 3);
       L.e('goblin', 55, 9); L.e('wraith', 66, 11); L.spk(62, 63, 9); L.sign(69, 9, '♪ The road goes west, the road goes far —|I’ll walk it home by a borrowed star.');
       L.mp(71, 8, 3, 2, 0, 180); L.mp(78, 8, 3, 2, 0, 180, 0.5); L.e('ember', 76, 2, { h: 10 }); L.arc(72, 12, 4); L.arc(79, 12, 4);
-      L.g(83, 100, 9); L.sign(98, 9, 'Carved in the rock: MINE. MINE. ALL THE LIGHT IS MINE.|Somebody has scratched underneath: “not for long.”'); L.cp(85, 9); L.e('troll', 93, 9); L.b(88, 12, '?S?');
-      L.g(101, 103, 11); L.g(104, 118, 13); L.keep('key', 111, 15); L.wonder('kings', 9, 3); L.sign(105, 13, 'On the wind, far ahead: somebody singing her walking song.|The verse she lost under the mountain. She walks faster.'); L.e('goblin', 108, 13); L.e('wraith', 116, 15);
+      L.g(83, 100, 9); L.cp(85, 9); L.e('troll', 93, 9); L.b(88, 12, '?S?');
+      L.g(101, 103, 11); L.g(104, 118, 13); L.keep('key', 111, 15); L.wonder('kings', 9, 3); L.sign(105, 13, 'Far ahead, on the wind: somebody is singing her song.'); L.e('goblin', 108, 13); L.e('wraith', 116, 15);
       L.p(120, 11, 2); L.m(123, 9, 4); L.p(128, 10, 2); L.mp(131, 9, 3, 4, 0, 190); L.p(138, 9, 2);
       L.s(120, 13, 2); L.s(128, 12, 2); L.gem('tiffany', 125, 13);
-      L.e('ember', 127, 2, { h: 11 }); L.e('ember', 136, 2, { h: 11, ph: 0.5 });
-      L.g(140, 165, 9); L.sign(143, 9, 'No lantern burns past here. Kaamos is very far away.|She laces her boots again, tighter.'); L.e('troll', 150, 9); L.b(146, 12, '?H?'); L.spk(161, 162, 9);
+      L.e('ember', 127, 2, { h: 11 });
+      L.g(140, 165, 9); L.e('troll', 150, 9); L.b(146, 12, '?H?'); L.spk(161, 162, 9);
       L.g(166, 168, 11); L.g(169, 231, 13); L.cp(172, 13);
-      L.sign(175, 13, 'The Hoarder King. He waited at a window once, too.|Nobody came, so he took. Strike when his fire dims.');
-      L.b(176, 16, 'BHB'); L.gem('cullinan', 177, 19); L.door(179, 13, 5, 'The last door. Beyond it, only him.'); L.arc(141, 11, 5); L.s(152, 10, 4);
+      L.sign(175, 13, 'The Hoarder King. Strike when his fire dims.');
+      L.b(175, 15, '?H?'); L.gem('cullinan', 176, 18); L.door(179, 13, 8, 'The last door. Beyond it, only him.'); L.arc(141, 11, 5); L.s(152, 10, 4);
       L.arena(181, 204, 13);
       L.sign(207, 13, '♪ The dark is deep, the dark is long,|and someone, somewhere, knows this song.');
       L.npc(211, 13);
-      L.beacon(216, 13, 'The last beacon burns', true);
+      L.beacon(226, 13, 'The last beacon burns', true);
     }
   },
   {
@@ -194,24 +191,24 @@ const REGIONS = [
     build(L) {
       L.liq(0, 155, 1);
       L.g(0, 60, 3); L.mark('ozArrive', 4, 3); L.cp(6, 3);
-      L.sign(9, 3, 'Australia. It is already tomorrow here.|Nothing she does in this place has happened yet.');
+      
       L.s(13, 4, 4); L.e('goblin', 19, 3);
-      L.sign(23, 3, 'Cane toads. Do not lick them.|People have. It went the way you would expect.');
+      L.sign(23, 3, 'Cane toads. Do not lick them.');
       L.p(27, 6, 4); L.e('spider', 29, 6, { len: 3 }); L.s(27, 8, 4);
-      L.sign(33, 3, 'Look up. The drop bear is a story told to visitors.|This one has not been told that it is a story.');
-      L.b(38, 6, '?H?'); L.e('wolf', 47, 3);
+      L.sign(33, 3, 'The drop bear is only a story. Look up anyway.');
+      L.b(38, 6, '?H?');
       L.wonder('cross', 52, 3);
       L.mp(61, 2, 3, 5, 0, 230); L.arc(62, 6, 6);
-      L.g(69, 100, 3); L.sign(71, 3, 'Magpie season. They remember faces.|Do not take it personally. Walk briskly.');
+      L.g(69, 100, 3); 
       L.e('bat', 78, 9, { free: true }); L.e('bat', 90, 9, { free: true });
-      L.b(84, 6, 'B?B'); L.keep('opal', 85, 10);
+      L.b(84, 5, '???'); L.keep('opal', 85, 9);
       L.g(96, 98, 5); L.g(99, 101, 7);
-      L.sign(100, 7, 'A long step into nothing. Hold up the reflector.|The oldest roads here were always sung, not built.');
+      
       L.m(102, 6, 9); L.gem('argyle', 106, 10); L.arc(103, 8, 6);
       L.g(111, 155, 3); L.e('wraith', 120, 6);
-      L.sign(116, 3, 'Min-min lights. They follow travellers over the plain by night.|It is morning. Nobody has told them.');
+      
       L.e('wolf', 132, 3); L.b(126, 6, '?S?'); L.s(136, 4, 5);
-      L.sign(143, 3, 'The tear in the afternoon, again. Through it: yesterday,|and the red rock, exactly as she left it.');
+      
       L.warp(148, 3, 'canyonBack');
     }
   }

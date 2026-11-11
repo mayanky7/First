@@ -2,21 +2,21 @@
 /* Starlight Queen — themes, parallax backdrops, scenery props, ambient particles */
 const THEMES = {
   north: {
-    id: 'north', food: 'Korvapuusti: a cinnamon bun. The name means “a slap on the ear”.', seed: 5, music: 'wood', dark: 0.2, darkCol: '8,14,44', amb: 'snow', pit: '#081030',
+    id: 'north', food: 'Korvapuusti. A cinnamon bun.', seed: 5, music: 'wood', dark: 0.2, darkCol: '8,14,44', amb: 'snow', pit: '#081030',
     tiles: { style: 'dirt', body: '#4c4760', dark: '#37334a', light: '#625c78', speck: '#7c7692', cap: '#eef4ff', capHi: '#ffffff', capDark: '#b4c6e8', capDots: '#d8e6ff',
       plat: '#8a6a4c', platHi: '#e8f0ff', platDark: '#5a4230', brick: '#7a6e86', brickHi: '#a096ac', brickDark: '#4c4458', spike: '#bfe0ff', spikeHi: '#ffffff' },
     liquid: { top: '#e4f8ff', body: '#3f74a8', deep: '#1f3f72', glow: null },
     scatter: [['snowtuft', 0.3], ['rock', 0.08], ['frostgrass', 0.2]], trees: 'spruce'
   },
   canyon: {
-    id: 'canyon', food: 'Apple pie, still warm. As American as it gets.', seed: 61, music: 'canyon', dark: 0, amb: 'pollen', pit: '#3a1220',
+    id: 'canyon', food: 'Apple pie, still warm.', seed: 61, music: 'canyon', dark: 0, amb: 'pollen', pit: '#3a1220',
     tiles: { style: 'dirt', body: '#a8502e', dark: '#7e361c', light: '#c46c3e', speck: '#dc9258', cap: '#eab474', capHi: '#ffe0a0', capDark: '#b46e38', capDots: '#fff0c0',
       plat: '#8e5c36', platHi: '#c08a58', platDark: '#5e3a20', brick: '#c0704a', brickHi: '#e09a70', brickDark: '#863e24', spike: '#5a7a3a', spikeHi: '#d8e8a0' },
     liquid: { top: '#c8f4ee', body: '#2f97a2', deep: '#1c5c74', glow: null },
     scatter: [['drygrass', 0.3], ['cactus', 0.06], ['skull', 0.03], ['rock', 0.1]], trees: 'saguaro'
   },
   meads: {
-    id: 'meads', food: 'Midsummer strawberries, the first of the year, with cream.', seed: 11, music: 'meads', dark: 0, amb: 'pollen', pit: '#14264a',
+    id: 'meads', food: 'Midsummer strawberries and cream.', seed: 11, music: 'meads', dark: 0, amb: 'pollen', pit: '#14264a',
     tiles: { style: 'dirt', body: '#8a5a34', dark: '#6e4426', light: '#a06c40', speck: '#b8946a', cap: '#58b848', capHi: '#9ee86a', capDark: '#3a8a38', capDots: '#ffe870',
       plat: '#b07c44', platHi: '#d8a468', platDark: '#7a5028', brick: '#b8825a', brickHi: '#d8a67c', brickDark: '#7c5234', spike: '#c8c8d0', spikeHi: '#ffffff' },
     liquid: { top: '#7fd0ff', body: '#3a8ad8', deep: '#2a5eb0', glow: null },
@@ -30,11 +30,11 @@ const THEMES = {
     scatter: [['fern', 0.3], ['mushroom', 0.14], ['grass', 0.3], ['flower', 0.08]], trees: 'elder'
   },
   halls: {
-    id: 'halls', food: 'Boiled coffee, with cheese in it. The north is like that.', seed: 37, music: 'halls', dark: 0.56, darkCol: '4,5,14', amb: 'dust',
+    id: 'halls', food: 'Boiled coffee, with cheese in it.', seed: 37, music: 'halls', dark: 0.56, darkCol: '4,5,14', amb: 'dust',
     tiles: { style: 'brick', body: '#555a74', dark: '#383c52', light: '#6e7492', speck: '#a8552e', cap: '#6f7590', capHi: '#9aa2c0', capDark: '#3d4156',
       plat: '#6a6f86', platHi: '#9aa2c0', platDark: '#3d4156', platStyle: 'stone', brick: '#5a5266', brickHi: '#7c7290', brickDark: '#3a3446', spike: '#8a8fa6', spikeHi: '#e0e4f4' },
-    liquid: { top: '#ffe070', body: '#ff7a18', deep: '#c83808', glow: '#ff6a10' },
-    scatter: [['crystal', 0.07], ['bones', 0.06], ['rubble', 0.2]], trees: null
+    liquid: { top: '#cfe8ff', body: '#2f5c9a', deep: '#14285a', glow: null }, // flooded shafts
+    scatter: [['crystal', 0.07], ['rubble', 0.2]], trees: null
   },
   fens: {
     id: 'fens', food: 'Honeycake.', seed: 41, music: 'fens', dark: 0.5, darkCol: '6,12,24', amb: 'mist',
@@ -44,14 +44,14 @@ const THEMES = {
     scatter: [['reeds', 0.3], ['skull', 0.05], ['grass', 0.25], ['deadbush', 0.08]], trees: 'dead'
   },
   oz: {
-    id: 'oz', food: 'A lamington: sponge, chocolate, coconut. Tomorrow’s morning tea.', seed: 71, music: 'oz', dark: 0, amb: 'pollen', pit: '#3a140c',
+    id: 'oz', food: 'A lamington.', seed: 71, music: 'oz', dark: 0, amb: 'pollen', pit: '#3a140c',
     tiles: { style: 'dirt', body: '#b4401c', dark: '#862a10', light: '#d05a2a', speck: '#e88a4a', cap: '#d8b458', capHi: '#f6e08e', capDark: '#a8782e', capDots: '#fff4c8',
       plat: '#9a6a44', platHi: '#d0a070', platDark: '#62402a', brick: '#c86a3a', brickHi: '#e8946a', brickDark: '#8a3a1c', spike: '#7a8a4a', spikeHi: '#e0e8a8' },
     liquid: { top: '#d0f0e0', body: '#3f9488', deep: '#1e5c5c', glow: null },
     scatter: [['spinifex', 0.3], ['termite', 0.05], ['rock', 0.07], ['wattle', 0.07]], trees: 'gum'
   },
   gloam: {
-    id: 'gloam', food: 'Cornbread. Somebody down here can still bake.', seed: 53, music: 'gloam', dark: 0.34, darkCol: '20,2,2', amb: 'ash', gaze: true,
+    id: 'gloam', food: 'Cornbread.', seed: 53, music: 'gloam', dark: 0.34, darkCol: '20,2,2', amb: 'ash', gaze: true,
     tiles: { style: 'rock', body: '#2e2630', dark: '#1e181f', light: '#40363f', speck: '#ff6a20', cap: '#5a5058', capHi: '#8a7e84', capDark: '#241c24',
       plat: '#4a4048', platHi: '#7a6e74', platDark: '#241c24', platStyle: 'stone', brick: '#4a2e2e', brickHi: '#6e4444', brickDark: '#2a1818', spike: '#d8d2c8', spikeHi: '#ff7a2a' },
     liquid: { top: '#fff0a0', body: '#ff6a10', deep: '#b82800', glow: '#ff5a10' },
@@ -106,7 +106,7 @@ const Backdrop = (() => {
       }
       aug.globalAlpha = 1;
     }
-    c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = alpha === undefined ? 1 : alpha; c.imageSmoothingEnabled = false;
+    c.save(); c.globalCompositeOperation = 'lighter'; c.globalAlpha = alpha === undefined ? 1 : alpha; c.imageSmoothingEnabled = true;
     c.drawImage(auc, 0, y || 0, W, 96); c.restore();
   }
   function layer(fn) { const [cv, g] = mk(LW, H); fn(g); return cv; }

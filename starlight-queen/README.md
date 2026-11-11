@@ -62,7 +62,7 @@ a midsummer dance in Sweden, the Under-Sky in the Kiruna mine, a whale at sea, a
 in the red rock, the Stone Kings, and the Southern Cross.
 
 **Seven keepsakes**, one small true thing from each land, and each land's own food and
-creatures: småtroll and knockers, coyotes and jackalopes, cane toads, magpies and one drop bear.
+creatures: småtroll and mine-folk, coyotes and jackalopes, cane toads, magpies and one drop bear.
 
 Everything found stays in the **Vault**. At the end the journey is graded like a stone on its
 four Cs: **carat** (diamonds carried), **colour** (melee gathered), **clarity** (wonders seen)
