@@ -1,0 +1,3050 @@
+{
+ "schema": 1,
+ "id": "starlight-queen",
+ "template": "road-west",
+ "title": "Starlight Queen",
+ "subtitle": "Ana & the Mountain of Light",
+ "titleLines": [
+  "STARLIGHT",
+  "QUEEN"
+ ],
+ "hero": "Ana",
+ "companion": "Mayank",
+ "speakers": [
+  "Tonttu",
+  "Mayank"
+ ],
+ "finalGem": "kohinoor",
+ "regions": [
+  {
+   "theme": "north",
+   "cols": 232,
+   "title": "Finland",
+   "sub": "Kaamos, in the winter that did not end",
+   "map": 0,
+   "ops": [
+    [
+     "g",
+     0,
+     40,
+     3
+    ],
+    [
+     "start",
+     3,
+     3
+    ],
+    [
+     "sign",
+     12,
+     3,
+     "Tonttu: “Bring the summer back. I’ll keep the porridge warm.”"
+    ],
+    [
+     "door",
+     39,
+     3,
+     8,
+     "The last gate of Kaamos stands open."
+    ],
+    [
+     "s",
+     13,
+     4,
+     4
+    ],
+    [
+     "b",
+     20,
+     6,
+     "?"
+    ],
+    [
+     "b",
+     31,
+     5,
+     "???"
+    ],
+    [
+     "b",
+     32,
+     8,
+     "?"
+    ],
+    [
+     "gem",
+     "first",
+     32,
+     11
+    ],
+    [
+     "g",
+     41,
+     47,
+     4
+    ],
+    [
+     "cp",
+     43,
+     4
+    ],
+    [
+     "g",
+     48,
+     57,
+     5
+    ],
+    [
+     "s",
+     50,
+     6,
+     3
+    ],
+    [
+     "sign",
+     49,
+     5,
+     "[X]  loose a starlight arrow"
+    ],
+    [
+     "g",
+     58,
+     66,
+     3
+    ],
+    [
+     "e",
+     "goblin",
+     62,
+     3
+    ],
+    [
+     "g",
+     70,
+     84,
+     3
+    ],
+    [
+     "b",
+     74,
+     6,
+     "?S?"
+    ],
+    [
+     "e",
+     "goblin",
+     79,
+     3
+    ],
+    [
+     "p",
+     86,
+     4,
+     2
+    ],
+    [
+     "p",
+     89,
+     5,
+     2
+    ],
+    [
+     "s",
+     86,
+     6,
+     2
+    ],
+    [
+     "keep",
+     "himmeli",
+     90,
+     8
+    ],
+    [
+     "g",
+     93,
+     104,
+     3
+    ],
+    [
+     "sign",
+     95,
+     3,
+     "[SPACE] in the air, and hold, to glide"
+    ],
+    [
+     "g",
+     100,
+     104,
+     5
+    ],
+    [
+     "arc",
+     105,
+     8,
+     8
+    ],
+    [
+     "g",
+     113,
+     146,
+     3
+    ],
+    [
+     "cp",
+     98,
+     3
+    ],
+    [
+     "b",
+     119,
+     6,
+     "???"
+    ],
+    [
+     "e",
+     "wolf",
+     127,
+     3
+    ],
+    [
+     "sign",
+     117,
+     3,
+     "Wolves. Hold [↓] and be still under your cloak."
+    ],
+    [
+     "sign",
+     123,
+     3,
+     "♪ The lane goes round, the lane comes back,|but I have boots and a starlit pack."
+    ],
+    [
+     "g",
+     128,
+     131,
+     4
+    ],
+    [
+     "g",
+     132,
+     135,
+     5
+    ],
+    [
+     "g",
+     136,
+     139,
+     6
+    ],
+    [
+     "wonder",
+     "fox",
+     137,
+     6
+    ],
+    [
+     "s",
+     136,
+     7,
+     4
+    ],
+    [
+     "b",
+     143,
+     6,
+     "H"
+    ],
+    [
+     "g",
+     150,
+     170,
+     3
+    ],
+    [
+     "e",
+     "goblin",
+     156,
+     3
+    ],
+    [
+     "b",
+     160,
+     6,
+     "???"
+    ],
+    [
+     "b",
+     161,
+     10,
+     "?"
+    ],
+    [
+     "p",
+     172,
+     4,
+     3
+    ],
+    [
+     "p",
+     177,
+     6,
+     3
+    ],
+    [
+     "p",
+     181,
+     4,
+     3
+    ],
+    [
+     "s",
+     172,
+     6,
+     3
+    ],
+    [
+     "s",
+     181,
+     6,
+     3
+    ],
+    [
+     "m",
+     180,
+     9,
+     2
+    ],
+    [
+     "gem",
+     "cut",
+     181,
+     12
+    ],
+    [
+     "g",
+     184,
+     231,
+     3
+    ],
+    [
+     "b",
+     192,
+     6,
+     "??"
+    ],
+    [
+     "sign",
+     188,
+     3,
+     "Under this drift something small and round sleeps till spring."
+    ],
+    [
+     "e",
+     "wolf",
+     198,
+     3
+    ],
+    [
+     "g",
+     204,
+     206,
+     4
+    ],
+    [
+     "g",
+     207,
+     209,
+     5
+    ],
+    [
+     "g",
+     210,
+     231,
+     6
+    ],
+    [
+     "s",
+     204,
+     6,
+     6
+    ],
+    [
+     "sign",
+     214,
+     6,
+     "The last fence. Light the beacon, Ana."
+    ],
+    [
+     "beacon",
+     221,
+     6,
+     "The beacon of Kaamos burns behind you"
+    ]
+   ]
+  },
+  {
+   "theme": "north",
+   "cols": 36,
+   "join": true,
+   "ops": [
+    [
+     "liq",
+     0,
+     35,
+     2
+    ],
+    [
+     "g",
+     0,
+     2,
+     3
+    ],
+    [
+     "sign",
+     1,
+     3,
+     "A cold thing crosses this ice at night. She only wants to be warm."
+    ],
+    [
+     "mp",
+     4,
+     2,
+     3,
+     3,
+     0,
+     210
+    ],
+    [
+     "p",
+     11,
+     2,
+     3
+    ],
+    [
+     "mp",
+     15,
+     2,
+     3,
+     4,
+     0,
+     230,
+     0.5
+    ],
+    [
+     "p",
+     23,
+     2,
+     2
+    ],
+    [
+     "mp",
+     26,
+     2,
+     3,
+     4,
+     0,
+     190
+    ],
+    [
+     "s",
+     11,
+     4,
+     3
+    ],
+    [
+     "gem",
+     "clarity",
+     17,
+     7
+    ],
+    [
+     "s",
+     23,
+     4,
+     2
+    ],
+    [
+     "e",
+     "bat",
+     14,
+     9,
+     {
+      "free": true
+     }
+    ],
+    [
+     "g",
+     33,
+     35,
+     3
+    ]
+   ]
+  },
+  {
+   "theme": "meads",
+   "cols": 252,
+   "title": "Sweden",
+   "sub": "The manic lands of the last midsummer",
+   "map": 1,
+   "manic": 1.3,
+   "ops": [
+    [
+     "g",
+     0,
+     30,
+     3
+    ],
+    [
+     "cp",
+     7,
+     3
+    ],
+    [
+     "s",
+     11,
+     4,
+     3
+    ],
+    [
+     "e",
+     "goblin",
+     17,
+     3
+    ],
+    [
+     "p",
+     20,
+     5,
+     3
+    ],
+    [
+     "p",
+     25,
+     8,
+     4
+    ],
+    [
+     "s",
+     25,
+     10,
+     4
+    ],
+    [
+     "e",
+     "spider",
+     27,
+     8,
+     {
+      "len": 4
+     }
+    ],
+    [
+     "g",
+     31,
+     33,
+     5
+    ],
+    [
+     "g",
+     34,
+     44,
+     3
+    ],
+    [
+     "e",
+     "wolf",
+     42,
+     3
+    ],
+    [
+     "b",
+     37,
+     6,
+     "???"
+    ],
+    [
+     "sign",
+     35,
+     3,
+     "DANCE! EAT! LEAP! If we stop, the summer will leave!"
+    ],
+    [
+     "g",
+     48,
+     70,
+     3
+    ],
+    [
+     "p",
+     49,
+     5,
+     3
+    ],
+    [
+     "p",
+     53,
+     8,
+     3
+    ],
+    [
+     "p",
+     57,
+     11,
+     10
+    ],
+    [
+     "s",
+     58,
+     13,
+     5
+    ],
+    [
+     "gem",
+     "colour",
+     65,
+     14
+    ],
+    [
+     "e",
+     "spider",
+     61,
+     11,
+     {
+      "len": 8
+     }
+    ],
+    [
+     "e",
+     "goblin",
+     58,
+     3
+    ],
+    [
+     "g",
+     75,
+     95,
+     3
+    ],
+    [
+     "g",
+     80,
+     82,
+     5
+    ],
+    [
+     "p",
+     84,
+     9,
+     3
+    ],
+    [
+     "e",
+     "spider",
+     85,
+     9,
+     {
+      "len": 4
+     }
+    ],
+    [
+     "b",
+     88,
+     6,
+     "?H?"
+    ],
+    [
+     "s",
+     80,
+     6,
+     3
+    ],
+    [
+     "p",
+     97,
+     4,
+     2
+    ],
+    [
+     "p",
+     101,
+     5,
+     3
+    ],
+    [
+     "s",
+     97,
+     6,
+     2
+    ],
+    [
+     "s",
+     101,
+     7,
+     2
+    ],
+    [
+     "g",
+     104,
+     125,
+     3
+    ],
+    [
+     "cp",
+     106,
+     3
+    ],
+    [
+     "p",
+     107,
+     6,
+     2
+    ],
+    [
+     "p",
+     110,
+     9,
+     12
+    ],
+    [
+     "e",
+     "spider",
+     113,
+     9,
+     {
+      "len": 5
+     }
+    ],
+    [
+     "e",
+     "spider",
+     121,
+     9,
+     {
+      "len": 5
+     }
+    ],
+    [
+     "s",
+     111,
+     4,
+     10
+    ],
+    [
+     "s",
+     111,
+     11,
+     3
+    ],
+    [
+     "b",
+     118,
+     13,
+     "S"
+    ],
+    [
+     "g",
+     126,
+     128,
+     5
+    ],
+    [
+     "g",
+     129,
+     131,
+     7
+    ],
+    [
+     "s",
+     129,
+     8,
+     2
+    ],
+    [
+     "keep",
+     "dala",
+     131,
+     9
+    ],
+    [
+     "wonder",
+     "frogs",
+     144,
+     3
+    ],
+    [
+     "g",
+     132,
+     150,
+     3
+    ],
+    [
+     "b",
+     133,
+     6,
+     "???"
+    ],
+    [
+     "g",
+     154,
+     156,
+     3
+    ],
+    [
+     "s",
+     154,
+     5,
+     3
+    ],
+    [
+     "g",
+     160,
+     180,
+     3
+    ],
+    [
+     "cp",
+     161,
+     3
+    ],
+    [
+     "e",
+     "wolf",
+     166,
+     3
+    ],
+    [
+     "p",
+     163,
+     6,
+     2
+    ],
+    [
+     "p",
+     167,
+     9,
+     4
+    ],
+    [
+     "e",
+     "spider",
+     169,
+     9,
+     {
+      "len": 5
+     }
+    ],
+    [
+     "s",
+     167,
+     11,
+     4
+    ],
+    [
+     "g",
+     181,
+     184,
+     5
+    ],
+    [
+     "g",
+     185,
+     188,
+     7
+    ],
+    [
+     "g",
+     189,
+     200,
+     9
+    ],
+    [
+     "e",
+     "goblin",
+     194,
+     9
+    ],
+    [
+     "arc",
+     201,
+     11,
+     12
+    ],
+    [
+     "p",
+     205,
+     4,
+     3
+    ],
+    [
+     "gem",
+     "pink",
+     206,
+     7
+    ],
+    [
+     "g",
+     213,
+     251,
+     3
+    ],
+    [
+     "e",
+     "goblin",
+     226,
+     3
+    ],
+    [
+     "b",
+     222,
+     6,
+     "?H?"
+    ],
+    [
+     "g",
+     236,
+     238,
+     4
+    ],
+    [
+     "g",
+     239,
+     251,
+     5
+    ],
+    [
+     "beacon",
+     244,
+     5,
+     "The midsummer beacon burns"
+    ]
+   ]
+  },
+  {
+   "theme": "meads",
+   "cols": 8,
+   "join": true,
+   "ops": [
+    [
+     "g",
+     0,
+     3,
+     7
+    ],
+    [
+     "g",
+     4,
+     7,
+     9
+    ],
+    [
+     "s",
+     1,
+     8,
+     2
+    ]
+   ]
+  },
+  {
+   "theme": "halls",
+   "cols": 252,
+   "title": "Sweden",
+   "sub": "The iron deeps of Kiruna",
+   "map": 2,
+   "roof": 2,
+   "ops": [
+    [
+     "ceil",
+     0,
+     251,
+     2
+    ],
+    [
+     "g",
+     0,
+     18,
+     10
+    ],
+    [
+     "door",
+     5,
+     10,
+     6,
+     "The door into the deeps remembers how to open."
+    ],
+    [
+     "sign",
+     9,
+     10,
+     "♪ The dark is deep, the dark is long, and —|She stops singing here."
+    ],
+    [
+     "torch",
+     11,
+     10
+    ],
+    [
+     "g",
+     19,
+     22,
+     8
+    ],
+    [
+     "g",
+     23,
+     26,
+     6
+    ],
+    [
+     "g",
+     27,
+     50,
+     4
+    ],
+    [
+     "s",
+     20,
+     9,
+     2
+    ],
+    [
+     "s",
+     24,
+     7,
+     2
+    ],
+    [
+     "ceil",
+     27,
+     50,
+     4
+    ],
+    [
+     "e",
+     "bat",
+     31,
+     15
+    ],
+    [
+     "e",
+     "goblin",
+     37,
+     4
+    ],
+    [
+     "b",
+     38,
+     7,
+     "???"
+    ],
+    [
+     "torch",
+     34,
+     4
+    ],
+    [
+     "torch",
+     47,
+     4
+    ],
+    [
+     "liq",
+     51,
+     58,
+     2
+    ],
+    [
+     "mp",
+     51,
+     3,
+     3,
+     5,
+     0,
+     200
+    ],
+    [
+     "arc",
+     52,
+     6,
+     6
+    ],
+    [
+     "g",
+     59,
+     75,
+     4
+    ],
+    [
+     "e",
+     "bat",
+     63,
+     15
+    ],
+    [
+     "e",
+     "goblin",
+     68,
+     4
+    ],
+    [
+     "torch",
+     61,
+     4
+    ],
+    [
+     "torch",
+     73,
+     4
+    ],
+    [
+     "b",
+     65,
+     7,
+     "?H?"
+    ],
+    [
+     "g",
+     76,
+     78,
+     6
+    ],
+    [
+     "liq",
+     79,
+     81,
+     2
+    ],
+    [
+     "g",
+     82,
+     84,
+     7
+    ],
+    [
+     "liq",
+     85,
+     87,
+     2
+    ],
+    [
+     "g",
+     88,
+     90,
+     6
+    ],
+    [
+     "liq",
+     91,
+     93,
+     2
+    ],
+    [
+     "keep",
+     "ore",
+     89,
+     8
+    ],
+    [
+     "wonder",
+     "undersky",
+     160,
+     12
+    ],
+    [
+     "s",
+     82,
+     8,
+     3
+    ],
+    [
+     "g",
+     94,
+     110,
+     4
+    ],
+    [
+     "cp",
+     96,
+     4
+    ],
+    [
+     "torch",
+     99,
+     4
+    ],
+    [
+     "ceil",
+     94,
+     126,
+     5
+    ],
+    [
+     "liq",
+     111,
+     124,
+     1
+    ],
+    [
+     "p",
+     111,
+     3,
+     14
+    ],
+    [
+     "e",
+     "troll",
+     119,
+     4
+    ],
+    [
+     "g",
+     125,
+     140,
+     4
+    ],
+    [
+     "b",
+     129,
+     7,
+     "?S?"
+    ],
+    [
+     "e",
+     "bat",
+     132,
+     14
+    ],
+    [
+     "torch",
+     127,
+     4
+    ],
+    [
+     "torch",
+     138,
+     4
+    ],
+    [
+     "g",
+     141,
+     143,
+     6
+    ],
+    [
+     "g",
+     144,
+     146,
+     8
+    ],
+    [
+     "g",
+     147,
+     149,
+     10
+    ],
+    [
+     "g",
+     150,
+     170,
+     12
+    ],
+    [
+     "s",
+     141,
+     7,
+     3
+    ],
+    [
+     "s",
+     144,
+     9,
+     3
+    ],
+    [
+     "s",
+     147,
+     11,
+     3
+    ],
+    [
+     "torch",
+     151,
+     12
+    ],
+    [
+     "torch",
+     168,
+     12
+    ],
+    [
+     "b",
+     152,
+     15,
+     "?"
+    ],
+    [
+     "gem",
+     "deep",
+     152,
+     17
+    ],
+    [
+     "g",
+     171,
+     200,
+     5
+    ],
+    [
+     "e",
+     "troll",
+     181,
+     5
+    ],
+    [
+     "e",
+     "bat",
+     176,
+     14
+    ],
+    [
+     "spk",
+     191,
+     193,
+     5
+    ],
+    [
+     "b",
+     185,
+     8,
+     "?H?"
+    ],
+    [
+     "torch",
+     177,
+     5
+    ],
+    [
+     "torch",
+     197,
+     5
+    ],
+    [
+     "cp",
+     173,
+     5
+    ],
+    [
+     "liq",
+     201,
+     216,
+     2
+    ],
+    [
+     "mp",
+     201,
+     4,
+     3,
+     4,
+     0,
+     200
+    ],
+    [
+     "mp",
+     209,
+     4,
+     3,
+     5,
+     0,
+     200,
+     0.5
+    ],
+    [
+     "e",
+     "ember",
+     208,
+     2,
+     {
+      "h": 8
+     }
+    ],
+    [
+     "g",
+     217,
+     251,
+     5
+    ],
+    [
+     "e",
+     "goblin",
+     222,
+     5
+    ],
+    [
+     "g",
+     229,
+     231,
+     6
+    ],
+    [
+     "g",
+     232,
+     234,
+     7
+    ],
+    [
+     "g",
+     235,
+     251,
+     8
+    ],
+    [
+     "torch",
+     237,
+     8
+    ],
+    [
+     "torch",
+     247,
+     8
+    ],
+    [
+     "beacon",
+     242,
+     8,
+     "The lamp of the deeps is kindled"
+    ]
+   ]
+  },
+  {
+   "theme": "sea",
+   "cols": 62,
+   "title": "The Western Sea",
+   "sub": "Every map she owned ended here",
+   "map": 3,
+   "ops": [
+    [
+     "liq",
+     0,
+     61,
+     2
+    ],
+    [
+     "g",
+     0,
+     4,
+     8
+    ],
+    [
+     "g",
+     5,
+     7,
+     5
+    ],
+    [
+     "g",
+     8,
+     11,
+     3
+    ],
+    [
+     "cp",
+     10,
+     3
+    ],
+    [
+     "mp",
+     12,
+     2,
+     5,
+     37,
+     0,
+     1300
+    ],
+    [
+     "mp",
+     12,
+     2,
+     5,
+     37,
+     0,
+     1300,
+     0.5
+    ],
+    [
+     "arc",
+     16,
+     6,
+     4
+    ],
+    [
+     "arc",
+     23,
+     6,
+     4
+    ],
+    [
+     "arc",
+     30,
+     6,
+     4
+    ],
+    [
+     "arc",
+     37,
+     6,
+     4
+    ],
+    [
+     "arc",
+     44,
+     6,
+     4
+    ],
+    [
+     "keep",
+     "compass",
+     34,
+     6
+    ],
+    [
+     "wonder",
+     "whale",
+     30,
+     3
+    ],
+    [
+     "g",
+     54,
+     61,
+     3
+    ],
+    [
+     "sign",
+     57,
+     3,
+     "♪ The sea is wide, the raft is small,|and no one hears me sing at all."
+    ]
+   ]
+  },
+  {
+   "theme": "canyon",
+   "cols": 252,
+   "title": "United States",
+   "sub": "A far country of red rock and frost",
+   "map": 3,
+   "ops": [
+    [
+     "liq",
+     0,
+     251,
+     1
+    ],
+    [
+     "g",
+     0,
+     22,
+     3
+    ],
+    [
+     "cp",
+     3,
+     3
+    ],
+    [
+     "cp",
+     19,
+     3,
+     true
+    ],
+    [
+     "sign",
+     10,
+     3,
+     "There is a field here where anyone may dig for diamonds."
+    ],
+    [
+     "b",
+     16,
+     6,
+     "?"
+    ],
+    [
+     "gemBlock",
+     "unclesam",
+     17,
+     6
+    ],
+    [
+     "b",
+     18,
+     6,
+     "?"
+    ],
+    [
+     "s",
+     9,
+     4,
+     3
+    ],
+    [
+     "e",
+     "wraith",
+     30,
+     6
+    ],
+    [
+     "g",
+     26,
+     34,
+     3
+    ],
+    [
+     "e",
+     "wolf",
+     31,
+     3
+    ],
+    [
+     "p",
+     36,
+     2,
+     2
+    ],
+    [
+     "p",
+     39,
+     2,
+     2
+    ],
+    [
+     "s",
+     36,
+     4,
+     2
+    ],
+    [
+     "s",
+     39,
+     4,
+     2
+    ],
+    [
+     "e",
+     "wraith",
+     41,
+     7
+    ],
+    [
+     "g",
+     43,
+     60,
+     3
+    ],
+    [
+     "b",
+     47,
+     6,
+     "???"
+    ],
+    [
+     "e",
+     "goblin",
+     49,
+     3
+    ],
+    [
+     "spk",
+     53,
+     54,
+     3
+    ],
+    [
+     "mp",
+     61,
+     2,
+     3,
+     5,
+     0,
+     230
+    ],
+    [
+     "g",
+     69,
+     80,
+     3
+    ],
+    [
+     "keep",
+     "quartz",
+     75,
+     7
+    ],
+    [
+     "wonder",
+     "arch",
+     204,
+     3
+    ],
+    [
+     "g",
+     73,
+     76,
+     5
+    ],
+    [
+     "e",
+     "wolf",
+     78,
+     3
+    ],
+    [
+     "s",
+     73,
+     6,
+     4
+    ],
+    [
+     "p",
+     82,
+     5,
+     2
+    ],
+    [
+     "p",
+     86,
+     7,
+     2
+    ],
+    [
+     "p",
+     90,
+     5,
+     3
+    ],
+    [
+     "gem",
+     "dresden",
+     87,
+     11
+    ],
+    [
+     "e",
+     "wraith",
+     84,
+     3
+    ],
+    [
+     "g",
+     93,
+     112,
+     3
+    ],
+    [
+     "cp",
+     95,
+     3
+    ],
+    [
+     "sign",
+     98,
+     3,
+     "Dust-wraiths. Only light undoes them."
+    ],
+    [
+     "b",
+     101,
+     6,
+     "?H?"
+    ],
+    [
+     "mark",
+     "canyonBack",
+     105,
+     3
+    ],
+    [
+     "warp",
+     110,
+     3,
+     "ozArrive"
+    ],
+    [
+     "g",
+     116,
+     118,
+     3
+    ],
+    [
+     "g",
+     122,
+     124,
+     4
+    ],
+    [
+     "g",
+     128,
+     140,
+     3
+    ],
+    [
+     "e",
+     "wolf",
+     133,
+     3
+    ],
+    [
+     "s",
+     116,
+     5,
+     3
+    ],
+    [
+     "s",
+     122,
+     6,
+     3
+    ],
+    [
+     "mp",
+     141,
+     2,
+     3,
+     3,
+     0,
+     200
+    ],
+    [
+     "mp",
+     147,
+     2,
+     3,
+     3,
+     0,
+     200,
+     0.5
+    ],
+    [
+     "g",
+     153,
+     170,
+     3
+    ],
+    [
+     "cp",
+     155,
+     3
+    ],
+    [
+     "b",
+     158,
+     6,
+     "?S?"
+    ],
+    [
+     "e",
+     "troll",
+     165,
+     3
+    ],
+    [
+     "g",
+     171,
+     173,
+     5
+    ],
+    [
+     "g",
+     174,
+     176,
+     7
+    ],
+    [
+     "arc",
+     177,
+     9,
+     5
+    ],
+    [
+     "m",
+     177,
+     6,
+     12
+    ],
+    [
+     "gem",
+     "hope",
+     183,
+     10
+    ],
+    [
+     "g",
+     189,
+     215,
+     3
+    ],
+    [
+     "b",
+     192,
+     6,
+     "?H?"
+    ],
+    [
+     "g",
+     219,
+     251,
+     3
+    ],
+    [
+     "e",
+     "goblin",
+     224,
+     3
+    ],
+    [
+     "g",
+     232,
+     234,
+     4
+    ],
+    [
+     "g",
+     235,
+     251,
+     5
+    ],
+    [
+     "beacon",
+     242,
+     5,
+     "The canyon beacon burns"
+    ]
+   ]
+  },
+  {
+   "theme": "gloam",
+   "cols": 232,
+   "title": "The Hoarder’s Mesa",
+   "sub": "Where the summer is kept",
+   "map": 4,
+   "ops": [
+    [
+     "liq",
+     0,
+     231,
+     2
+    ],
+    [
+     "g",
+     0,
+     20,
+     3
+    ],
+    [
+     "sign",
+     24,
+     3,
+     "When the sky reddens, he is looking. Hold [↓]. Be a stone."
+    ],
+    [
+     "g",
+     23,
+     24,
+     3
+    ],
+    [
+     "e",
+     "ember",
+     21,
+     2,
+     {
+      "h": 6
+     }
+    ],
+    [
+     "e",
+     "ember",
+     26,
+     2,
+     {
+      "h": 6,
+      "ph": 0.5
+     }
+    ],
+    [
+     "g",
+     27,
+     45,
+     3
+    ],
+    [
+     "e",
+     "troll",
+     38,
+     3
+    ],
+    [
+     "b",
+     31,
+     6,
+     "?H?"
+    ],
+    [
+     "g",
+     46,
+     48,
+     5
+    ],
+    [
+     "g",
+     49,
+     51,
+     7
+    ],
+    [
+     "g",
+     52,
+     70,
+     9
+    ],
+    [
+     "s",
+     46,
+     6,
+     3
+    ],
+    [
+     "s",
+     49,
+     8,
+     3
+    ],
+    [
+     "e",
+     "goblin",
+     55,
+     9
+    ],
+    [
+     "e",
+     "wraith",
+     66,
+     11
+    ],
+    [
+     "spk",
+     62,
+     63,
+     9
+    ],
+    [
+     "sign",
+     69,
+     9,
+     "♪ The road goes west, the road goes far —|I’ll walk it home by a borrowed star."
+    ],
+    [
+     "mp",
+     71,
+     8,
+     3,
+     2,
+     0,
+     180
+    ],
+    [
+     "mp",
+     78,
+     8,
+     3,
+     2,
+     0,
+     180,
+     0.5
+    ],
+    [
+     "e",
+     "ember",
+     76,
+     2,
+     {
+      "h": 10
+     }
+    ],
+    [
+     "arc",
+     72,
+     12,
+     4
+    ],
+    [
+     "arc",
+     79,
+     12,
+     4
+    ],
+    [
+     "g",
+     83,
+     100,
+     9
+    ],
+    [
+     "cp",
+     85,
+     9
+    ],
+    [
+     "e",
+     "troll",
+     93,
+     9
+    ],
+    [
+     "b",
+     88,
+     12,
+     "?S?"
+    ],
+    [
+     "g",
+     101,
+     103,
+     11
+    ],
+    [
+     "g",
+     104,
+     118,
+     13
+    ],
+    [
+     "keep",
+     "key",
+     111,
+     15
+    ],
+    [
+     "wonder",
+     "kings",
+     9,
+     3
+    ],
+    [
+     "sign",
+     105,
+     13,
+     "Far ahead, on the wind: somebody is singing her song."
+    ],
+    [
+     "e",
+     "goblin",
+     108,
+     13
+    ],
+    [
+     "e",
+     "wraith",
+     116,
+     15
+    ],
+    [
+     "p",
+     120,
+     11,
+     2
+    ],
+    [
+     "m",
+     123,
+     9,
+     4
+    ],
+    [
+     "p",
+     128,
+     10,
+     2
+    ],
+    [
+     "mp",
+     131,
+     9,
+     3,
+     4,
+     0,
+     190
+    ],
+    [
+     "p",
+     138,
+     9,
+     2
+    ],
+    [
+     "s",
+     120,
+     13,
+     2
+    ],
+    [
+     "s",
+     128,
+     12,
+     2
+    ],
+    [
+     "gem",
+     "tiffany",
+     125,
+     13
+    ],
+    [
+     "e",
+     "ember",
+     127,
+     2,
+     {
+      "h": 11
+     }
+    ],
+    [
+     "g",
+     140,
+     165,
+     9
+    ],
+    [
+     "e",
+     "troll",
+     150,
+     9
+    ],
+    [
+     "b",
+     146,
+     12,
+     "?H?"
+    ],
+    [
+     "spk",
+     161,
+     162,
+     9
+    ],
+    [
+     "g",
+     166,
+     168,
+     11
+    ],
+    [
+     "g",
+     169,
+     231,
+     13
+    ],
+    [
+     "cp",
+     172,
+     13
+    ],
+    [
+     "sign",
+     175,
+     13,
+     "The Hoarder King. Strike when his fire dims."
+    ],
+    [
+     "b",
+     175,
+     15,
+     "?H?"
+    ],
+    [
+     "gem",
+     "cullinan",
+     176,
+     18
+    ],
+    [
+     "door",
+     179,
+     13,
+     8,
+     "The last door. Beyond it, only him."
+    ],
+    [
+     "arc",
+     141,
+     11,
+     5
+    ],
+    [
+     "s",
+     152,
+     10,
+     4
+    ],
+    [
+     "arena",
+     181,
+     204,
+     13
+    ],
+    [
+     "sign",
+     207,
+     13,
+     "♪ The dark is deep, the dark is long,|and someone, somewhere, knows this song."
+    ],
+    [
+     "npc",
+     216,
+     13
+    ],
+    [
+     "beacon",
+     226,
+     13,
+     "The last beacon burns",
+     true
+    ]
+   ]
+  },
+  {
+   "theme": "oz",
+   "cols": 156,
+   "title": "Australia",
+   "sub": "It is already tomorrow here",
+   "map": 3,
+   "warp": true,
+   "ops": [
+    [
+     "liq",
+     0,
+     155,
+     1
+    ],
+    [
+     "g",
+     0,
+     60,
+     3
+    ],
+    [
+     "mark",
+     "ozArrive",
+     4,
+     3
+    ],
+    [
+     "cp",
+     6,
+     3
+    ],
+    [
+     "s",
+     13,
+     4,
+     4
+    ],
+    [
+     "e",
+     "goblin",
+     19,
+     3
+    ],
+    [
+     "sign",
+     23,
+     3,
+     "Cane toads. Do not lick them."
+    ],
+    [
+     "p",
+     27,
+     6,
+     4
+    ],
+    [
+     "e",
+     "spider",
+     29,
+     6,
+     {
+      "len": 3
+     }
+    ],
+    [
+     "s",
+     27,
+     8,
+     4
+    ],
+    [
+     "sign",
+     33,
+     3,
+     "The drop bear is only a story. Look up anyway."
+    ],
+    [
+     "b",
+     38,
+     6,
+     "?H?"
+    ],
+    [
+     "wonder",
+     "cross",
+     52,
+     3
+    ],
+    [
+     "mp",
+     61,
+     2,
+     3,
+     5,
+     0,
+     230
+    ],
+    [
+     "arc",
+     62,
+     6,
+     6
+    ],
+    [
+     "g",
+     69,
+     100,
+     3
+    ],
+    [
+     "e",
+     "bat",
+     78,
+     9,
+     {
+      "free": true
+     }
+    ],
+    [
+     "e",
+     "bat",
+     90,
+     9,
+     {
+      "free": true
+     }
+    ],
+    [
+     "b",
+     84,
+     5,
+     "???"
+    ],
+    [
+     "keep",
+     "opal",
+     85,
+     9
+    ],
+    [
+     "g",
+     96,
+     98,
+     5
+    ],
+    [
+     "g",
+     99,
+     101,
+     7
+    ],
+    [
+     "m",
+     102,
+     6,
+     9
+    ],
+    [
+     "gem",
+     "argyle",
+     106,
+     10
+    ],
+    [
+     "arc",
+     103,
+     8,
+     6
+    ],
+    [
+     "g",
+     111,
+     155,
+     3
+    ],
+    [
+     "e",
+     "wraith",
+     120,
+     6
+    ],
+    [
+     "e",
+     "wolf",
+     132,
+     3
+    ],
+    [
+     "b",
+     126,
+     6,
+     "?S?"
+    ],
+    [
+     "s",
+     136,
+     4,
+     5
+    ],
+    [
+     "warp",
+     148,
+     3,
+     "canyonBack"
+    ]
+   ]
+  }
+ ],
+ "gems": [
+  {
+   "id": "first",
+   "name": "The First Light",
+   "real": false,
+   "carat": 0.3,
+   "cut": "Round brilliant",
+   "shape": "round",
+   "color": "G · near colourless",
+   "tint": "#eaf6ff",
+   "clarity": "VS1",
+   "origin": "Kaavi kimberlite, eastern Finland",
+   "lesson": "Carat",
+   "text": "Carat is weight, not size: one carat is exactly 0.2 grams. The word comes from the carob seeds once used to balance jewellers’ scales."
+  },
+  {
+   "id": "cut",
+   "name": "The Lantern Square",
+   "real": false,
+   "carat": 1,
+   "cut": "Princess",
+   "shape": "princess",
+   "color": "F · colourless",
+   "tint": "#f2f8ff",
+   "clarity": "VS2",
+   "origin": "Jwaneng, Botswana",
+   "lesson": "Cut",
+   "text": "Cut is the only one of the four Cs made by human hands. Its angles decide how much light comes back to the eye."
+  },
+  {
+   "id": "clarity",
+   "name": "The Ice Window",
+   "real": false,
+   "carat": 2,
+   "cut": "Emerald (step cut)",
+   "shape": "emerald",
+   "color": "E · colourless",
+   "tint": "#e6fbff",
+   "clarity": "VVS1",
+   "origin": "Diavik, Northwest Territories, Canada",
+   "lesson": "Clarity",
+   "text": "Clarity counts the tiny crystals and feathers trapped inside, judged at ten-power magnification: FL, IF, VVS, VS, SI, I. A step cut hides nothing."
+  },
+  {
+   "id": "colour",
+   "name": "Midsummer White",
+   "real": false,
+   "carat": 5,
+   "cut": "Oval brilliant",
+   "shape": "oval",
+   "color": "D · colourless",
+   "tint": "#ffffff",
+   "clarity": "IF",
+   "origin": "Mir pipe, Yakutia, Russia",
+   "lesson": "Colour",
+   "text": "For white diamonds, less colour is worth more. The scale starts at D, colourless, and runs to Z, a light yellow."
+  },
+  {
+   "id": "pink",
+   "name": "The Savannah Rose",
+   "real": false,
+   "carat": 6,
+   "cut": "Cushion",
+   "shape": "cushion",
+   "color": "Fancy vivid pink",
+   "tint": "#ff9ac8",
+   "clarity": "VS1",
+   "origin": "Williamson mine, Tanzania",
+   "lesson": "Fancy colour",
+   "text": "Past Z the rules turn over: strong colour becomes rare and precious. Pink comes from no impurity at all. The crystal itself was bent under pressure."
+  },
+  {
+   "id": "deep",
+   "name": "The Deep One",
+   "real": false,
+   "carat": 10,
+   "cut": "Pear brilliant",
+   "shape": "pear",
+   "color": "H · near colourless",
+   "tint": "#f4f0e6",
+   "clarity": "SI1",
+   "origin": "Kimberley, South Africa",
+   "lesson": "Where diamonds come from",
+   "text": "A diamond is pure carbon, crystallised about 150 kilometres down, most of them one to three billion years ago. Volcanoes carried them up in pipes of kimberlite."
+  },
+  {
+   "id": "unclesam",
+   "name": "Uncle Sam",
+   "real": true,
+   "carat": 12.42,
+   "cut": "Emerald (step cut)",
+   "shape": "emerald",
+   "color": "M · faint brown",
+   "tint": "#f6e6cc",
+   "clarity": "VVS",
+   "origin": "Crater of Diamonds, Arkansas, USA",
+   "lesson": "A real American find",
+   "text": "The largest diamond ever found in the United States: 40.23 carats in the rough, found by a mine worker in 1924. The field is now a park where anyone may dig, and keep what they find."
+  },
+  {
+   "id": "dresden",
+   "name": "The Dresden Green",
+   "real": true,
+   "carat": 41,
+   "cut": "Pear brilliant",
+   "shape": "pear",
+   "color": "Natural fancy green",
+   "tint": "#8fe6a8",
+   "clarity": "VS1, seen in its setting",
+   "origin": "Probably Golconda, India",
+   "lesson": "Colour by radiation",
+   "text": "The largest naturally green diamond known. Its colour was made by natural radiation in the earth, over millions of years. It came to Dresden in the 1740s."
+  },
+  {
+   "id": "hope",
+   "name": "The Hope Diamond",
+   "real": true,
+   "carat": 45.52,
+   "cut": "Antique cushion",
+   "shape": "cushion",
+   "color": "Fancy deep greyish blue",
+   "tint": "#6f9ae8",
+   "clarity": "VS1",
+   "origin": "Probably the Kollur mine, India",
+   "lesson": "Blue from boron",
+   "text": "A trace of boron makes it blue. After ultraviolet light it glows red for a while, like an ember. It rests in the Smithsonian in Washington."
+  },
+  {
+   "id": "argyle",
+   "name": "The Argyle Alpha",
+   "real": true,
+   "carat": 3.14,
+   "cut": "Emerald shape",
+   "shape": "emerald",
+   "color": "Fancy vivid purplish pink",
+   "tint": "#ff7ab8",
+   "clarity": "Not published",
+   "origin": "Argyle mine, East Kimberley, Western Australia",
+   "lesson": "Rarity",
+   "text": "Small, and the largest vivid pink the Argyle mine ever offered. Argyle gave the world about nine in ten of its pink diamonds. It stood on Gija and Miriwoong country, and closed in 2020."
+  },
+  {
+   "id": "tiffany",
+   "name": "The Tiffany Yellow",
+   "real": true,
+   "carat": 128.54,
+   "cut": "Cushion brilliant, 82 facets",
+   "shape": "cushion",
+   "color": "Fancy yellow",
+   "tint": "#ffe26a",
+   "clarity": "VS1, by Tiffany",
+   "origin": "Kimberley, South Africa",
+   "lesson": "Cut for colour",
+   "text": "Cut from a 287.42-carat crystal with 82 facets, two dozen more than a standard brilliant, to make the yellow blaze. Nitrogen gives it its colour."
+  },
+  {
+   "id": "cullinan",
+   "name": "Cullinan I · The Great Star of Africa",
+   "real": true,
+   "carat": 530.2,
+   "cut": "Pear brilliant, 74 facets",
+   "shape": "pear",
+   "color": "Colourless",
+   "tint": "#ffffff",
+   "clarity": "Not formally graded",
+   "origin": "Premier Mine, Cullinan, South Africa",
+   "lesson": "The largest crystal",
+   "text": "Cut from the Cullinan, at 3,106 carats the largest gem diamond crystal ever found. It is set in the Sovereign’s Sceptre of the British Crown Jewels."
+  },
+  {
+   "id": "kohinoor",
+   "name": "The Koh-i-Noor",
+   "real": true,
+   "carat": 105.6,
+   "cut": "Oval brilliant",
+   "shape": "oval",
+   "color": "Colourless",
+   "tint": "#fffdf4",
+   "clarity": "Not formally graded",
+   "origin": "Probably Golconda, India",
+   "lesson": "The Mountain of Light",
+   "text": "Its name is Persian for “Mountain of Light”. Won and lost by Mughal, Persian, Afghan and Sikh rulers, it was taken by Britain in 1849. India and others have asked for its return."
+  }
+ ],
+ "keeps": [
+  {
+   "id": "himmeli",
+   "name": "A himmeli",
+   "line": "Straw, thread and geometry. It turns in the slightest breath."
+  },
+  {
+   "id": "dala",
+   "name": "A Dala horse",
+   "line": "Carved in Dalarna, painted red. It has never run anywhere."
+  },
+  {
+   "id": "ore",
+   "name": "A lump of Kiruna magnetite",
+   "line": "Iron ore. Hold a compass near and it changes its mind."
+  },
+  {
+   "id": "compass",
+   "name": "A ship’s compass",
+   "line": "It points north, which is home, which is no help."
+  },
+  {
+   "id": "quartz",
+   "name": "An Arkansas quartz crystal",
+   "line": "Not a diamond. Quite honest about it."
+  },
+  {
+   "id": "key",
+   "name": "A small iron key",
+   "line": "It opens a room with no windows."
+  },
+  {
+   "id": "opal",
+   "name": "An opal",
+   "line": "From Coober Pedy. Fire, kept in a stone, and nobody shut it in."
+  }
+ ],
+ "wonders": [
+  {
+   "id": "fox",
+   "where": "Finland",
+   "name": "The Fox Fires",
+   "line": "A fox runs over the fells, and its tail strikes sparks from the snow."
+  },
+  {
+   "id": "frogs",
+   "where": "Sweden",
+   "name": "Små grodorna",
+   "line": "Adults, hopping like frogs round a pole. Nobody is embarrassed."
+  },
+  {
+   "id": "undersky",
+   "where": "Kiruna",
+   "name": "The Under-Sky",
+   "line": "Ore in the roof of the mine, catching her light."
+  },
+  {
+   "id": "whale",
+   "where": "the sea",
+   "name": "A Whale",
+   "line": "It looks at her with one eye, and finds nothing to object to."
+  },
+  {
+   "id": "arch",
+   "where": "America",
+   "name": "The Window",
+   "line": "Water did this, and frost, and time."
+  },
+  {
+   "id": "kings",
+   "where": "the Mesa",
+   "name": "The Stone Kings",
+   "line": "Each with a hand held out. Whoever carved them had met a king."
+  },
+  {
+   "id": "cross",
+   "where": "Australia",
+   "name": "The Southern Cross",
+   "line": "Stars she has never seen. Nothing bad has come of it."
+  }
+ ],
+ "prologue": [
+  {
+   "s": "Far in the north is a small town called Kaamos: the long dark. The old people say elves lived here once, and went west over the sea. Every house still leaves one window unshuttered, in case."
+  },
+  {
+   "s": "Ana grew up at the last fence, looking at the place where the road stops being Kaamos and becomes everywhere else. Nothing ever came down it for her."
+  },
+  {
+   "s": "Then came the winter that did not end. A king in the west had shut the world’s light inside its great diamonds, and dropped most of them on the long way home. The sun rose thin as a coin and warmed nothing.",
+   "fx": "gems"
+  },
+  {
+   "s": "“The summer is in those stones,” said the Tonttu, who kept her house. “All of it. Somebody will have to fetch every one, and let the light out.”"
+  },
+  {
+   "s": "Ana held out her hand, the way you would to see if it was snowing. Starlight came down into it like a bird that had been waiting for her to stand still."
+  },
+  {
+   "s": "“Well,” said the Tonttu. “That explains the ears. Your boots are by the door. They have been by the door for years.”"
+  }
+ ],
+ "epilogue": [
+  {
+   "bg": "mesa",
+   "s": "Under the armour there was hardly anyone. He had only wanted to be warm."
+  },
+  {
+   "bg": "mesa",
+   "s": "The weather had eased with every stone. But the summer itself was still shut inside them. “I know a shore,” said Mayank, “where the sun goes last of all. Let it out there, and it has the whole world to cross.”"
+  },
+  {
+   "bg": "kauai",
+   "rise": true,
+   "s": "So they carried the diamonds west, over one more sea, to a green island called Kauaʻi. On the sand, at the end of the day, Ana opened her hands."
+  },
+  {
+   "bg": "dawn",
+   "s": "The light went home along her road, and summer followed it. It reached Kaamos by morning. “That is the Starlight Queen,” the Tonttu tells the children. “She is from here.”"
+  },
+  {
+   "bg": "kauai",
+   "s": "“This,” said Mayank, “is the beginning of a new adventure.”"
+  }
+ ],
+ "places": [
+  {
+   "name": "Kaamos",
+   "note": "Finland, where the road begins"
+  },
+  {
+   "name": "The Manic Lands",
+   "note": "Sweden",
+   "theme": "meads",
+   "col": 3
+  },
+  {
+   "name": "The Iron Deeps",
+   "note": "Kiruna",
+   "theme": "halls",
+   "col": 3
+  },
+  {
+   "name": "The Western Sea",
+   "note": "two rafts, and a whale",
+   "theme": "sea",
+   "col": 9
+  },
+  {
+   "name": "Red Rock Country",
+   "note": "the United States",
+   "theme": "canyon",
+   "col": 3
+  },
+  {
+   "name": "Australia",
+   "note": "through the tear, where it is already tomorrow",
+   "mark": "ozArrive"
+  },
+  {
+   "name": "The Hoarder’s Mesa",
+   "note": "where the summer is kept",
+   "theme": "gloam",
+   "col": 3
+  },
+  {
+   "name": "The Hoarder King",
+   "note": "at his door",
+   "theme": "gloam",
+   "col": 172
+  },
+  {
+   "name": "Past the King",
+   "note": "the stone is hers; somebody is singing",
+   "after": true
+  }
+ ],
+ "mapNames": [
+  "Kaamos · Finland",
+  "The Manic Lands · Sweden",
+  "The Iron Deeps of Kiruna",
+  "Red Rock Country · United States",
+  "The Hoarder’s Mesa"
+ ],
+ "gemWhere": [
+  "Finland",
+  "Finland",
+  "the Gulf",
+  "Sweden",
+  "Sweden",
+  "Kiruna",
+  "America",
+  "America",
+  "America",
+  "Australia",
+  "the Mesa",
+  "the Mesa",
+  "the King"
+ ],
+ "companionLines": [
+  "Mayank: “A dream promised me an elf queen in a distant land. I walked|from India to find her. It was right about the ears.”",
+  "He holds up his lantern. She holds up her starlight."
+ ],
+ "text": {
+  "backdrops.cornbread": "Cornbread.",
+  "backdrops.a-lamington": "A lamington.",
+  "backdrops.honeycake": "Honeycake.",
+  "backdrops.boiled-coffee-with-cheese": "Boiled coffee, with cheese in it.",
+  "backdrops.midsummer-strawberries-and-cream": "Midsummer strawberries and cream.",
+  "backdrops.apple-pie-still-warm": "Apple pie, still warm.",
+  "backdrops.korvapuusti-a-cinnamon-bun": "Korvapuusti. A cinnamon bun.",
+  "entities.the-crown-burns-brighter": "The crown burns brighter. He shivers.",
+  "entities.his-fire-has-gone": "His fire has gone out. He was only ever cold.",
+  "entities.somebody-is-waiting-a": "Somebody is waiting, a little way back.",
+  "entities.the-beacon-is-waiting": "The beacon is waiting for the Mountain of Light.",
+  "entities.somebody-has-kept-this": "Somebody has kept this one burning.",
+  "entities.starlight-sets-her-back": "Starlight sets her back on the road.",
+  "entities.the-starlight-comes-to": "The starlight comes to her hand. There is a road in the air.",
+  "entities.starlight-carries-her-across": "Starlight carries her across.",
+  "main.sound-on": "Sound on",
+  "main.sound-off": "Sound off",
+  "scenes.enter-to-return-to": "ENTER TO RETURN TO THE TITLE",
+  "scenes.tap-to-return": "TAP TO RETURN",
+  "scenes.every-light-is-home": "Every light is home. There is more out there to look at.",
+  "scenes.stones-still-hold-their": "stones still hold their",
+  "scenes.stone-still-holds-its": "stone still holds its",
+  "scenes.every-light-is-home-2": "Every light is home, and you stopped to look at everything.",
+  "scenes.excellent": "Excellent",
+  "scenes.of-keepsakes-brought-home": "{0} of {1} keepsakes brought home",
+  "scenes.cut": "CUT",
+  "scenes.of-wonders-seen": "{0} of {1} wonders seen",
+  "scenes.clarity": "CLARITY",
+  "scenes.of-melee-gathered": "{0} of {1} melee gathered",
+  "scenes.colour": "COLOUR",
+  "scenes.of-diamonds-carried": "{0} of {1} diamonds carried",
+  "scenes.ct": "{0} ct",
+  "scenes.carat": "CARAT",
+  "scenes.the-journey-graded": "THE JOURNEY, GRADED",
+  "scenes.enter-to-close": "ENTER TO CLOSE",
+  "scenes.tap-to-close": "TAP TO CLOSE",
+  "scenes.choose-enter-study-a": "← → ↑ ↓  CHOOSE   ·   ENTER  STUDY A DIAMOND   ·   ESC  RETURN",
+  "scenes.tap-to-choose-tap": "TAP TO CHOOSE   ·   TAP A DIAMOND TWICE TO STUDY IT   ·   TAP THE TITLE TO RETURN",
+  "scenes.not-yet-found-it": "Not yet found. It is out there, in {0}.",
+  "scenes.the-hoarder-king-has": "The Hoarder King has it.",
+  "scenes.the-king": "the King",
+  "scenes.not-yet-seen-it": "Not yet seen. It is out there, in {0}.",
+  "scenes.wonders-seen-of": "WONDERS SEEN   ·   {0} OF {1}",
+  "scenes.keepsakes-of": "KEEPSAKES   ·   {0} OF {1}",
+  "scenes.of-diamonds-of-carats": "{0} of {1} diamonds   ·   {2} of {3} carats",
+  "scenes.the-windowsill": "THE WINDOWSILL",
+  "scenes.save-and-quit-to": "Save and quit to title",
+  "scenes.sound": "Sound  ·  ",
+  "scenes.return-to-the-last": "Return to the last lantern",
+  "scenes.again-to-confirm": "Again, to confirm",
+  "scenes.walk-on": "Walk on",
+  "scenes.the-road-waits": "THE ROAD WAITS",
+  "scenes.enter-to-continue": "ENTER TO CONTINUE",
+  "scenes.tap-to-continue": "TAP TO CONTINUE",
+  "scenes.carats-two-travellers-one": "{0} carats, two travellers, one lantern",
+  "scenes.far-off-one-window": "Far off, one window in Kaamos answers.",
+  "scenes.thief-of-the-mountain": "Thief of the Mountain of Light",
+  "scenes.the-hoarder-king": "THE HOARDER KING",
+  "scenes.hold": "hold  ",
+  "scenes.a-wonder-of": "A WONDER   ·   {0} OF {1}",
+  "scenes.walk-space-leap": "[←] [→]  walk      [SPACE]  leap",
+  "scenes.enter-to-set-forth": "ENTER TO SET FORTH",
+  "scenes.tap-to-set-forth": "TAP TO SET FORTH",
+  "scenes.of-diamonds-carats-carried": "{0} of {1} diamonds   ·   {2} carats carried",
+  "scenes.the-hoarders-mesa": "The Hoarder’s Mesa",
+  "scenes.united-states": "UNITED STATES",
+  "scenes.red-rock-country": "Red Rock Country",
+  "scenes.kiruna": "KIRUNA",
+  "scenes.iron-deeps": "Iron Deeps",
+  "scenes.sweden": "SWEDEN",
+  "scenes.the-manic-lands": "The Manic Lands",
+  "scenes.finland": "FINLAND",
+  "scenes.kaamos": "Kaamos",
+  "scenes.from-kaamos-after-the": "from Kaamos, after the summer",
+  "scenes.the-road-west": "THE ROAD WEST",
+  "scenes.enter-go-on-back": "[ENTER]  go on        [←]  back        [ESC]  skip",
+  "scenes.skip": "SKIP",
+  "scenes.tap-to-go-on": "TAP TO GO ON",
+  "scenes.choose-enter-begin-there": "↑ ↓  CHOOSE   ·   ENTER  BEGIN THERE   ·   ESC  RETURN",
+  "scenes.tap-a-land-then": "TAP A LAND, THEN TAP IT AGAIN   ·   TAP THE TITLE TO RETURN",
+  "scenes.begin-from-any-land": "Begin from any land.",
+  "scenes.begin-from-any-land-2": "Begin from any land. What you have found comes with you.",
+  "scenes.another-way-in": "ANOTHER WAY IN",
+  "scenes.g-fullscreen": "   ·   G  FULLSCREEN",
+  "scenes.on": "ON",
+  "scenes.off": "OFF",
+  "scenes.choose-enter-begin-m": "↑ ↓  CHOOSE   ·   ENTER  BEGIN   ·   M  SOUND ",
+  "scenes.tap-to-choose": "TAP TO CHOOSE",
+  "scenes.finest-journey-ct-colour": "Finest journey  ·  {0} ct  ·  {1} colour  ·  {2}  ·  {3} cut",
+  "scenes.one-file-plays-on": "one file  ·  plays on a laptop with no internet",
+  "scenes.download-the-game": "DOWNLOAD THE GAME",
+  "scenes.the-windowsill-of-diamonds": "The windowsill  ·  {0} of {1} diamonds",
+  "scenes.australia": "Australia",
+  "scenes.begin-the-journey": "Begin the journey",
+  "scenes.new-journey": "New journey",
+  "scenes.ana-the-mountain-of": "Ana & the Mountain of Light",
+  "scenes.queen": "QUEEN",
+  "scenes.starlight": "STARLIGHT",
+  "scenes.that-did-not-work": "That did not work just now. Try again with a connection.",
+  "scenes.saved-as-starlight-queenhtml": "Saved as “Starlight Queen.html”. Double-click it to play, no internet needed.",
+  "scenes.starlight-queenhtml": "Starlight Queen.html",
+  "scenes.fetching-the-game": "Fetching the game…",
+  "scenes.a-teaching-stone": "A TEACHING STONE",
+  "scenes.a-real-stone": "A REAL STONE",
+  "scenes.very-good": "Very good",
+  "scenes.good": "Good",
+  "scenes.fair": "Fair",
+  "scenes.flawless": "Flawless",
+  "scenes.internally-flawless": "Internally flawless",
+  "scenes.very-very-slightly-included": "Very, very slightly included",
+  "scenes.very-slightly-included": "Very slightly included",
+  "scenes.slightly-included": "Slightly included",
+  "scenes.included": "Included",
+  "scenes.a-pale-summer-yet": "A pale summer yet: {0} {1} light.",
+  "scenes.continue": "Continue  ·  {0}",
+  "scenes.diamond-of": "DIAMOND {0} OF {1}   ·   {2}",
+  "wonders.the-late-shift": "THE LATE SHIFT",
+  "wonders.the-kettle": "THE KETTLE",
+  "wonders.the-pick": "THE PICK",
+  "world.he-has-seen-you": "He has seen you.",
+  "world.the-starlight-comes-to": "The starlight comes to her hand.",
+  "world.hold-e-to-raise": "Hold [E] to raise her starlight.",
+  "world.the-hoarder-king-is": "The Hoarder King is fallen. The Mountain of Light is waiting.",
+  "world.something-bright-was-buried": "Something bright was buried here…",
+  "world.the-last-cloud-stands": "The last cloud stands aside.",
+  "world.the-sky-is-holding": "The sky is holding its breath.",
+  "world.a-green-shoot-through": "A green shoot, through the frost.",
+  "world.the-snow-is-only": "The snow is only falling out of habit now.",
+  "world.warm-on-the-back": "Warm on the back of her neck.",
+  "world.her-shadow-comes-back": "Her shadow comes back.",
+  "world.the-air-smells-of": "The air smells of rain, not snow.",
+  "world.up-above-a-patch": "Up above, a patch of blue.",
+  "world.the-cold-lets-go": "The cold lets go of her fingers.",
+  "world.somewhere-a-bird-tries": "Somewhere a bird tries one note.",
+  "world.a-gap-opens-in": "A gap opens in the cloud.",
+  "world.the-wind-drops": "The wind drops.",
+  "world.the-snow-thins-a": "The snow thins a little."
+ },
+ "description": "A side-scrolling story. For anyone who waited at eleven for a letter that never came. Ana walks out of a small Finnish town and west across the world, after the Mountain of Light, and towards somebody carrying a lantern.",
+ "turnText": "Turn your screen sideways\nto walk the road west."
+}

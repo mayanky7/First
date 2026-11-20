@@ -1,0 +1,16 @@
+{
+  "name": "maincharacter",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Main Character: anyone can build a game where they are the main character",
+  "bin": {
+    "mc": "bin/mc.js"
+  },
+  "scripts": {
+    "verify": "node bin/mc.js verify games/starlight-queen.json"
+  },
+  "devDependencies": {
+    "acorn": "^8.19.0",
+    "playwright": "1.58.2"
+  }
+}
