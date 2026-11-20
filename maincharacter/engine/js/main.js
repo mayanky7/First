@@ -192,6 +192,6 @@
   if (q.has('at')) { Game.newGame(); Game.cp = { x: (+q.get('at') || 3) * T + 8, y: (ROWS - (+q.get('alt') || 3)) * T }; if (q.has('down')) { Game.bossDown = true; Game.gems[SPEC.finalGem] = 1; } Scenes.go('play', { resume: true, god: q.has('god') }); }
   else Scenes.go(q.get('scene') || 'title');
   /* The bots' build: nothing moves unless the harness steps it, and the harness can see inside. */
-  if (HARNESS) { window.__mc = { SPEC, Game, World, Scenes, Input, Sound, RNG, tx, step, frame, T, ROWS, W, H }; return; }
+  if (HARNESS) { window.__mc = { SPEC, Game, World, Scenes, Input, Sound, RNG, tx, step, frame, T, ROWS, W, H, MECHS, ENT, UI }; return; }
   requestAnimationFrame(loop);
 })();

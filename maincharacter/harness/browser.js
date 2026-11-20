@@ -1,7 +1,7 @@
 'use strict';
 /* Opens a built game in a real browser for the bots. The page gets no network at all. */
 const { chromium, webkit } = require('playwright');
-const path = require('path');
+const path = require('path'), fs = require('fs');
 const log = require('../lib/log')('browser');
 
 async function open(file, opts = {}) {
@@ -19,7 +19,13 @@ async function open(file, opts = {}) {
   await page.goto(url);
   if (opts.harness !== false) await page.waitForFunction(() => window.__mc && window.__mc.Scenes.cur !== undefined, null, { timeout: 15000 });
   await page.evaluate(() => document.fonts && document.fonts.ready);
-  if (opts.harness !== false) { await page.addScriptTag({ path: path.join(__dirname, 'inpage.js') }); await page.addScriptTag({ path: path.join(__dirname, 'bots-inpage.js') }); }
+  if (opts.harness !== false) { 
+    await page.addScriptTag({ path: path.join(__dirname, 'inpage.js') });
+    // a template's mechanic may bring advice for the bots: how a person would use it
+    const mechs = await page.evaluate(() => window.__mc.SPEC.mechanics || []);
+    for (const m of mechs) { const f = path.join(__dirname, '../engine/mechanics', m + '.bot.js'); if (/^[a-z0-9-]+$/.test(m) && fs.existsSync(f)) await page.addScriptTag({ path: f }); }
+    await page.addScriptTag({ path: path.join(__dirname, 'bots-inpage.js') });
+  }
   return { browser, page, errors, requests, close: () => browser.close() };
 }
 module.exports = { open };

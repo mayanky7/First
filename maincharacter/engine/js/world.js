@@ -71,6 +71,7 @@ const World = (() => {
     lastCamX = w.cam.x;
     w.thaw = gemCount() / GEMS.length; w.thawT = 0; w.snow = Paint.makeAmbient('snow', 120);
     scatter();
+    w.mech = {}; for (const m of MECHS) if (m.init) m.init(w, L, cp);
     Sound.duck(false);
   }
   function enterZone(z) {
@@ -321,6 +322,7 @@ const World = (() => {
     }
     if (alive.length) w.deadT = 0;
     const cx = w.cam.x + W / 2;
+    for (const m of MECHS) if (m.step) m.step(w);
     for (let i = 0; i < w.ents.length; i++) {
       const e = w.ents[i], d = ENT[e.type];
       if (e.dead) continue;
@@ -464,6 +466,7 @@ const World = (() => {
     }
     for (const d of w.back) { const x = d.x - ox; if (x > W + 80 || x < -80) continue; Paint.prop(c, d.type, d.v, x, d.y - oy, w, d); }
     for (const e of w.ents) { const d = ENT[e.type]; if (d.back) d.back(c, w, e, ox, oy); }
+    for (const m of MECHS) if (m.back) m.back(c, w, ox, oy);
     for (const tq of w.torches) Paint.torch(c, tq.x - ox, tq.y - oy + 14, w.t, false);
     for (const d of w.decor) { const x = d.x - ox; if (x > W + 20 || x < -20) continue; Paint.prop(c, d.type, d.v, x, d.y - oy, w, d); }
     { // mist in the deeps, where there is no ground
@@ -475,6 +478,7 @@ const World = (() => {
     Paint.tiles(c, w, ox, oy);
     for (const e of w.ents) { const d = ENT[e.type]; if (!d.lit && e.x - ox < W + 40 && e.x + e.w - ox > -40) d.draw(c, w, e, ox, oy); }
     for (let i = w.players.length - 1; i >= 0; i--) drawPlayer(c, w, w.players[i], ox, oy);
+    for (const m of MECHS) if (m.draw) m.draw(c, w, ox, oy);
     drawParts(c, ox, oy, false);
     darkness(c, ox, oy, bl);
     Paint.liquid(c, w, ox, oy, true);
@@ -515,6 +519,7 @@ const World = (() => {
     if (w.flash > 0) { c.fillStyle = `rgba(255,255,255,${Math.min(1, w.flash)})`; c.fillRect(0, 0, W, H); }
     // embers about to leap from lava below the screen are announced at its edge
     for (const e of w.ents) if (e.type === 'ember' && e.warn > 0 && e.x - ox > -10 && e.x - ox < W + 10) { const yy = Math.min(e.by - oy, H - 4); Paint.soft(c, e.x - ox + 4, yy, 8 + (40 - e.warn) * 0.3, '#ff7a20', 0.5 + 0.3 * Math.sin(w.t * 0.6)); }
+    for (const m of MECHS) if (m.over) m.over(c, w, ox, oy);
   }
 
   return Object.assign(w, { load, update, draw, ring, dust, spark, sparkle, toast, gainShard, gainGem, bump, lightBeacon, checkpoint, bossDefeated, clearHazards, wonder, warp, zoneAt });

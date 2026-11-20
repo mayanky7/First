@@ -11,7 +11,7 @@ const OUT = path.resolve(__dirname, '../out');
 const SIM = ['core.js', 'gems.js', 'levels.js', 'entities.js', 'wonders.js', 'world.js', 'scenes.js', 'main.js']; // modules the simulation runs in
 
 /* P-6, static half: the simulation may ask no clock and no dice but its own. */
-function staticScan() {
+function staticScan(mechanics) {
   const dir = path.resolve(__dirname, '../engine/js'), found = [];
   // each line the scan lets through, and why it cannot change what a step does
   const ALLOW = [
@@ -24,7 +24,7 @@ function staticScan() {
     /URL\.revokeObjectURL/                                 // tidying up after the download
   ];
 
-  for (const f of SIM) {
+  for (const f of SIM.concat((mechanics || []).map(m => '../mechanics/' + m + '.js'))) {
     fs.readFileSync(path.join(dir, f), 'utf8').split('\n').forEach((line, i) => {
       if (/Math\.random|Date\.now|new Date|performance\.now|setTimeout|setInterval/.test(line) && !ALLOW.some(a => a.test(line))) found.push(`${f}:${i + 1}: ${line.trim().slice(0, 120)}`);
     });
@@ -61,7 +61,7 @@ async function verify(spec, opts = {}) {
   // the bots' build differs from the one people get by the one flag that hands the loop to the bots, and nothing else
   const flag = 'window.__MC_HARNESS=true;';
   add('V-1', 'the bots play the same game people get', harness.split(flag).join('') === release && harness.split(flag).length === 2, { flag });
-  const scan = staticScan();
+  const scan = staticScan(spec.mechanics);
   add('P-6a', 'simulation asks no clock and no dice but its own (static scan)', scan.length === 0, { found: scan });
 
   /* ---- the expert: find a route, then prove it by replaying it on fresh pages ---- */
@@ -181,7 +181,7 @@ async function verify(spec, opts = {}) {
 
   function finish() {
     const failed = checks.filter(c => !c.pass && !c.waived), waived = checks.filter(c => c.waived);
-    const report = { game: spec.id, title: spec.title, engine: engineHash(), spec: sha(JSON.stringify(spec)).slice(0, 16), when: new Date().toISOString(), seconds: Math.round((Date.now() - t0) / 1000), pass: failed.length === 0, passed: checks.length - failed.length - waived.length, failed: failed.length, waived: waived.map(c => ({ id: c.id, why: c.waived })), checks };
+    const report = { game: spec.id, title: spec.title, engine: engineHash(spec.mechanics), spec: sha(JSON.stringify(spec)).slice(0, 16), when: new Date().toISOString(), seconds: Math.round((Date.now() - t0) / 1000), pass: failed.length === 0, passed: checks.length - failed.length - waived.length, failed: failed.length, waived: waived.map(c => ({ id: c.id, why: c.waived })), checks };
     fs.mkdirSync(path.join(OUT, 'reports'), { recursive: true });
     const f = path.join(OUT, 'reports', spec.id + '.verify.json'); fs.writeFileSync(f, JSON.stringify(report, null, 1)); report.file = f;
     return report;

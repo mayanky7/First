@@ -10,6 +10,7 @@
   const hard = (cx, cy) => !!SOLID[tile(cx, cy)];
   const floorAt = (cx, cy) => { const ch = tile(cx, cy); return hard(cx, cy) || ch === '=' || ch === 'M'; };
   const FOES = { goblin: 1, wolf: 1, bat: 1, spider: 1, troll: 1, ember: 1, wraith: 1 };
+  const HINTS = window.__botHints || []; // from mechanic modules: (ctx) => buttons, or undefined to leave the habit alone
 
   /* The person every other habit is built on: goes forward, jumps at what is in the way,
      tries the light when stuck, backs up when that fails. Reacts a quarter of a second late,
@@ -89,6 +90,7 @@
       if (p.onGround && S.jump === 0) { S.glideAt = -1; S.air = 0; }
       if (S.light > 0) { S.light--; m |= LIGHT; }
       if (fire) m |= FIRE;
+      for (const hint of HINTS) { const v = hint({ w, p, S, o, r, mask: m, dir, BIT: h.BIT, tile, hard, floorAt, Game, T }); if (v !== undefined) m = v; }
       return m;
     };
   }

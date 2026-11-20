@@ -8,12 +8,32 @@ const ORDER = ['core', 'audio', 'gems', 'backdrops', 'paint', 'paint-props', 'pa
 const sha = s => crypto.createHash('sha256').update(s).digest('hex');
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
-function engineSources() { return ORDER.map(n => ({ name: n, src: fs.readFileSync(path.join(ENGINE, 'js', n + '.js'), 'utf8') })); }
-function engineHash() { return sha(engineSources().map(s => s.src).join('\0') + fs.readFileSync(path.join(ENGINE, 'shell.html'), 'utf8')).slice(0, 16); }
+/* The engine proper, then the mechanic modules this game's template asks for (after the scenes, before the game starts). */
+function engineSources(mechanics) {
+  const out = ORDER.map(n => ({ name: n, src: fs.readFileSync(path.join(ENGINE, 'js', n + '.js'), 'utf8') }));
+  const mech = (mechanics || []).map(n => {
+    if (!/^[a-z0-9-]+$/.test(n)) throw new Error('bad mechanic name ' + n);
+    const f = path.join(ENGINE, 'mechanics', n + '.js'); if (!fs.existsSync(f)) throw new Error('unknown mechanic ' + n);
+    return { name: 'mechanics/' + n, src: fs.readFileSync(f, 'utf8'), mechanic: n };
+  });
+  out.splice(out.length - 1, 0, ...mech);
+  return out;
+}
+function engineHash(mechanics) { return sha(engineSources(mechanics).map(s => s.src).join('\0') + fs.readFileSync(path.join(ENGINE, 'shell.html'), 'utf8')).slice(0, 16); }
+/* level ops and creature types a set of sources defines */
+function engineOps(sources) {
+  const ops = new Set(BASE_OPS), ents = new Set();
+  for (const s of sources) {
+    for (const m of s.src.matchAll(/\bENT\.([A-Za-z_]\w*)\s*=/g)) ents.add(m[1]);
+    const d = s.mechanic && s.src.match(/\/\*\s*@ops\s+([^*]*)\*\//); if (d) for (const o of d[1].trim().split(/[\s,]+/)) if (o) ops.add(o);
+  }
+  return { ops, ents };
+}
+const BASE_OPS = ['g', 'ceil', 'liq', 'p', 'b', 'spk', 's', 'arc', 'e', 'keep', 'mp', 'cp', 'wonder', 'warp', 'mark', 'beacon', 'sign', 'gem', 'gemBlock', 'npc', 'torch', 'start', 'm', 'door', 'arena'];
 /* every text key the engine can ask for */
-function engineTextKeys() {
+function engineTextKeys(mechanics) {
   const keys = new Set();
-  for (const s of engineSources()) for (const m of s.src.matchAll(/\btx\('([^']+)'/g)) keys.add(m[1]);
+  for (const s of engineSources(mechanics)) for (const m of s.src.matchAll(/\btx\('([^']+)'/g)) keys.add(m[1]);
   return keys;
 }
 
@@ -27,17 +47,20 @@ function validate(spec) {
   for (const k of ['regions', 'gems', 'keeps', 'wonders', 'prologue', 'epilogue', 'places', 'mapNames', 'gemWhere', 'companionLines', 'speakers']) need(Array.isArray(spec[k]) && spec[k].length, k + ' is missing or empty');
   need(spec.text && typeof spec.text === 'object', 'text table is missing');
   if (bad.length) return bad;
-  for (const k of engineTextKeys()) need(typeof spec.text[k] === 'string', 'text is missing key ' + k);
+  need(spec.mechanics === undefined || (Array.isArray(spec.mechanics) && spec.mechanics.every(m => typeof m === 'string')), 'mechanics must be a list of names');
+  let sources; try { sources = engineSources(spec.mechanics); } catch (e) { bad.push(String(e.message)); return bad; }
+  for (const k of engineTextKeys(spec.mechanics)) need(typeof spec.text[k] === 'string', 'text is missing key ' + k);
   const gemIds = new Set(spec.gems.map(g => g.id)), keepIds = new Set(spec.keeps.map(g => g.id)), wonderIds = new Set(spec.wonders.map(g => g.id));
   need(gemIds.has(spec.finalGem), 'finalGem is not one of the gems');
   need(spec.gemWhere.length === spec.gems.length, 'gemWhere must have one entry per gem');
-  const OPS = new Set(['g', 'ceil', 'liq', 'p', 'b', 'spk', 's', 'arc', 'e', 'keep', 'mp', 'cp', 'wonder', 'warp', 'mark', 'beacon', 'sign', 'gem', 'gemBlock', 'npc', 'torch', 'start', 'm', 'door', 'arena']);
+  const { ops: OPS, ents: ENTS } = engineOps(sources);
   const placed = { gem: new Set(), keep: new Set(), wonder: new Set() }, marks = new Set(), warps = [];
   let starts = 0, arenas = 0, finals = 0, npcs = 0;
   spec.regions.forEach((r, i) => {
     need(typeof r.theme === 'string' && r.cols > 0 && Array.isArray(r.ops), `region ${i} needs theme, cols and ops`);
     for (const o of r.ops || []) {
       need(OPS.has(o[0]), `region ${i}: unknown op ${o[0]}`);
+      if (o[0] === 'e') need(ENTS.has(o[1]), `region ${i}: unknown creature ${o[1]}`);
       if (o[0] === 'gem' || o[0] === 'gemBlock') { need(gemIds.has(o[1]), `region ${i}: unknown gem ${o[1]}`); need(!placed.gem.has(o[1]), `gem ${o[1]} placed twice`); placed.gem.add(o[1]); }
       if (o[0] === 'keep') { need(keepIds.has(o[1]), `region ${i}: unknown keepsake ${o[1]}`); placed.keep.add(o[1]); }
       if (o[0] === 'wonder') { need(wonderIds.has(o[1]), `region ${i}: unknown wonder ${o[1]}`); placed.wonder.add(o[1]); }
@@ -64,9 +87,9 @@ function compile(spec, opts = {}) {
   let html = fs.readFileSync(path.join(ENGINE, 'shell.html'), 'utf8');
   const fonts = fs.readFileSync(path.join(ENGINE, 'fonts.css'), 'utf8');
   const json = JSON.stringify(spec).replace(/</g, '\\u003c').split(String.fromCharCode(0x2028)).join('\\u2028').split(String.fromCharCode(0x2029)).join('\\u2029');
-  const stamp = `engine ${engineHash()} spec ${sha(JSON.stringify(spec)).slice(0, 16)}`;
+  const stamp = `engine ${engineHash(spec.mechanics)} spec ${sha(JSON.stringify(spec)).slice(0, 16)}`;
   const scripts = [`<script>window.__SPEC=${json};${opts.harness ? 'window.__MC_HARNESS=true;' : ''}</script>`];
-  for (const s of engineSources()) { if (/<\/script/i.test(s.src)) throw new Error(s.name + ' contains a closing script tag'); scripts.push(`<script>\n${s.src}\n</script>`); }
+  for (const s of engineSources(spec.mechanics)) { if (/<\/script/i.test(s.src)) throw new Error(s.name + ' contains a closing script tag'); scripts.push(`<script>\n${s.src}\n</script>`); }
   html = html.replace('<style>/*FONTS*/</style>', () => `<style>\n${fonts}\n</style>`).replace('<!--SCRIPTS-->', () => scripts.join('\n'))
     .replace('{{TITLE}}', esc(spec.title + ' — ' + spec.subtitle)).replace('{{DESCRIPTION}}', esc(spec.description)).replace('{{TURN}}', esc(spec.turnText).replace(/\n/g, '<br>'))
     .split('{{NAME}}').join(esc(spec.title))

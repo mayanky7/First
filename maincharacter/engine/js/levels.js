@@ -3,6 +3,12 @@
    Coordinates inside a region use tile columns (x) and "altitude" (a): a = 0 is the bottom row,
    so ground of height h has its walking surface at altitude h. */
 const ROWS = 22;
+/* Mechanic modules: one per story template, loaded after the engine proper. A module registers itself with
+   mechanic({ id, ops(ctx) -> extra level ops, init(w, L, cp), step(w), back/draw/over(c, w, ox, oy),
+   invariants(w) -> [problems], progress(w) -> number, cellKey(w) -> string, info(w) -> {} }).
+   Modules keep their simulation state in w.mech[id] (plain data), so it is saved, restored and hashed with the world. */
+const MECHS = [];
+function mechanic(def) { MECHS.push(def); return def; }
 const REGIONS = SPEC.regions.map(r => Object.assign({}, r, { build(L) { for (const o of r.ops) L[o[0]].apply(L, o.slice(1)); } }));
 
 function buildWorld() {
@@ -49,6 +55,7 @@ function buildWorld() {
         out.ents.push({ t: 'boss', x: px(a1 - 5), y: py(a) });
       }
     };
+    for (const m of MECHS) if (m.ops) Object.assign(L, m.ops({ out, set, px, py, X, row, reg, ri, shard }));
     reg.build(L);
     const last = out.zones[out.zones.length - 1];
     if (reg.join && last && last.theme === reg.theme) last.x1 = (x0 + reg.cols) * T;

@@ -4,7 +4,7 @@
    A route the solver finds is only believed once it has been replayed from a fresh page. */
 (() => {
   'use strict';
-  const mc = window.__mc, { World: w, Game, Scenes, Input, RNG, T } = mc;
+  const mc = window.__mc, { World: w, Game, Scenes, Input, RNG, T } = mc, MECHS = mc.MECHS || [];
   const ACT = ['left', 'right', 'down', 'jump', 'fire', 'light', 'enter', 'up', 'dn', 'pause', 'vault', 'travel', 'quit', 'restart', 'mute'];
   const BIT = {}; ACT.forEach((a, i) => { BIT[a] = 1 << i; });
   const { left: LEFT, right: RIGHT, down: DOWN, jump: JUMP, fire: FIRE, light: LIGHT, enter: ENTER } = BIT;
@@ -39,6 +39,7 @@
     if (p.x < w.minX - 1 || p.x + p.w > w.maxX + 1) bad('player outside road', p.x);
     if (p.y < -400) bad('player above the sky', p.y);
     if (w.cam.x < w.bx0 - 0.5 || w.cam.x > w.bx1 - mc.W + 0.5) bad('camera outside road', w.cam.x);
+    for (const m of MECHS) if (m.invariants) { let r; try { r = m.invariants(w) || []; } catch (e) { r = ['invariants threw: ' + e]; } for (const s of r) bad('mechanic ' + m.id, s); }
   }
 
   /* ---------- walking the state: copy, hash ---------- */
@@ -138,6 +139,7 @@
         fight: w.fight, bossAlive: w.bossAlive, bossHp: w.boss ? w.boss.hp : 0, gems: Object.keys(Game.gems).length, wonders: Object.keys(Game.wonders).length, keeps: Object.keys(Game.keeps).length,
         shards: Object.keys(Game.meleeGot).length, deaths: Game.stats.deaths, hits: Game.stats.hits, metBoy: !!Game.metBoy, card: !!w.card, paused: !!Scenes.cur.paused
       });
+      for (const m of MECHS) if (m.info) o[m.id] = m.info(w);
     }
     return o;
   }
@@ -206,12 +208,13 @@
     if (Game.gems[fin]) s += 1500;
     if (Game.metBoy) { s += 1500; const boy = w.ents.find(e => e.type === 'boy'); if (boy) s += Math.min(720, w.t - boy.metT) * 1.2; }
     for (const k in w.doorP) s += Math.min(70, w.doorP[k]) * 0.5;
+    for (const m of MECHS) if (m.progress) s += m.progress(w) || 0;
     if (w.state === 'clear') s += 1e5;
     return s;
   }
   function cellKey() {
     const p = w.player, boy = Game.metBoy ? w.ents.find(e => e.type === 'boy') : null;
-    return [w.zone.warp ? 1 : 0, p.x >> 5, Math.floor(p.y / 40), w.bossAlive ? (w.fight ? w.boss.hp : 99) : 0, Game.gems[mc.SPEC.finalGem] ? 1 : 0, boy ? Math.min(6, Math.floor((w.t - boy.metT) / 120)) : -1, w.state].join('|');
+    return [w.zone.warp ? 1 : 0, p.x >> 5, Math.floor(p.y / 40), w.bossAlive ? (w.fight ? w.boss.hp : 99) : 0, Game.gems[mc.SPEC.finalGem] ? 1 : 0, boy ? Math.min(6, Math.floor((w.t - boy.metT) / 120)) : -1, w.state].concat(MECHS.map(m => m.cellKey ? m.cellKey(w) : '')).join('|');
   }
   const MACROS = [
     [3, 'R', n => i => RIGHT, [8, 16, 30, 50]],
